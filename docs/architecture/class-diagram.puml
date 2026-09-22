@@ -1,0 +1,242 @@
+@startuml
+title Aplicativo de escrita — modelo de dominio e servicos v0.1
+left to right direction
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+hide empty members
+
+package "Dominio" {
+  class PerfilLocal {
+    +id: UUID
+    +nome: String
+  }
+  class FormatoLivro {
+    +id: String
+    +nome: String
+    +mercado: String
+    +larguraUm: Integer
+    +alturaUm: Integer
+    +ativo: Boolean
+  }
+  class FontePredefinida {
+    +id: String
+    +nome: String
+    +manifesto: String
+  }
+  class Livro {
+    +id: UUID
+    +titulo: String
+    +nomeAutor: String
+    +posicao: Integer
+    +reordenarCapitulos(ids)
+    +gerarEntradasSumario(): Lista
+  }
+  class ConfiguracaoPagina <<value object>> {
+    +tamanhoFontePt: Real
+    +entrelinha: Real
+    +margensUm: Margens
+    +validar(formato)
+  }
+  class Capitulo {
+    +id: UUID
+    +titulo: String
+    +posicao: Integer
+    +revisaoConteudo: Integer
+    +controleAlteracoesAtivo: Boolean
+  }
+  class DocumentoRico {
+    +versaoSchema: Integer
+    +validarReferencias()
+    +possuiAlteracoesPendentes(): Boolean
+  }
+  abstract class Bloco {
+    +id: UUID
+  }
+  class BlocoTexto {
+    +papel: PapelTexto
+    +conteudoInline: Lista
+    +atributos: AtributosTexto
+  }
+  class Ilustracao {
+    +apresentacao: ApresentacaoImagem
+    +textoAlternativo: String
+    +legenda: String [0..1]
+  }
+  enum ApresentacaoImagem {
+    ENTRE_PARAGRAFOS
+    PAGINA_INTEIRA
+  }
+  class ArquivoImagem {
+    +id: UUID
+    +chaveArmazenamento: String
+    +larguraPx: Integer
+    +alturaPx: Integer
+    +sha256: String
+  }
+  class NotaRodape {
+    +id: UUID
+    +conteudoRico: ConteudoNota
+  }
+  class ChamadaNota {
+    +id: UUID
+    +notaId: UUID
+  }
+  class AlteracaoControlada {
+    +id: UUID
+    +autorId: UUID
+    +tipo: TipoAlteracao
+    +estado: EstadoAlteracao
+    +operacaoJson: JSON
+    +criadaEm: Instant
+    +decididaEm: Instant [0..1]
+  }
+  enum TipoAlteracao {
+    INSERCAO
+    EXCLUSAO
+    FORMATACAO
+  }
+  enum EstadoAlteracao {
+    PENDENTE
+    ACEITA
+    REJEITADA
+  }
+  class ReferenciaTrecho <<value object>> {
+    +payloadEditor: JSON
+    +versaoSchema: Integer
+    +revisaoDocumento: Integer
+  }
+  class ComentarioRevisao {
+    +id: UUID
+    +texto: String
+    +trechoOriginal: String
+    +estadoReferencia: EstadoReferencia
+    +estado: EstadoComentario
+    +resolver()
+    +reabrir()
+    +marcarTrechoRemovido()
+  }
+  enum EstadoComentario {
+    ABERTO
+    RESOLVIDO
+  }
+  enum EstadoReferencia {
+    VINCULADO
+    REMOVIDO
+  }
+  class ProgressoRevisao {
+    +revisaoRevisada: Integer
+    +precisaRever: Boolean
+    +marcadoEm: Instant
+    +invalidar()
+  }
+
+  PerfilLocal "1" -- "0..*" Livro : possui
+  Livro "0..*" --> "1" FormatoLivro
+  Livro "0..*" --> "1" FontePredefinida
+  Livro "1" *-- "1" ConfiguracaoPagina
+  Livro "1" *-- "0..*" Capitulo : ordem explicita
+  Livro "1" *-- "0..*" ArquivoImagem
+  Livro --> "0..1" ArquivoImagem : imagem do card
+  Capitulo "1" *-- "1" DocumentoRico
+  DocumentoRico "1" *-- "0..*" Bloco : sequencia ordenada
+  Bloco <|-- BlocoTexto
+  Bloco <|-- Ilustracao
+  Ilustracao "0..*" --> "1" ArquivoImagem
+  Ilustracao --> ApresentacaoImagem
+  BlocoTexto "1" *-- "0..*" ChamadaNota
+  DocumentoRico "1" *-- "0..*" NotaRodape
+  ChamadaNota "1" --> "1" NotaRodape
+  DocumentoRico "1" *-- "0..*" AlteracaoControlada
+  AlteracaoControlada --> TipoAlteracao
+  AlteracaoControlada --> EstadoAlteracao
+  AlteracaoControlada "0..*" --> "1" PerfilLocal : autoria
+  Capitulo "1" *-- "0..*" ComentarioRevisao
+  ComentarioRevisao "0..*" --> "1" PerfilLocal : autoria
+  ComentarioRevisao *-- "0..1" ReferenciaTrecho
+  ComentarioRevisao --> EstadoComentario
+  ComentarioRevisao --> EstadoReferencia
+  Capitulo "1" *-- "0..1" ProgressoRevisao
+  ProgressoRevisao "0..*" --> "1" PerfilLocal
+  ProgressoRevisao *-- "0..1" ReferenciaTrecho
+}
+
+package "Aplicacao" {
+  class ServicoEscrita {
+    +salvarEdicao(capituloId, revisaoEsperada, edicao)
+    +aceitarAlteracao(capituloId, alteracaoId)
+    +rejeitarAlteracao(capituloId, alteracaoId)
+    +reordenarCapitulos(livroId, ids)
+  }
+  class ServicoRevisao {
+    +comentar(capituloId, selecao, texto)
+    +resolverComentario(id)
+    +marcarRevisao(capituloId, ponto)
+  }
+  class ServicoExportacao {
+    +exportarPdf(livroId, destino)
+  }
+  interface AdaptadorDocumento {
+    +aplicarEdicao(documento, edicao): ResultadoEdicao
+    +decidirAlteracao(documento, id, decisao): ResultadoEdicao
+    +remapearReferencia(referencia, resultado)
+    +validar(documento)
+  }
+  interface UnidadeDeTrabalho {
+    +executarAtomicamente(operacao)
+  }
+  interface RepositorioManuscrito {
+    +carregarLivro(id): Livro
+    +carregarCapitulo(id): Capitulo
+    +salvarCapitulo(capitulo, revisaoEsperada)
+    +salvarComentarios(comentarios)
+    +salvarProgresso(progresso)
+  }
+  interface ArmazenamentoImagens {
+    +importar(arquivo, livroId): ArquivoImagem
+    +ler(id): Bytes
+  }
+  interface ExportadorPdf {
+    +exportar(manuscrito, destino)
+  }
+  ServicoEscrita ..> AdaptadorDocumento
+  ServicoEscrita ..> UnidadeDeTrabalho
+  ServicoEscrita ..> RepositorioManuscrito
+  ServicoRevisao ..> AdaptadorDocumento
+  ServicoRevisao ..> UnidadeDeTrabalho
+  ServicoRevisao ..> RepositorioManuscrito
+  ServicoExportacao ..> RepositorioManuscrito
+  ServicoExportacao ..> ArmazenamentoImagens
+  ServicoExportacao ..> ExportadorPdf
+  ServicoEscrita ..> Capitulo
+  ServicoRevisao ..> ComentarioRevisao
+}
+
+note bottom of DocumentoRico
+  Persistido em chapters.content_json.
+  Notas, chamadas, ilustracoes e alteracoes nao sao tabelas.
+  Numeracao de notas e calculada pela ordem de leitura.
+  Blocos e conteudo inline sao um modelo conceitual:
+  o schema final depende da prova do editor.
+end note
+note bottom of ComentarioRevisao
+  Persistido separadamente em review_comments.
+  Excluir o trecho nao exclui nem resolve o comentario.
+  Ao perder a referencia, preserva o trecho original.
+end note
+note bottom of ServicoEscrita
+  Documento, comentarios e progresso sao gravados
+  na mesma transacao com verificacao de revisao.
+  Aceitar/rejeitar muda conteudo e referencias juntos.
+end note
+note bottom of ServicoExportacao
+  Proposta: bloquear exportacao final com alteracoes pendentes.
+  PDF inclui notas; omite comentarios e marcas de revisao.
+  Usa copia consistente do manuscrito durante a exportacao.
+end note
+legend bottom
+  Modelo conceitual; nao exige classes com heranca em Rust.
+  Dominio pode usar structs, enums e traits.
+  Composicao representa pertencimento, nao DELETE CASCADE.
+  Interfaces sao contratos propostos, nao bibliotecas escolhidas.
+endlegend
+@enduml

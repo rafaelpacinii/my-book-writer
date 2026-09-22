@@ -1,0 +1,64 @@
+{
+  "version": "3.0.0",
+  "darkMode": true,
+  "gridEnabling": false,
+  "currentViewName": null,
+  "defaultView": {
+    "detailLevel": "All",
+    "relationshipMode": "All",
+    "tablePositions": [
+      {
+        "name": "local_profiles",
+        "schemaName": "public",
+        "x": 12,
+        "y": 10.187359954960193
+      },
+      {
+        "name": "book_formats",
+        "schemaName": "public",
+        "x": 12,
+        "y": 218
+      },
+      {
+        "name": "font_presets",
+        "schemaName": "public",
+        "x": 12,
+        "y": 488
+      },
+      {
+        "name": "books",
+        "schemaName": "public",
+        "x": 542.0771484375,
+        "y": 53
+      },
+      {
+        "name": "image_assets",
+        "schemaName": "public",
+        "x": 12,
+        "y": 726
+      },
+      {
+        "name": "chapters",
+        "schemaName": "public",
+        "x": 1061.82666015625,
+        "y": 53
+      },
+      {
+        "name": "review_comments",
+        "schemaName": "public",
+        "x": 1626.1162109375,
+        "y": 12
+      },
+      {
+        "name": "review_progress",
+        "schemaName": "public",
+        "x": 1626.1162109375,
+        "y": 474
+      }
+    ],
+    "tableGroupCollapseStates": [],
+    "stickyNoteLayouts": [],
+    "referencePaths": []
+  },
+  "views": {}
+}
