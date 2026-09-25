@@ -15,20 +15,27 @@ pub fn run() {
         .setup(|app| {
             let handle = app.handle().clone();
 
-            // Bloqueia a thread principal temporariamente no startup para garantir
-            // que o banco e as migrações estejam 100% prontos antes de abrir a UI
+            // Resolve o diretório seguro de armazenamento do app
+            let app_dir = handle
+                .path()
+                .app_data_dir()
+                .expect("Falha ao obter app_data_dir");
+
             tauri::async_runtime::block_on(async move {
                 let pool = database::init_pool(&handle)
                     .await
                     .expect("Falha ao inicializar o banco de dados");
 
-                app.manage(state::AppState { db_pool: pool });
+                app.manage(state::AppState {
+                    db_pool: pool,
+                    storage_dir: app_dir,
+                });
             });
 
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
-            // Livros (CRUD Completo)
+            // Livros
             commands::book_commands::create_book,
             commands::book_commands::list_books,
             commands::book_commands::get_book_by_id,
@@ -48,6 +55,11 @@ pub fn run() {
             commands::chapter_commands::save_chapter_content,
             commands::chapter_commands::reorder_chapters,
             commands::chapter_commands::delete_chapter,
+            // Imagens e Capas
+            commands::image_asset_commands::import_image_asset,
+            commands::image_asset_commands::list_image_assets,
+            commands::image_asset_commands::set_book_card_image,
+            commands::image_asset_commands::get_image_file_path,
         ])
         .run(tauri::generate_context!())
         .expect("Erro ao executar aplicação Tauri");
