@@ -60,6 +60,13 @@ pub fn run() {
             commands::image_asset_commands::list_image_assets,
             commands::image_asset_commands::set_book_card_image,
             commands::image_asset_commands::get_image_file_path,
+            // Revisão e Comentários
+            commands::review_commands::create_review_comment,
+            commands::review_commands::list_review_comments,
+            commands::review_commands::resolve_review_comment,
+            commands::review_commands::reopen_review_comment,
+            commands::review_commands::get_review_progress,
+            commands::review_commands::mark_review_progress,
         ])
         .run(tauri::generate_context!())
         .expect("Erro ao executar aplicação Tauri");

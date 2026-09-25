@@ -51,7 +51,11 @@ impl<'a> ImageAssetService<'a> {
         // Calcula o hash SHA-256 do arquivo binário
         let mut hasher = Sha256::new();
         hasher.update(&bytes);
-        let sha256 = format!("{:x}", hasher.finalize());
+        let hash_result = hasher.finalize();
+        let sha256 = hash_result
+            .iter()
+            .map(|byte| format!("{:02x}", byte))
+            .collect::<String>();
 
         // Identificador único da imagem
         let asset_id = Uuid::now_v7().to_string();
