@@ -31,6 +31,10 @@ pub fn run() {
             commands::book_commands::create_book,
             commands::book_commands::list_books,
             commands::book_commands::get_book_by_id,
+            commands::profile_commands::get_profile,
+            commands::profile_commands::update_profile,
+            commands::catalog_commands::list_book_formats,
+            commands::catalog_commands::list_font_presets
         ])
         .run(tauri::generate_context!())
         .expect("Erro ao executar aplicação Tauri");

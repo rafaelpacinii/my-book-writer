@@ -1,0 +1,146 @@
+  // Modelo v0.1: aplicativo de escrita offline. Nao e uma migracao SQL.
+// IDs: UUID gerado localmente. Datas: texto ISO 8601 em UTC.
+// Documento JSON e referencias devem ser validados pelo adaptador do editor.
+
+Project escrita_offline {
+  database_type: 'SQLite'
+  Note: 'Modelo inicial. Sem login, sincronizacao, EPUB ou historico de versoes. Campos *_um usam micrometros inteiros: 1000 um = 1 mm.'
+}
+
+Table local_profiles {
+  id text [pk, not null]
+  display_name text [not null]
+  created_at text [not null]
+  updated_at text [not null]
+  Note: 'Uma instalacao usa um perfil no MVP. Nome editavel; nao e conta online nem identidade autenticada.'
+}
+
+Table book_formats {
+  id text [pk, not null, note: 'Chave estavel do catalogo distribuido com o aplicativo.']
+  name text [not null]
+  market text [not null, check: `market IN ('BR', 'US', 'GB')`]
+  width_um integer [not null, check: `width_um > 0`]
+  height_um integer [not null, check: `height_um > 0`]
+  is_active integer [not null, default: 1, check: `is_active IN (0, 1)`]
+  Note: 'Catalogo predefinido. Sem cadastro pelo usuario. Dimensoes de um registro utilizado sao imutaveis; novas dimensoes exigem outro ID. Nomes nao sao unicos.'
+}
+
+Table font_presets {
+  id text [pk, not null]
+  name text [not null]
+  family_name text [not null]
+  manifest_path text [not null, note: 'Manifesto relativo aos recursos do app: arquivos regular, italico, negrito e negrito-italico.']
+  is_active integer [not null, default: 1, check: `is_active IN (0, 1)`]
+  Note: 'Catalogo predefinido de fontes incluidas no app e disponiveis offline. Arquivos e licencas de distribuicao/incorporacao devem ser verificados antes do cadastro.'
+}
+
+Table books {
+  id text [pk, not null]
+  profile_id text [not null]
+  format_id text [not null]
+  font_preset_id text [not null]
+  title text [not null]
+  author_name text [not null, note: 'Proposta: copia inicial do nome do perfil, editavel por livro.']
+  card_image_asset_id text [note: 'Opcional. Imagem do card, nao capa editorial. Deve pertencer a este livro.']
+  position integer [not null, check: `position >= 0`, note: 'Ordem dos cards na biblioteca. Desempate por id.']
+  font_size_pt real [not null, check: `font_size_pt > 0`]
+  line_height_ratio real [not null, check: `line_height_ratio > 0`]
+  margin_top_um integer [not null, check: `margin_top_um >= 0`]
+  margin_bottom_um integer [not null, check: `margin_bottom_um >= 0`]
+  margin_left_um integer [not null, check: `margin_left_um >= 0`]
+  margin_right_um integer [not null, check: `margin_right_um >= 0`]
+  created_at text [not null]
+  updated_at text [not null]
+  deleted_at text
+  indexes {
+    (profile_id, position)
+    format_id
+    font_preset_id
+  }
+  Note: 'Servico valida margens contra dimensoes do formato. Exclusao logica. Configuracoes iniciais sugeridas pelo app, ainda sem valores definidos.'
+}
+
+Table image_assets {
+  id text [pk, not null]
+  book_id text [not null]
+  original_filename text [not null]
+  storage_key text [not null, unique, note: 'Caminho relativo no armazenamento gerenciado; nunca caminho original absoluto.']
+  mime_type text [not null]
+  width_px integer [not null, check: `width_px > 0`]
+  height_px integer [not null, check: `height_px > 0`]
+  byte_size integer [not null, check: `byte_size > 0`]
+  sha256 text [not null]
+  created_at text [not null]
+  indexes {
+    book_id
+  }
+  Note: 'Binario fora do SQLite, em copia gerenciada pelo app. Ilustracoes no JSON referenciam este ID. Nao remover arquivo ainda referenciado por comentarios/alteracoes ou documento. Sem deduplicacao obrigatoria.'
+}
+
+Table chapters {
+  id text [pk, not null]
+  book_id text [not null]
+  title text [not null, note: 'Fonte do titulo exibido no card e no sumario.']
+  position integer [not null, check: `position >= 0`, note: 'Ordenar por position e id; reordenacao em transacao.']
+  content_json text [not null, note: 'Fonte canonica: blocos com IDs estaveis, marcas de texto, ilustracoes, notas e alteracoes controladas.']
+  content_schema_version integer [not null, default: 1, check: `content_schema_version >= 1`]
+  content_revision integer [not null, default: 0, check: `content_revision >= 0`, note: 'Contador local para concorrencia e referencias; nao e historico nem protocolo de sync.']
+  track_changes_enabled integer [not null, default: 0, check: `track_changes_enabled IN (0, 1)`]
+  created_at text [not null]
+  updated_at text [not null]
+  deleted_at text
+  indexes {
+    (book_id, position)
+  }
+  Note: 'Schema JSON ainda depende da prova do editor. Nao duplicar notas/alteracoes em tabelas. Escrita, referencias dos comentarios e progresso de revisao sao atualizados na mesma transacao.'
+}
+
+Table review_comments {
+  id text [pk, not null]
+  chapter_id text [not null]
+  author_profile_id text [not null]
+  body text [not null]
+  original_excerpt text [not null, note: 'Copia imutavel do trecho ao comentar. Nao e atualizada quando o texto muda.']
+  anchor_json text [note: 'Referencia de intervalo mantida pelo editor, com versao propria. Nula quando o trecho foi removido.']
+  anchor_revision integer [not null, check: `anchor_revision >= 0`]
+  anchor_state text [not null, default: 'attached', check: `anchor_state IN ('attached', 'removed')`]
+  status text [not null, default: 'open', check: `status IN ('open', 'resolved')`]
+  created_at text [not null]
+  updated_at text [not null]
+  resolved_at text
+  indexes {
+    (chapter_id, status)
+    author_profile_id
+  }
+  checks {
+    `(anchor_state = 'attached' AND anchor_json IS NOT NULL) OR (anchor_state = 'removed' AND anchor_json IS NULL)`
+    `(status = 'open' AND resolved_at IS NULL) OR (status = 'resolved' AND resolved_at IS NOT NULL)`
+  }
+  Note: 'Excluir texto nunca apaga nem resolve comentario. Exclusao controlada pendente mantem referencia. Aceitar exclusao integral remove referencia e preserva excerpt. Alteracoes parciais remapeiam o intervalo.'
+}
+
+Table review_progress {
+  chapter_id text [pk, not null]
+  profile_id text [not null]
+  anchor_json text [note: 'Ponto final revisado, inclusive fim do capitulo. Nulo se o ponto foi removido.']
+  anchor_revision integer [not null, check: `anchor_revision >= 0`]
+  reviewed_content_revision integer [not null, check: `reviewed_content_revision >= 0`]
+  needs_recheck integer [not null, default: 0, check: `needs_recheck IN (0, 1)`]
+  marked_at text [not null]
+  updated_at text [not null]
+  checks {
+    `anchor_json IS NOT NULL OR needs_recheck = 1`
+  }
+  Note: 'No MVP, uma marcacao por capitulo; ausencia significa nao marcado. Editar regiao revisada exige nova verificacao. Se nao for possivel determinar impacto, marcar needs_recheck. Reordenar capitulos nao invalida por si so.'
+}
+
+Ref: books.profile_id > local_profiles.id [delete: restrict]
+Ref: books.format_id > book_formats.id [delete: restrict]
+Ref: books.font_preset_id > font_presets.id [delete: restrict]
+Ref: books.card_image_asset_id > image_assets.id [delete: restrict]
+Ref: image_assets.book_id > books.id [delete: restrict]
+Ref: chapters.book_id > books.id [delete: restrict]
+Ref: review_comments.chapter_id > chapters.id [delete: restrict]
+Ref: review_comments.author_profile_id > local_profiles.id [delete: restrict]
+Ref: chapters.id - review_progress.chapter_id [delete: restrict]
+Ref: review_progress.profile_id > local_profiles.id [delete: restrict]
