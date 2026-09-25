@@ -28,13 +28,24 @@ pub fn run() {
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
+            // Livros
             commands::book_commands::create_book,
             commands::book_commands::list_books,
             commands::book_commands::get_book_by_id,
+            // Perfil
             commands::profile_commands::get_profile,
             commands::profile_commands::update_profile,
+            // Catálogos
             commands::catalog_commands::list_book_formats,
-            commands::catalog_commands::list_font_presets
+            commands::catalog_commands::list_font_presets,
+            // Capítulos
+            commands::chapter_commands::create_chapter,
+            commands::chapter_commands::list_chapters,
+            commands::chapter_commands::get_chapter_by_id,
+            commands::chapter_commands::update_chapter_title,
+            commands::chapter_commands::save_chapter_content,
+            commands::chapter_commands::reorder_chapters,
+            commands::chapter_commands::delete_chapter,
         ])
         .run(tauri::generate_context!())
         .expect("Erro ao executar aplicação Tauri");
