@@ -28,10 +28,12 @@ pub fn run() {
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
-            // Livros
+            // Livros (CRUD Completo)
             commands::book_commands::create_book,
             commands::book_commands::list_books,
             commands::book_commands::get_book_by_id,
+            commands::book_commands::update_book,
+            commands::book_commands::delete_book,
             // Perfil
             commands::profile_commands::get_profile,
             commands::profile_commands::update_profile,

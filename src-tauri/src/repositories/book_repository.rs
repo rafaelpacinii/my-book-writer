@@ -1,4 +1,4 @@
-use crate::domain::book::Book;
+use crate::domain::book::{Book, UpdateBookInput};
 use crate::error::AppError;
 use sqlx::SqlitePool;
 
@@ -107,5 +107,56 @@ impl<'a> BookRepository<'a> {
         .await?;
 
         Ok(book)
+    }
+
+    /// Atualiza os metadados e configurações de página de um livro
+    pub async fn update(&self, id: &str, input: &UpdateBookInput) -> Result<Book, AppError> {
+        let book = sqlx::query_as::<_, Book>(
+            r#"
+            UPDATE books
+            SET title = COALESCE(?, title),
+                author_name = COALESCE(?, author_name),
+                format_id = COALESCE(?, format_id),
+                font_preset_id = COALESCE(?, font_preset_id),
+                card_image_asset_id = COALESCE(?, card_image_asset_id),
+                font_size_pt = COALESCE(?, font_size_pt),
+                line_height_ratio = COALESCE(?, line_height_ratio),
+                margin_top_um = COALESCE(?, margin_top_um),
+                margin_bottom_um = COALESCE(?, margin_bottom_um),
+                margin_left_um = COALESCE(?, margin_left_um),
+                margin_right_um = COALESCE(?, margin_right_um),
+                updated_at = datetime('now')
+            WHERE id = ? AND deleted_at IS NULL
+            RETURNING *
+            "#,
+        )
+        .bind(&input.title)
+        .bind(&input.author_name)
+        .bind(&input.format_id)
+        .bind(&input.font_preset_id)
+        .bind(&input.card_image_asset_id)
+        .bind(input.font_size_pt)
+        .bind(input.line_height_ratio)
+        .bind(input.margin_top_um)
+        .bind(input.margin_bottom_um)
+        .bind(input.margin_left_um)
+        .bind(input.margin_right_um)
+        .bind(id)
+        .fetch_one(self.pool)
+        .await?;
+
+        Ok(book)
+    }
+
+    /// Exclusão lógica (soft delete) do livro
+    pub async fn soft_delete(&self, id: &str) -> Result<(), AppError> {
+        sqlx::query(
+            "UPDATE books SET deleted_at = datetime('now'), updated_at = datetime('now') WHERE id = ? AND deleted_at IS NULL"
+        )
+        .bind(id)
+        .execute(self.pool)
+        .await?;
+
+        Ok(())
     }
 }

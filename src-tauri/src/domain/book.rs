@@ -39,3 +39,18 @@ pub struct CreateBookInput {
     pub margin_left_um: Option<i64>,
     pub margin_right_um: Option<i64>,
 }
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct UpdateBookInput {
+    pub title: Option<String>,
+    pub author_name: Option<String>,
+    pub format_id: Option<String>,
+    pub font_preset_id: Option<String>,
+    pub card_image_asset_id: Option<String>,
+    pub font_size_pt: Option<f64>,
+    pub line_height_ratio: Option<f64>,
+    pub margin_top_um: Option<i64>,
+    pub margin_bottom_um: Option<i64>,
+    pub margin_left_um: Option<i64>,
+    pub margin_right_um: Option<i64>,
+}
