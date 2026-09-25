@@ -29,6 +29,9 @@ VALUES
 -- 3. Catálogo de presets de fontes embutidas disponíveis offline
 INSERT OR IGNORE INTO font_presets (id, name, family_name, manifest_path, is_active)
 VALUES
-    ('font-eb-garamond', 'EB Garamond (Clássica)', 'EB Garamond', 'fonts/eb-garamond/manifest.json', 1),
-    ('font-merriweather', 'Merriweather (Moderna)', 'Merriweather', 'fonts/merriweather/manifest.json', 1),
-    ('font-inter', 'Inter (Sem Serifa)', 'Inter', 'fonts/inter/manifest.json', 1);
+    ('font-eb-garamond', 'EB Garamond (Clássica Literária)', 'EB Garamond', 'fonts/eb-garamond/manifest.json', 1),
+    ('font-merriweather', 'Merriweather (Leitura Digital)', 'Merriweather', 'fonts/merriweather/manifest.json', 1),
+    ('font-inter', 'Inter (Sem Serifa / Técnico)', 'Inter', 'fonts/inter/manifest.json', 1),
+    ('font-libre-baskerville', 'Libre Baskerville (Elegante Clássica)', 'Libre Baskerville', 'fonts/libre-baskerville/manifest.json', 1),
+    ('font-libre-caslon', 'Libre Caslon Text (Tradicional Inglesa)', 'Libre Caslon Text', 'fonts/libre-caslon/manifest.json', 1),
+    ('font-crimson-pro', 'Crimson Pro (Editorial Renascentista)', 'Crimson Pro', 'fonts/crimson-pro/manifest.json', 1);
