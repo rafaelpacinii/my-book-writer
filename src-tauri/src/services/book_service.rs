@@ -1,4 +1,4 @@
-use crate::domain::book::{Book, CreateBookInput};
+use crate::domain::book::{Book, CreateBookInput, UpdateBookInput};
 use crate::error::AppError;
 use crate::repositories::book_repository::BookRepository;
 use sqlx::SqlitePool;
@@ -78,5 +78,49 @@ impl<'a> BookService<'a> {
     pub async fn get_book_by_id(&self, id: &str) -> Result<Option<Book>, AppError> {
         let repo = BookRepository::new(self.pool);
         repo.find_by_id(id).await
+    }
+
+    /// Atualiza os dados de um livro com validações
+    pub async fn update_book(
+        &self,
+        id: &str,
+        mut input: UpdateBookInput,
+    ) -> Result<Book, AppError> {
+        if let Some(ref title) = input.title {
+            let trimmed = title.trim();
+            if trimmed.is_empty() {
+                return Err(AppError::Validation(
+                    "O título do livro não pode ser vazio".into(),
+                ));
+            }
+            input.title = Some(trimmed.to_string());
+        }
+
+        if let Some(ref author) = input.author_name {
+            let trimmed = author.trim();
+            if trimmed.is_empty() {
+                return Err(AppError::Validation(
+                    "O nome do autor não pode ser vazio".into(),
+                ));
+            }
+            input.author_name = Some(trimmed.to_string());
+        }
+
+        if let Some(font_size) = input.font_size_pt {
+            if font_size <= 0.0 {
+                return Err(AppError::Validation(
+                    "O tamanho da fonte deve ser maior que zero".into(),
+                ));
+            }
+        }
+
+        let repo = BookRepository::new(self.pool);
+        repo.update(id, &input).await
+    }
+
+    /// Executa a exclusão lógica do livro
+    pub async fn delete_book(&self, id: &str) -> Result<(), AppError> {
+        let repo = BookRepository::new(self.pool);
+        repo.soft_delete(id).await
     }
 }
