@@ -25,7 +25,7 @@ export function Main() {
 
   return (
     <AppShell>
-      <div className="max-w-5xl mx-auto flex flex-col gap-6 pb-8">
+      <div className="max-w-6xl mx-auto flex flex-col gap-6 pb-8">
         <Greeting />
 
         {isLoading ? (
