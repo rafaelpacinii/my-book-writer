@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect } from "react";
+import { X } from "lucide-react";
 
 export interface ModalProps {
   isOpen: boolean;
@@ -36,9 +37,9 @@ export function Modal({ isOpen, onClose, title, children, footer }: ModalProps) 
             <button
               onClick={onClose}
               aria-label="Fechar diálogo"
-              className="text-muted hover:text-foreground cursor-pointer text-lg font-bold p-1 rounded-md"
+              className="text-muted hover:text-foreground cursor-pointer p-1 rounded-md transition-colors"
             >
-              ✕
+              <X className="w-5 h-5" />
             </button>
           </div>
         )}
