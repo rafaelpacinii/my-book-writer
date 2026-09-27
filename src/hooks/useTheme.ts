@@ -17,6 +17,7 @@ function getSystemTheme(): ResolvedTheme {
 function applyTheme(resolved: ResolvedTheme) {
   if (typeof document === "undefined") return;
   const root = document.documentElement;
+  root.style.colorScheme = resolved;
   if (resolved === "dark") {
     root.classList.add("dark");
     root.setAttribute("data-theme", "dark");

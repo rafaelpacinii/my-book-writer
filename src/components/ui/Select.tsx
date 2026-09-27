@@ -1,4 +1,5 @@
 import React, { SelectHTMLAttributes, forwardRef, useId } from "react";
+import { ChevronDown } from "lucide-react";
 
 export interface SelectOption {
   value: string;
@@ -29,24 +30,25 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
             {label}
           </label>
         )}
-        <select
-          ref={ref}
-          id={selectId}
-          aria-invalid={Boolean(error)}
-          aria-describedby={error ? errorId : undefined}
-          className={`h-12 px-3.5 rounded-lg bg-surface text-foreground border text-sm ` +
-            `transition-colors duration-150 cursor-pointer ` +
-            `focus-visible:outline-2 focus-visible:outline-offset-1 disabled:opacity-50 ${borderStyle} ${className}`}
-          {...props}
-        >
-          {options
-            ? options.map((opt) => (
-                <option key={opt.value} value={opt.value}>
+        <div className="relative w-full">
+          <select
+            ref={ref}
+            id={selectId}
+            aria-invalid={Boolean(error)}
+            aria-describedby={error ? errorId : undefined}
+            className={`h-12 w-full appearance-none pl-3.5 pr-10 rounded-lg bg-surface text-foreground border text-sm transition-colors duration-150 cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-1 disabled:opacity-50 ${borderStyle} ${className}`}
+            {...props}
+          >
+            {options
+              ? options.map((opt) => (
+                <option key={opt.value} value={opt.value} className="bg-surface text-foreground py-1">
                   {opt.label}
                 </option>
               ))
-            : children}
-        </select>
+              : children}
+          </select>
+          <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted pointer-events-none" />
+        </div>
         {error ? (
           <span id={errorId} className="text-xs text-danger font-medium">{error}</span>
         ) : hint ? (
