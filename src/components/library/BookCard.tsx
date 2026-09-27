@@ -18,7 +18,7 @@ export function BookCard({ book, index, formatName, fontName }: Props) {
 
   return (
     <Link
-      href={`/books/${book.id}`}
+      href={`/books/view?bookId=${encodeURIComponent(book.id)}`}
       className="flex flex-col bg-surface border border-border rounded-xl overflow-hidden shadow-xs hover:border-primary/50 transition-all group cursor-pointer"
     >
       <BookCoverArtwork index={index} />
