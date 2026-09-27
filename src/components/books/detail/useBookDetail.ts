@@ -35,7 +35,9 @@ export function useBookDetail(bookId: string) {
 
   const handleCreateChapter = async (title: string) => {
     const chapter = await addChapter(title);
-    router.push(`/books/${bookId}/chapters/${chapter.id}`);
+    router.push(
+      `/books/editor?bookId=${encodeURIComponent(bookId)}&chapterId=${encodeURIComponent(chapter.id)}`
+    );
   };
 
   return {

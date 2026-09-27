@@ -14,7 +14,7 @@ export function ChapterCard({ chapter, bookId, index }: Props) {
 
   return (
     <Link
-      href={`/books/${bookId}/chapters/${chapter.id}`}
+      href={`/books/editor?bookId=${encodeURIComponent(bookId)}&chapterId=${encodeURIComponent(chapter.id)}`}
       className="flex flex-col justify-between p-6 sm:p-7 rounded-xl bg-surface border border-border hover:border-primary/40 transition-all shadow-xs group cursor-pointer min-h-52"
     >
       <div>
