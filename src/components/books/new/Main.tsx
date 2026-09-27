@@ -13,7 +13,7 @@ export function Main() {
 
   return (
     <AppShell>
-      <div className="max-w-5xl mx-auto pb-12">
+      <div className="max-w-6xl mx-auto pb-12">
         <NewBookHeader />
 
         <form onSubmit={form.handleSubmit} className="flex flex-col gap-6">
