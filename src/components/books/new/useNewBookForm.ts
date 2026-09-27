@@ -1,0 +1,79 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useProfile } from "@/hooks/useProfile";
+import { useCatalog } from "@/hooks/useCatalog";
+import { useBooks } from "@/hooks/useBooks";
+
+export function useNewBookForm() {
+  const router = useRouter();
+  const { profile } = useProfile();
+  const { formats, fonts, isLoading: isCatalogLoading } = useCatalog();
+  const { addBook } = useBooks(profile?.id);
+
+  const [title, setTitle] = useState("");
+  const [titleError, setTitleError] = useState<string | null>(null);
+  const [author, setAuthor] = useState("");
+  const [formatId, setFormatId] = useState("");
+  const [fontId, setFontId] = useState("");
+  const [fontSize, setFontSize] = useState(11);
+  const [lineHeight, setLineHeight] = useState(1.4);
+  const [marginMm, setMarginMm] = useState(20);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (profile?.display_name && !author) {
+      setAuthor(profile.display_name);
+    }
+  }, [profile, author]);
+
+  useEffect(() => {
+    if (formats.length > 0 && !formatId) setFormatId(formats[0].id);
+    if (fonts.length > 0 && !fontId) setFontId(fonts[0].id);
+  }, [formats, fonts, formatId, fontId]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const trimmedTitle = title.trim();
+    if (!trimmedTitle) {
+      setTitleError("O título do livro é obrigatório.");
+      return;
+    }
+    setTitleError(null);
+    setIsSubmitting(true);
+    try {
+      const marginUm = Math.round(marginMm * 1000);
+      await addBook({
+        profile_id: profile?.id || "local-default-id",
+        title: trimmedTitle,
+        author_name: author.trim() || profile?.display_name || "Autor",
+        format_id: formatId || formats[0]?.id || "fmt-br-14x21",
+        font_preset_id: fontId || fonts[0]?.id || "font-merriweather",
+        font_size_pt: fontSize,
+        line_height_ratio: lineHeight,
+        margin_top_um: marginUm,
+        margin_bottom_um: marginUm,
+        margin_left_um: marginUm,
+        margin_right_um: marginUm,
+      });
+      router.push("/home");
+    } catch {
+      // error is handled by hook
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return {
+    title, setTitle, titleError,
+    author, setAuthor,
+    formatId, setFormatId, formats,
+    fontId, setFontId, fonts,
+    fontSize, setFontSize,
+    lineHeight, setLineHeight,
+    marginMm, setMarginMm,
+    isSubmitting, handleSubmit,
+    router, isCatalogLoading,
+  };
+}

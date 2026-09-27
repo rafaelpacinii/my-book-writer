@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useProfile } from "@/hooks/useProfile";
 import { useBooks } from "@/hooks/useBooks";
 import { AppShell } from "@/components/shared/AppShell";
 import { Greeting } from "./Greeting";
@@ -10,7 +11,8 @@ import { ActionCards } from "./ActionCards";
 import { PersistenceNotice } from "./PersistenceNotice";
 
 export function Main() {
-  const { books, isLoading } = useBooks();
+  const { profile } = useProfile();
+  const { books, isLoading } = useBooks(profile?.id);
 
   const latestBook = React.useMemo(() => {
     if (!books || books.length === 0) return null;
