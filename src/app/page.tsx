@@ -1,5 +1,5 @@
-import { Main } from "@/components/auth/Main";
+import { Main } from "@/components/entry/Main";
 
-export default function Home() {
+export default function EntryPage() {
   return <Main />;
 }

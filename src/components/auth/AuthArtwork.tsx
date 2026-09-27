@@ -2,11 +2,12 @@ import React from "react";
 
 export function AuthArtwork() {
   return (
-    <div className="flex flex-col w-full max-w-[592px]">
-      <div className="relative w-full h-[320px] sm:h-[400px] lg:h-[480px] rounded-[24px] overflow-hidden shadow-xs border border-border/40">
+    <div className="flex flex-col w-full max-w-148">
+      <div className="relative w-full h-80 sm:h-100 lg:h-120 rounded-3xl overflow-hidden shadow-xs border border-border/40 bg-gradient-to-br from-[#CBD4BF] to-[#E4D8BC]">
         <svg
           viewBox="0 0 600 400"
-          className="w-full h-full object-cover"
+          preserveAspectRatio="xMidYMid slice"
+          className="w-full h-full"
           aria-hidden="true"
         >
           <defs>
@@ -26,19 +27,6 @@ export function AuthArtwork() {
           <circle cx="270" cy="160" r="48" fill="var(--primary)" opacity="0.6" />
           <path d="M220 400V250l105-66V400Z" fill="var(--primary)" opacity="0.88" />
         </svg>
-      </div>
-
-      <div className="mt-8">
-        <span className="text-[12px] font-bold text-primary tracking-wider uppercase">
-          UM ESPAÇO PARA SUAS IDEIAS
-        </span>
-        <h1 className="font-serif text-[30px] sm:text-[34px] text-foreground font-normal leading-[1.3] mt-2.5">
-          Cada linha abre <br /> um novo caminho.
-        </h1>
-        <p className="text-muted text-[15px] sm:text-[16px] mt-3.5 leading-relaxed">
-          Organize seus livros. Encontre sua voz. <br />
-          Continue de onde a história parou.
-        </p>
       </div>
     </div>
   );
