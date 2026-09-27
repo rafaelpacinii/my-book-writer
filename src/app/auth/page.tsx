@@ -1,5 +1,5 @@
 import { Main } from "@/components/auth/Main";
 
-export default function Home() {
+export default function AuthPage() {
   return <Main />;
 }

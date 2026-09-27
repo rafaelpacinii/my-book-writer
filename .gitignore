@@ -25,3 +25,8 @@ out/
 *.njsproj
 *.sln
 *.sw?
+
+# UI Prototype and Implementation Guide (local only)
+docs/guia-implementacao-ui.md
+docs/prototipo-ui/
+src/prototype/
