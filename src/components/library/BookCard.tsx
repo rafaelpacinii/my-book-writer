@@ -1,7 +1,10 @@
-import React from "react";
+"use client";
+
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import type { Book } from "@/types/book";
 import { formatLastEdited } from "@/utils/format";
+import { loadBookCoverUrl } from "@/lib/api/images";
 import { BookCoverArtwork } from "./BookCoverArtwork";
 
 interface Props {
@@ -12,6 +15,18 @@ interface Props {
 }
 
 export function BookCard({ book, index, formatName, fontName }: Props) {
+  const [coverUrl, setCoverUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    void loadBookCoverUrl(book.id, book.card_image_asset_id).then((url) => {
+      if (active) setCoverUrl(url);
+    });
+    return () => {
+      active = false;
+    };
+  }, [book.id, book.card_image_asset_id]);
+
   const metaText = [formatName || "14 × 21 cm", fontName || "Merriweather"]
     .filter(Boolean)
     .join(" · ");
@@ -21,7 +36,17 @@ export function BookCard({ book, index, formatName, fontName }: Props) {
       href={`/books/view?bookId=${encodeURIComponent(book.id)}`}
       className="flex flex-col bg-surface border border-border rounded-xl overflow-hidden shadow-xs hover:border-primary/50 transition-all group cursor-pointer"
     >
-      <BookCoverArtwork index={index} />
+      {coverUrl ? (
+        <div className="relative aspect-[3/2] w-full overflow-hidden bg-surface-hover">
+          <img
+            src={coverUrl}
+            alt={book.title}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+          />
+        </div>
+      ) : (
+        <BookCoverArtwork index={index} />
+      )}
 
       <div className="flex flex-col flex-1 p-5 pt-4">
         <h3 className="font-bold text-lg text-foreground group-hover:text-primary transition-colors line-clamp-1">
@@ -30,9 +55,7 @@ export function BookCard({ book, index, formatName, fontName }: Props) {
         <p className="text-sm text-muted mt-1 truncate">
           {book.author_name || "Autor"}
         </p>
-        <p className="text-xs text-muted mt-2 truncate">
-          {metaText}
-        </p>
+        <p className="text-xs text-muted mt-2 truncate">{metaText}</p>
 
         <div className="border-t border-border mt-4 pt-3">
           <p className="text-xs text-muted">

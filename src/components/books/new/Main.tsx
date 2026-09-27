@@ -43,7 +43,10 @@ export function Main() {
             </div>
 
             <div className="lg:col-span-5 bg-surface p-6 sm:p-8 rounded-xl border border-border shadow-xs">
-              <CoverPreview />
+              <CoverPreview
+                coverUrl={form.coverUrl}
+                onCoverChange={form.setCoverUrl}
+              />
             </div>
           </div>
 

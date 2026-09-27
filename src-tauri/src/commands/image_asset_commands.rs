@@ -50,3 +50,16 @@ pub async fn get_image_file_path(
     let path = service.get_absolute_path(&storage_key);
     Ok(path.to_string_lossy().to_string())
 }
+
+/// Lê os bytes da imagem do disco e retorna como data URL Base64 para exibição imediata
+#[tauri::command]
+pub async fn read_image_data_url(
+    state: State<'_, AppState>,
+    storage_key: String,
+) -> Result<String, String> {
+    let service = ImageAssetService::new(&state.db_pool, &state.storage_dir);
+    service
+        .read_image_data_url(&storage_key)
+        .await
+        .map_err(|e| e.to_string())
+}
