@@ -1,12 +1,9 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { Main } from "@/components/layout/Main";
-import { Footer } from "@/components/layout/Footer";
-import { Header } from "@/components/layout/Header";
 
 export const metadata: Metadata = {
-  title: "Meu App",
-  description: "Aplicação desktop com Tauri e Next.js",
+  title: "My Book Writer",
+  description: "Estúdio editorial para escritores",
 };
 
 export default function RootLayout({
@@ -15,11 +12,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR">
-      <body>
-        <Header />
-        <Main>{children}</Main>
-        <Footer />
+    <html lang="pt-BR" suppressHydrationWarning>
+      <body className="min-h-screen bg-background text-foreground antialiased font-sans">
+        {children}
       </body>
     </html>
   );
