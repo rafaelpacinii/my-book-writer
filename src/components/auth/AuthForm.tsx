@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { ArrowLeft } from "lucide-react";
 import { AuthFields } from "./AuthFields";
 import { AuthActions } from "./AuthActions";
 
@@ -22,9 +23,10 @@ export function AuthForm({ onBack, onContinueOffline }: AuthFormProps) {
     <div className="flex flex-col w-full max-w-[496px] mx-auto py-4">
       <button
         onClick={onBack}
-        className="inline-flex items-center gap-1 self-start text-[13px] font-bold text-foreground hover:text-primary transition-colors cursor-pointer mb-6"
+        className="inline-flex items-center gap-1.5 self-start text-[13px] font-bold text-foreground hover:text-primary transition-colors cursor-pointer mb-6"
       >
-        ← Voltar
+        <ArrowLeft className="w-4 h-4" />
+        <span>Voltar</span>
       </button>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
