@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useProfile } from "@/hooks/useProfile";
 import { useCatalog } from "@/hooks/useCatalog";
 import { useBooks } from "@/hooks/useBooks";
+import { saveBookCoverImage } from "@/lib/api/images";
 
 export function useNewBookForm() {
   const router = useRouter();
@@ -20,6 +21,7 @@ export function useNewBookForm() {
   const [fontSize, setFontSize] = useState(11);
   const [lineHeight, setLineHeight] = useState(1.4);
   const [marginMm, setMarginMm] = useState(20);
+  const [coverUrl, setCoverUrl] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
@@ -44,7 +46,7 @@ export function useNewBookForm() {
     setIsSubmitting(true);
     try {
       const marginUm = Math.round(marginMm * 1000);
-      await addBook({
+      const newBook = await addBook({
         profile_id: profile?.id || "local-default-id",
         title: trimmedTitle,
         author_name: author.trim() || profile?.display_name || "Autor",
@@ -57,6 +59,11 @@ export function useNewBookForm() {
         margin_left_um: marginUm,
         margin_right_um: marginUm,
       });
+
+      if (coverUrl && newBook?.id) {
+        await saveBookCoverImage(newBook.id, coverUrl);
+      }
+
       router.push("/home");
     } catch {
       // error is handled by hook
@@ -73,6 +80,7 @@ export function useNewBookForm() {
     fontSize, setFontSize,
     lineHeight, setLineHeight,
     marginMm, setMarginMm,
+    coverUrl, setCoverUrl,
     isSubmitting, handleSubmit,
     router, isCatalogLoading,
   };

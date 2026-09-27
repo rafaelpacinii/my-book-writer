@@ -116,6 +116,53 @@ impl<'a> ImageAssetService<'a> {
         self.storage_dir.join(storage_key)
     }
 
+    /// Lê os bytes da imagem do disco e retorna como data URL Base64 para exibição segura
+    pub async fn read_image_data_url(&self, storage_key: &str) -> Result<String, AppError> {
+        let path = self.get_absolute_path(storage_key);
+        let bytes = fs::read(&path)
+            .map_err(|e| AppError::Validation(format!("Falha ao ler imagem do disco: {}", e)))?;
+
+        let mime = match path.extension().and_then(|ext| ext.to_str()).unwrap_or("") {
+            "jpg" | "jpeg" => "image/jpeg",
+            "webp" => "image/webp",
+            "gif" => "image/gif",
+            _ => "image/png",
+        };
+
+        const B64_CHARS: &[u8] =
+            b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+        let mut out = String::with_capacity(bytes.len() * 4 / 3 + 32);
+        out.push_str(&format!("data:{};base64,", mime));
+
+        let mut chunks = bytes.chunks_exact(3);
+        for chunk in chunks.by_ref() {
+            let b0 = chunk[0];
+            let b1 = chunk[1];
+            let b2 = chunk[2];
+            out.push(B64_CHARS[(b0 >> 2) as usize] as char);
+            out.push(B64_CHARS[(((b0 & 0x03) << 4) | (b1 >> 4)) as usize] as char);
+            out.push(B64_CHARS[(((b1 & 0x0f) << 2) | (b2 >> 6)) as usize] as char);
+            out.push(B64_CHARS[(b2 & 0x3f) as usize] as char);
+        }
+        let rem = chunks.remainder();
+        if rem.len() == 1 {
+            let b0 = rem[0];
+            out.push(B64_CHARS[(b0 >> 2) as usize] as char);
+            out.push(B64_CHARS[((b0 & 0x03) << 4) as usize] as char);
+            out.push('=');
+            out.push('=');
+        } else if rem.len() == 2 {
+            let b0 = rem[0];
+            let b1 = rem[1];
+            out.push(B64_CHARS[(b0 >> 2) as usize] as char);
+            out.push(B64_CHARS[(((b0 & 0x03) << 4) | (b1 >> 4)) as usize] as char);
+            out.push(B64_CHARS[((b1 & 0x0f) << 2) as usize] as char);
+            out.push('=');
+        }
+
+        Ok(out)
+    }
+
     fn decode_base64(data: &str) -> Result<Vec<u8>, AppError> {
         const B64_CHARS: &[u8] =
             b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";

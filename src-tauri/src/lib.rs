@@ -60,6 +60,7 @@ pub fn run() {
             commands::image_asset_commands::list_image_assets,
             commands::image_asset_commands::set_book_card_image,
             commands::image_asset_commands::get_image_file_path,
+            commands::image_asset_commands::read_image_data_url,
             // Revisão e Comentários
             commands::review_commands::create_review_comment,
             commands::review_commands::list_review_comments,

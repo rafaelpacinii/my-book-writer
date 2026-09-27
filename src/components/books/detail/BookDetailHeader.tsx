@@ -41,7 +41,7 @@ export function BookDetailHeader({ book, formatName, fontName }: Props) {
 
         <div className="flex items-center gap-2.5 flex-wrap">
           <Link
-            href={`/books/${book.id}/settings`}
+            href={`/books/settings?bookId=${encodeURIComponent(book.id)}`}
             className="inline-flex items-center gap-2 h-10 px-4 rounded-lg border border-border bg-surface text-foreground font-bold text-xs hover:border-primary/40 transition-colors shadow-xs"
           >
             <Settings className="w-4 h-4 text-muted" />

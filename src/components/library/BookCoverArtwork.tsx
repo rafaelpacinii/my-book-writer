@@ -2,6 +2,7 @@ import React from "react";
 
 interface Props {
   index?: number;
+  className?: string;
 }
 
 const PALETTES = [
@@ -11,13 +12,13 @@ const PALETTES = [
   ["#E4D8BC", "#D8B8A6"],
 ];
 
-export function BookCoverArtwork({ index = 0 }: Props) {
+export function BookCoverArtwork({ index = 0, className }: Props) {
   const p = Math.abs(index) % 4;
   const [c0, c1] = PALETTES[p];
   const gradId = `art-grad-${p}`;
 
   return (
-    <div className="w-full h-44 rounded-t-xl overflow-hidden relative border-b border-border/50 select-none">
+    <div className={className || "w-full h-44 rounded-t-xl overflow-hidden relative border-b border-border/50 select-none"}>
       <svg viewBox="0 0 600 400" preserveAspectRatio="xMidYMid slice" className="w-full h-full" aria-hidden="true">
         <defs>
           <linearGradient id={gradId} x1="0" y1="0" x2="1" y2="1">

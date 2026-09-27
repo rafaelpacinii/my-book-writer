@@ -1,59 +1,64 @@
 "use client";
 
-import React, { useRef } from "react";
-import { Upload } from "lucide-react";
-import { ContinueArtwork } from "@/components/home/ContinueArtwork";
+import React, { useState } from "react";
+import { X } from "lucide-react";
+import { BookCoverArtwork } from "@/components/library/BookCoverArtwork";
+import { CoverDropZone } from "./CoverDropZone";
 
 interface Props {
-  onSelectImage?: (file: File) => void;
+  coverUrl?: string | null;
+  onCoverChange?: (dataUrl: string | null) => void;
 }
 
-export function CoverPreview({ onSelectImage }: Props) {
-  const fileInputRef = useRef<HTMLInputElement>(null);
+export function CoverPreview({ coverUrl, onCoverChange }: Props) {
+  const [internalUrl, setInternalUrl] = useState<string | null>(coverUrl ?? null);
+  const activeUrl = coverUrl !== undefined ? coverUrl : internalUrl;
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file && onSelectImage) onSelectImage(file);
+  const handleLoaded = (dataUrl: string) => {
+    setInternalUrl(dataUrl);
+    onCoverChange?.(dataUrl);
+  };
+
+  const handleRemove = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setInternalUrl(null);
+    onCoverChange?.(null);
   };
 
   return (
-    <div className="flex flex-col gap-3 select-none">
-      <p className="text-xs font-bold tracking-wider text-muted uppercase">
-        Capa do livro
-      </p>
-
-      <div className="w-full h-44 rounded-xl overflow-hidden border border-border bg-surface">
-        <ContinueArtwork />
+    <div className="flex flex-col gap-3 select-none w-full">
+      <div className="flex items-center justify-between">
+        <p className="text-xs font-bold tracking-wider text-muted uppercase">Capa do livro</p>
+        {activeUrl && (
+          <button
+            type="button"
+            onClick={handleRemove}
+            className="inline-flex items-center gap-1 text-xs text-danger font-bold hover:underline cursor-pointer"
+          >
+            <X className="w-3.5 h-3.5" />
+            <span>Remover imagem</span>
+          </button>
+        )}
       </div>
 
-      <div className="mt-1">
+      <div className="w-full h-48 rounded-xl overflow-hidden border border-border bg-surface relative">
+        {activeUrl ? (
+          <img src={activeUrl} alt="Capa do livro" className="w-full h-full object-cover" />
+        ) : (
+          <BookCoverArtwork className="w-full h-full" />
+        )}
+      </div>
+
+      <div>
         <p className="text-[13px] font-bold text-foreground">
-          Sua capa geométrica já está pronta.
+          {activeUrl ? "Capa personalizada ativa." : "Sua capa geométrica já está pronta."}
         </p>
         <p className="text-xs text-muted mt-0.5">
-          Você pode personalizar quando quiser.
+          {activeUrl ? "Você pode trocar a imagem ou removê-la para voltar à capa geométrica." : "Você pode personalizar quando quiser."}
         </p>
       </div>
 
-      <div
-        onClick={() => fileInputRef.current?.click()}
-        className="flex flex-col items-center justify-center p-5 rounded-xl border border-dashed border-border bg-surface hover:border-primary/60 transition-colors cursor-pointer text-center group mt-1"
-      >
-        <Upload className="w-5 h-5 text-primary mb-2 group-hover:scale-105 transition-transform" />
-        <span className="text-xs font-bold text-foreground">
-          Arraste uma capa ou escolha um arquivo
-        </span>
-        <span className="text-[11px] text-muted mt-1">
-          Opcional · PNG, JPG ou WebP · até 25 MiB
-        </span>
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/png,image/jpeg,image/webp"
-          onChange={handleFileChange}
-          className="hidden"
-        />
-      </div>
+      <CoverDropZone onFileLoaded={handleLoaded} />
     </div>
   );
 }
