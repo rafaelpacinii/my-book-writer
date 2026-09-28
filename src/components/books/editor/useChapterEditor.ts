@@ -42,7 +42,7 @@ export function useChapterEditor(bookId: string, chapterId: string) {
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
   const [isFocusMode, setIsFocusMode] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(true);
   const [isNewChapterModalOpen, setIsNewChapterModalOpen] = useState(false);
 
   const [isBold, setIsBold] = useState(false);

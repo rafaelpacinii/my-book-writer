@@ -20,7 +20,7 @@ export function EditorSaveIndicator({ status }: Props) {
     return (
       <div className="flex items-center gap-1.5 text-xs text-amber-600 dark:text-amber-400 select-none">
         <Clock className="w-3.5 h-3.5" />
-        <span>Não salvo</span>
+        <span>Alterações não salvas</span>
       </div>
     );
   }
@@ -35,9 +35,9 @@ export function EditorSaveIndicator({ status }: Props) {
   }
 
   return (
-    <div className="flex items-center gap-1.5 text-xs text-muted/70 select-none">
-      <Check className="w-3.5 h-3.5 text-primary" />
-      <span>Salvo</span>
+    <div className="flex items-center gap-1.5 text-xs text-muted select-none">
+      <Check className="w-4 h-4 text-success" />
+      <span className="hidden sm:inline">Salvo neste dispositivo</span>
     </div>
   );
 }
