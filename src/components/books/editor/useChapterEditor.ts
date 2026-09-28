@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getBookById } from "@/lib/api/books";
 import {
+  createChapter,
   deleteChapter,
   getChapterById,
   listChapters,
@@ -17,6 +18,7 @@ import {
   parseChapterText,
   serializeChapterText,
 } from "@/utils/chapterContent";
+import { executeFormatAction, type FormatAction } from "@/utils/textFormatting";
 import type { Book } from "@/types/book";
 import type { Chapter, ChapterSummary } from "@/types/chapter";
 
@@ -31,6 +33,7 @@ export function useChapterEditor(bookId: string, chapterId: string) {
 
   const [title, setTitle] = useState("");
   const [text, setText] = useState("");
+  const contentRef = useRef<HTMLDivElement>(null);
   const originalTitleRef = useRef("");
   const originalTextRef = useRef("");
   const revisionRef = useRef(1);
@@ -39,6 +42,54 @@ export function useChapterEditor(bookId: string, chapterId: string) {
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
   const [isFocusMode, setIsFocusMode] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [isNewChapterModalOpen, setIsNewChapterModalOpen] = useState(false);
+
+  const [isBold, setIsBold] = useState(false);
+  const [isItalic, setIsItalic] = useState(false);
+  const [isUnderline, setIsUnderline] = useState(false);
+
+  const updateActiveStyles = useCallback(() => {
+    if (typeof document === "undefined") return;
+    try {
+      setIsBold(document.queryCommandState("bold"));
+      setIsItalic(document.queryCommandState("italic"));
+      setIsUnderline(document.queryCommandState("underline"));
+    } catch {
+      // Ignora erro se seleção estiver fora
+    }
+  }, []);
+
+  const handleFormat = useCallback(
+    (action: FormatAction) => {
+      executeFormatAction(action);
+      if (contentRef.current) {
+        setText(contentRef.current.innerHTML);
+      }
+      updateActiveStyles();
+    },
+    [updateActiveStyles],
+  );
+
+  const handleUndo = useCallback(() => {
+    if (typeof document !== "undefined") {
+      document.execCommand("undo");
+      if (contentRef.current) {
+        setText(contentRef.current.innerHTML);
+      }
+      updateActiveStyles();
+    }
+  }, [updateActiveStyles]);
+
+  const handleRedo = useCallback(() => {
+    if (typeof document !== "undefined") {
+      document.execCommand("redo");
+      if (contentRef.current) {
+        setText(contentRef.current.innerHTML);
+      }
+      updateActiveStyles();
+    }
+  }, [updateActiveStyles]);
 
   // Carrega dados iniciais do livro e do capítulo
   useEffect(() => {
@@ -128,7 +179,7 @@ export function useChapterEditor(bookId: string, chapterId: string) {
     return () => clearTimeout(timer);
   }, [title, text, saveNow]);
 
-  // Atalho de teclado Ctrl+S / Cmd+S
+  // Atalho global Ctrl+S / Cmd+S para salvar
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key === "s") {
@@ -140,7 +191,7 @@ export function useChapterEditor(bookId: string, chapterId: string) {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [saveNow]);
 
-  // Métricas do texto em tempo real
+  // Métricas do texto em tempo real (extrai texto limpo do HTML)
   const wordCount = useMemo(() => countWords(text), [text]);
   const charCount = useMemo(() => countCharacters(text), [text]);
   const readingTime = useMemo(() => estimateReadingTime(wordCount), [wordCount]);
@@ -154,6 +205,26 @@ export function useChapterEditor(bookId: string, chapterId: string) {
       currentIndex: idx >= 0 ? idx : 0,
     };
   }, [chapters, chapterId]);
+
+  const handleSelectChapter = useCallback(
+    async (targetChapterId: string) => {
+      if (targetChapterId === chapterId) return;
+      await saveNow();
+      router.push(`/books/editor?bookId=${encodeURIComponent(bookId)}&chapterId=${encodeURIComponent(targetChapterId)}`);
+    },
+    [chapterId, bookId, saveNow, router],
+  );
+
+  const handleQuickCreateChapter = useCallback(
+    async (newTitle: string) => {
+      await saveNow();
+      const created = await createChapter({ book_id: bookId, title: newTitle });
+      setIsNewChapterModalOpen(false);
+      setIsDrawerOpen(false);
+      router.push(`/books/editor?bookId=${encodeURIComponent(bookId)}&chapterId=${encodeURIComponent(created.id)}`);
+    },
+    [bookId, saveNow, router],
+  );
 
   const handleDeleteChapter = async () => {
     if (!chapterId) return;
@@ -175,11 +246,25 @@ export function useChapterEditor(bookId: string, chapterId: string) {
     setTitle,
     text,
     setText,
+    contentRef,
+    handleFormat,
+    handleUndo,
+    handleRedo,
+    isBold,
+    isItalic,
+    isUnderline,
+    updateActiveStyles,
     saveStatus,
     lastSavedAt,
     saveNow,
     isFocusMode,
     setIsFocusMode,
+    isDrawerOpen,
+    setIsDrawerOpen,
+    isNewChapterModalOpen,
+    setIsNewChapterModalOpen,
+    handleSelectChapter,
+    handleQuickCreateChapter,
     isDeleteModalOpen,
     setIsDeleteModalOpen,
     handleDeleteChapter,

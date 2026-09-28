@@ -10,6 +10,9 @@ import { EditorFooter } from "./EditorFooter";
 import { EditorSkeleton } from "./EditorSkeleton";
 import { EditorNotFound } from "./EditorNotFound";
 import { DeleteChapterModal } from "./DeleteChapterModal";
+import { EditorDrawer } from "./EditorDrawer";
+import { QuickNewChapterModal } from "./QuickNewChapterModal";
+import { EditorToolbar } from "./EditorToolbar";
 import { useChapterEditor } from "./useChapterEditor";
 
 interface Props {
@@ -35,14 +38,20 @@ export function Main({ bookId, chapterId }: Props) {
         onToggleFocus={() => ed.setIsFocusMode(!ed.isFocusMode)}
         onSave={ed.saveNow}
         onDeleteClick={() => ed.setIsDeleteModalOpen(true)}
+        onToggleDrawer={() => ed.setIsDrawerOpen(true)}
       />
-      <main className="flex-1 flex flex-col py-6">
+      <main className="flex-1 flex flex-col py-4">
+        <div className="flex items-center justify-between mb-4">
+          <EditorToolbar onFormat={ed.handleFormat} onUndo={ed.handleUndo} onRedo={ed.handleRedo} isBold={ed.isBold} isItalic={ed.isItalic} isUnderline={ed.isUnderline} />
+        </div>
         <EditorTitleInput chapterNumber={chapterNumber} title={ed.title} onChange={ed.setTitle} />
-        <EditorCanvas text={ed.text} onChange={ed.setText} fontSizePt={ed.book?.font_size_pt} lineHeightRatio={ed.book?.line_height_ratio} />
+        <EditorCanvas contentRef={ed.contentRef} initialContent={ed.text} onChange={ed.setText} fontSizePt={ed.book?.font_size_pt} lineHeightRatio={ed.book?.line_height_ratio} onSelectionChange={ed.updateActiveStyles} />
         <EditorNav bookId={bookId} prevChapter={ed.prevChapter} nextChapter={ed.nextChapter} />
       </main>
       <EditorFooter wordCount={ed.wordCount} charCount={ed.charCount} readingTime={ed.readingTime} lastSavedAt={ed.lastSavedAt} />
       <DeleteChapterModal isOpen={ed.isDeleteModalOpen} onClose={() => ed.setIsDeleteModalOpen(false)} onConfirm={ed.handleDeleteChapter} chapterTitle={ed.title} />
+      <EditorDrawer isOpen={ed.isDrawerOpen} onClose={() => ed.setIsDrawerOpen(false)} chapters={ed.chapters} currentChapterId={chapterId} onSelectChapter={ed.handleSelectChapter} onNewChapterClick={() => { ed.setIsDrawerOpen(false); ed.setIsNewChapterModalOpen(true); }} />
+      <QuickNewChapterModal isOpen={ed.isNewChapterModalOpen} onClose={() => ed.setIsNewChapterModalOpen(false)} onCreate={ed.handleQuickCreateChapter} />
     </div>
   );
 

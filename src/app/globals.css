@@ -140,3 +140,30 @@ select option {
   background-color: var(--surface);
   color: var(--foreground);
 }
+
+.editor-content {
+  outline: none;
+  min-height: 480px;
+}
+
+.editor-content p {
+  margin-bottom: 1.25rem;
+}
+
+.editor-content blockquote {
+  border-left: 3px solid var(--primary);
+  padding-left: 1rem;
+  margin: 1.25rem 0;
+  font-style: italic;
+  color: var(--muted);
+}
+
+.editor-content .scene-break {
+  text-align: center;
+  margin: 2rem 0;
+  letter-spacing: 0.35em;
+  font-family: var(--font-serif);
+  color: var(--muted);
+  font-weight: 700;
+  user-select: none;
+}

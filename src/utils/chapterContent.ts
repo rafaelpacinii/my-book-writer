@@ -1,6 +1,7 @@
 export interface ChapterDoc {
   type: string;
   text?: string;
+  html?: string;
   word_count?: number;
   content?: Array<{
     type?: string;
@@ -9,39 +10,65 @@ export interface ChapterDoc {
   }>;
 }
 
+export function extractPlainText(htmlOrText: string): string {
+  if (!htmlOrText) return "";
+  if (!/<[a-z][\s\S]*>/i.test(htmlOrText)) return htmlOrText.trim();
+  return htmlOrText
+    .replace(/<br\s*[\/]?>/gi, "\n")
+    .replace(/<\/p>/gi, "\n\n")
+    .replace(/<\/div>/gi, "\n")
+    .replace(/<[^>]+>/g, "")
+    .replace(/&nbsp;/gi, " ")
+    .replace(/&amp;/gi, "&")
+    .replace(/&lt;/gi, "<")
+    .replace(/&gt;/gi, ">")
+    .trim();
+}
+
+export function textToHtml(plain: string): string {
+  if (!plain) return "<p><br></p>";
+  if (/<[a-z][\s\S]*>/i.test(plain)) return plain;
+  return plain
+    .split(/\n\n+/)
+    .map((p) => `<p>${p.replace(/\n/g, "<br>")}</p>`)
+    .join("");
+}
+
 export function parseChapterText(contentJson: string | null | undefined): string {
-  if (!contentJson) return "";
+  if (!contentJson) return "<p><br></p>";
   try {
     const parsed = JSON.parse(contentJson) as ChapterDoc;
-    if (typeof parsed.text === "string") {
-      return parsed.text;
+    if (typeof parsed.html === "string" && parsed.html) {
+      return parsed.html;
+    }
+    if (typeof parsed.text === "string" && parsed.text) {
+      return textToHtml(parsed.text);
     }
     if (Array.isArray(parsed.content)) {
       const parts: string[] = [];
       for (const node of parsed.content) {
-        if (node.text) {
-          parts.push(node.text);
-        } else if (Array.isArray(node.content)) {
+        if (node.text) parts.push(node.text);
+        else if (Array.isArray(node.content)) {
           const inner = node.content.map((c) => c.text || "").join("");
           if (inner) parts.push(inner);
         }
       }
-      return parts.join("\n\n");
+      return textToHtml(parts.join("\n\n"));
     }
-    return "";
+    return "<p><br></p>";
   } catch {
-    return contentJson;
+    return textToHtml(contentJson);
   }
 }
 
-export function countWords(text: string): number {
-  const trimmed = text.trim();
-  if (!trimmed) return 0;
-  return trimmed.split(/\s+/).filter(Boolean).length;
+export function countWords(content: string): number {
+  const plain = extractPlainText(content);
+  if (!plain) return 0;
+  return plain.split(/\s+/).filter(Boolean).length;
 }
 
-export function countCharacters(text: string): number {
-  return text.length;
+export function countCharacters(content: string): number {
+  return extractPlainText(content).length;
 }
 
 export function estimateReadingTime(words: number): string {
@@ -50,11 +77,13 @@ export function estimateReadingTime(words: number): string {
   return `~${minutes} min de leitura`;
 }
 
-export function serializeChapterText(text: string): string {
+export function serializeChapterText(content: string): string {
+  const plain = extractPlainText(content);
   const doc: ChapterDoc = {
     type: "doc",
-    text,
-    word_count: countWords(text),
+    html: content,
+    text: plain,
+    word_count: countWords(plain),
   };
   return JSON.stringify(doc);
 }
