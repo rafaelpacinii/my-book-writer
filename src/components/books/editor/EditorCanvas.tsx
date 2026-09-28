@@ -1,42 +1,63 @@
+"use client";
+
 import React, { useEffect, useRef } from "react";
 
 interface Props {
-  text: string;
-  onChange: (value: string) => void;
+  contentRef: React.RefObject<HTMLDivElement | null>;
+  initialContent: string;
+  onChange: (html: string) => void;
   fontSizePt?: number;
   lineHeightRatio?: number;
+  onSelectionChange?: () => void;
 }
 
 export function EditorCanvas({
-  text,
-  onChange,
-  fontSizePt = 11,
-  lineHeightRatio = 1.6,
+  contentRef, initialContent, onChange, fontSizePt = 11,
+  lineHeightRatio = 1.6, onSelectionChange,
 }: Props) {
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const isInternal = useRef(false);
 
-  // Auto-ajusta altura com base no conteúdo para rolagem natural da página
-  useEffect(() => {
-    const el = textareaRef.current;
-    if (!el) return;
-    el.style.height = "auto";
-    el.style.height = `${Math.max(480, el.scrollHeight)}px`;
-  }, [text]);
-
-  const style = {
-    fontSize: `${fontSizePt * 1.33}px`,
-    lineHeight: lineHeightRatio,
+  const triggerChange = () => {
+    if (!contentRef.current) return;
+    isInternal.current = true;
+    onChange(contentRef.current.innerHTML);
+    onSelectionChange?.();
   };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (!e.ctrlKey && !e.metaKey) return;
+    const k = e.key.toLowerCase();
+    if (k === "b") { e.preventDefault(); document.execCommand("bold"); triggerChange(); }
+    else if (k === "i") { e.preventDefault(); document.execCommand("italic"); triggerChange(); }
+    else if (k === "u") { e.preventDefault(); document.execCommand("underline"); triggerChange(); }
+    else if (k === "z") {
+      e.preventDefault();
+      if (e.shiftKey) document.execCommand("redo");
+      else document.execCommand("undo");
+      triggerChange();
+    } else if (k === "y") { e.preventDefault(); document.execCommand("redo"); triggerChange(); }
+  };
+
+  useEffect(() => {
+    if (isInternal.current) { isInternal.current = false; return; }
+    if (contentRef.current && contentRef.current.innerHTML !== initialContent) {
+      contentRef.current.innerHTML = initialContent || "<p><br></p>";
+    }
+  }, [initialContent, contentRef]);
 
   return (
     <div className="w-full flex-1 flex flex-col py-4">
-      <textarea
-        ref={textareaRef}
-        value={text}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder="Comece a escrever a história deste capítulo aqui..."
-        style={style}
-        className="w-full flex-1 min-h-[480px] bg-transparent border-none outline-none resize-none font-serif text-foreground placeholder:text-muted/30 p-0 focus:ring-0 leading-relaxed tracking-normal"
+      <div
+        ref={contentRef}
+        contentEditable
+        suppressContentEditableWarning
+        onInput={triggerChange}
+        onKeyDown={handleKeyDown}
+        onKeyUp={onSelectionChange}
+        onMouseUp={onSelectionChange}
+        data-placeholder="Comece a escrever a história deste capítulo aqui..."
+        style={{ fontSize: `${fontSizePt * 1.33}px`, lineHeight: lineHeightRatio }}
+        className="editor-content w-full flex-1 min-h-[480px] bg-transparent font-serif text-foreground p-0 focus:ring-0 leading-relaxed tracking-normal outline-none"
         spellCheck="true"
       />
     </div>
