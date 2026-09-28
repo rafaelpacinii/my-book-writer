@@ -1,18 +1,14 @@
 "use client";
 
 import React from "react";
-import { AppShell } from "@/components/shared/AppShell";
 import { EditorHeader } from "./EditorHeader";
-import { EditorTitleInput } from "./EditorTitleInput";
-import { EditorCanvas } from "./EditorCanvas";
-import { EditorNav } from "./EditorNav";
+import { EditorToolbar } from "./EditorToolbar";
+import { EditorSidebar } from "./EditorSidebar";
+import { EditorSheet } from "./EditorSheet";
 import { EditorFooter } from "./EditorFooter";
 import { EditorSkeleton } from "./EditorSkeleton";
 import { EditorNotFound } from "./EditorNotFound";
-import { DeleteChapterModal } from "./DeleteChapterModal";
-import { EditorDrawer } from "./EditorDrawer";
-import { QuickNewChapterModal } from "./QuickNewChapterModal";
-import { EditorToolbar } from "./EditorToolbar";
+import { EditorModals } from "./EditorModals";
 import { useChapterEditor } from "./useChapterEditor";
 
 interface Props {
@@ -22,38 +18,51 @@ interface Props {
 
 export function Main({ bookId, chapterId }: Props) {
   const ed = useChapterEditor(bookId, chapterId);
-  const chapterNumber = `Capítulo ${String(ed.currentIndex + 1).padStart(2, "0")}`;
+  const num = `Capítulo ${String(ed.currentIndex + 1).padStart(2, "0")}`;
 
   if (ed.isLoading && !ed.chapter) return <EditorSkeleton />;
   if (!ed.chapter) return <EditorNotFound bookId={bookId} />;
 
-  const content = (
-    <div className={`mx-auto flex flex-col min-h-screen ${ed.isFocusMode ? "max-w-3xl px-6 py-6" : "max-w-4xl px-4 sm:px-6"}`}>
-      <EditorHeader
-        bookId={bookId}
-        bookTitle={ed.book?.title}
-        chapterNumber={chapterNumber}
-        saveStatus={ed.saveStatus}
-        isFocusMode={ed.isFocusMode}
-        onToggleFocus={() => ed.setIsFocusMode(!ed.isFocusMode)}
-        onSave={ed.saveNow}
-        onDeleteClick={() => ed.setIsDeleteModalOpen(true)}
-        onToggleDrawer={() => ed.setIsDrawerOpen(true)}
+  return (
+    <div className="flex flex-col h-screen overflow-hidden bg-background text-foreground">
+      {!ed.isFocusMode && (
+        <>
+          <EditorHeader
+            bookId={bookId} bookTitle={ed.book?.title} chapterNumber={num} chapterTitle={ed.title}
+            saveStatus={ed.saveStatus} isFocusMode={ed.isFocusMode} isSidebarOpen={ed.isDrawerOpen}
+            onToggleSidebar={() => ed.setIsDrawerOpen(!ed.isDrawerOpen)} onToggleFocus={() => ed.setIsFocusMode(true)}
+            onSave={ed.saveNow} onDeleteClick={() => ed.setIsDeleteModalOpen(true)}
+          />
+          <EditorToolbar
+            onFormat={ed.handleFormat} onUndo={ed.handleUndo} onRedo={ed.handleRedo}
+            isBold={ed.isBold} isItalic={ed.isItalic} isUnderline={ed.isUnderline}
+            fontFamily={ed.book?.font_preset_id || "Merriweather"} fontSizePt={ed.book?.font_size_pt}
+          />
+        </>
+      )}
+
+      <div className="flex flex-1 min-h-0 overflow-hidden">
+        {!ed.isFocusMode && ed.isDrawerOpen && (
+          <EditorSidebar
+            chapters={ed.chapters} currentChapterId={chapterId}
+            onSelectChapter={ed.handleSelectChapter} onNewChapterClick={() => ed.setIsNewChapterModalOpen(true)}
+          />
+        )}
+        <EditorSheet
+          chapterNumber={num} title={ed.title} onTitleChange={ed.setTitle}
+          contentRef={ed.contentRef} initialContent={ed.text} onContentChange={ed.setText}
+          fontSizePt={ed.book?.font_size_pt} lineHeightRatio={ed.book?.line_height_ratio}
+          onSelectionChange={ed.updateActiveStyles} bookId={bookId}
+          prevChapter={ed.prevChapter} nextChapter={ed.nextChapter}
+          isFocusMode={ed.isFocusMode} onExitFocus={() => ed.setIsFocusMode(false)}
+        />
+      </div>
+
+      {!ed.isFocusMode && <EditorFooter wordCount={ed.wordCount} readingTime={ed.readingTime} />}
+      <EditorModals
+        isNewOpen={ed.isNewChapterModalOpen} onCloseNew={() => ed.setIsNewChapterModalOpen(false)} onCreateNew={ed.handleQuickCreateChapter}
+        isDeleteOpen={ed.isDeleteModalOpen} onCloseDelete={() => ed.setIsDeleteModalOpen(false)} onConfirmDelete={ed.handleDeleteChapter} chapterTitle={ed.title}
       />
-      <main className="flex-1 flex flex-col py-4">
-        <div className="flex items-center justify-between mb-4">
-          <EditorToolbar onFormat={ed.handleFormat} onUndo={ed.handleUndo} onRedo={ed.handleRedo} isBold={ed.isBold} isItalic={ed.isItalic} isUnderline={ed.isUnderline} />
-        </div>
-        <EditorTitleInput chapterNumber={chapterNumber} title={ed.title} onChange={ed.setTitle} />
-        <EditorCanvas contentRef={ed.contentRef} initialContent={ed.text} onChange={ed.setText} fontSizePt={ed.book?.font_size_pt} lineHeightRatio={ed.book?.line_height_ratio} onSelectionChange={ed.updateActiveStyles} />
-        <EditorNav bookId={bookId} prevChapter={ed.prevChapter} nextChapter={ed.nextChapter} />
-      </main>
-      <EditorFooter wordCount={ed.wordCount} charCount={ed.charCount} readingTime={ed.readingTime} lastSavedAt={ed.lastSavedAt} />
-      <DeleteChapterModal isOpen={ed.isDeleteModalOpen} onClose={() => ed.setIsDeleteModalOpen(false)} onConfirm={ed.handleDeleteChapter} chapterTitle={ed.title} />
-      <EditorDrawer isOpen={ed.isDrawerOpen} onClose={() => ed.setIsDrawerOpen(false)} chapters={ed.chapters} currentChapterId={chapterId} onSelectChapter={ed.handleSelectChapter} onNewChapterClick={() => { ed.setIsDrawerOpen(false); ed.setIsNewChapterModalOpen(true); }} />
-      <QuickNewChapterModal isOpen={ed.isNewChapterModalOpen} onClose={() => ed.setIsNewChapterModalOpen(false)} onCreate={ed.handleQuickCreateChapter} />
     </div>
   );
-
-  return ed.isFocusMode ? <div className="min-h-screen bg-background text-foreground">{content}</div> : <AppShell>{content}</AppShell>;
 }
