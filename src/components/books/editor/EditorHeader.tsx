@@ -16,12 +16,15 @@ interface Props {
   onToggleFocus: () => void;
   onSave: () => void;
   onDeleteClick: () => void;
+  onExport: () => void;
+  isOpeningExport: boolean;
 }
 
 export function EditorHeader({
   bookId, bookTitle, chapterNumber, chapterTitle, saveStatus,
   isFocusMode, isSidebarOpen, onToggleSidebar, onToggleFocus,
   onSave, onDeleteClick,
+  onExport, isOpeningExport,
 }: Props) {
   return (
     <header className="h-[72px] px-6 border-b border-border bg-surface flex items-center justify-between select-none shrink-0">
@@ -57,6 +60,8 @@ export function EditorHeader({
         onToggleFocus={onToggleFocus}
         onSave={onSave}
         onDeleteClick={onDeleteClick}
+        onExport={onExport}
+        isOpeningExport={isOpeningExport}
       />
     </header>
   );

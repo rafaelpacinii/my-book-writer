@@ -12,6 +12,7 @@ use tauri::Manager;
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_dialog::init())
         .setup(|app| {
             let handle = app.handle().clone();
 
@@ -41,6 +42,8 @@ pub fn run() {
             commands::book_commands::get_book_by_id,
             commands::book_commands::update_book,
             commands::book_commands::delete_book,
+            commands::export_commands::get_pdf_export_info,
+            commands::export_commands::export_book_pdf,
             // Perfil
             commands::profile_commands::get_profile,
             commands::profile_commands::update_profile,

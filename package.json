@@ -13,6 +13,8 @@
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:report": "playwright show-report src/tests/playwright-report",
+    "pdf:install": "playwright install chromium",
+    "pdf:prepare": "node --experimental-strip-types src-tauri/prepareChromium.ts",
     "tauri": "tauri"
   },
   "dependencies": {

@@ -27,6 +27,7 @@ export function Main({ bookId, chapterId }: { bookId: string; chapterId: string 
             saveStatus={ed.saveStatus} isFocusMode={ed.isFocusMode} isSidebarOpen={ed.isDrawerOpen}
             onToggleSidebar={() => ed.setIsDrawerOpen(!ed.isDrawerOpen)} onToggleFocus={() => ed.setIsFocusMode(true)}
             onSave={ed.saveNow} onDeleteClick={() => ed.setIsDeleteModalOpen(true)}
+            onExport={() => void ed.handleExport()} isOpeningExport={ed.isOpeningExport}
           />
           <EditorToolbar
             onFormat={ed.handleFormat} onUndo={ed.handleUndo} onRedo={ed.handleRedo}

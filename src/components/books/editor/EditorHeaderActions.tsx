@@ -1,6 +1,7 @@
 import React from "react";
 import { Maximize2, Minimize2, Trash2 } from "lucide-react";
 import { EditorSaveIndicator } from "./EditorSaveIndicator";
+import { EditorExportButton } from "./EditorExportButton";
 import type { SaveStatus } from "./useChapterEditor";
 
 interface Props {
@@ -9,6 +10,8 @@ interface Props {
   onToggleFocus: () => void;
   onSave: () => void;
   onDeleteClick: () => void;
+  onExport: () => void;
+  isOpeningExport: boolean;
 }
 
 export function EditorHeaderActions({
@@ -16,10 +19,13 @@ export function EditorHeaderActions({
   isFocusMode,
   onToggleFocus,
   onDeleteClick,
+  onExport,
+  isOpeningExport,
 }: Props) {
   return (
     <div className="flex items-center gap-3">
       <EditorSaveIndicator status={saveStatus} />
+      <EditorExportButton onExport={onExport} isOpeningExport={isOpeningExport} />
 
       <button
         type="button"
