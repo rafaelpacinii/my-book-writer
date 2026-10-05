@@ -327,6 +327,19 @@ select option {
   orphans: 1;
 }
 
+.editor-paged-caret {
+  animation: paged-caret-blink 1s steps(1, end) infinite;
+}
+
+@keyframes paged-caret-blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .editor-paged-caret { animation: none; }
+}
+
 .editor-content-paged p,
 .editor-content-paged > div {
   margin: 0 0 1.25em;

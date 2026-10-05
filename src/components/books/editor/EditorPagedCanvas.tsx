@@ -10,6 +10,7 @@ interface Props {
   onSelectionChange?: () => void;
   fontSizePx: number;
   lineHeight: number;
+  hasCaret: boolean;
 }
 
 export function EditorPagedCanvas(props: Props) {
@@ -27,7 +28,7 @@ export function EditorPagedCanvas(props: Props) {
       onKeyDown={handleKeyDown}
       onKeyUp={props.onSelectionChange}
       onMouseUp={props.onSelectionChange}
-      style={{ fontSize: props.fontSizePx, lineHeight: props.lineHeight }}
+      style={{ fontSize: props.fontSizePx, lineHeight: props.lineHeight, caretColor: props.hasCaret ? "transparent" : undefined }}
       className="editor-content editor-content-paged w-full bg-transparent p-0 outline-none"
       spellCheck
     />
