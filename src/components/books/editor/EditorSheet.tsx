@@ -12,6 +12,7 @@ interface Props {
   initialContent: string;
   onContentChange: (v: string) => void;
   fontSizePt?: number;
+  fontFamily?: string;
   lineHeightRatio?: number;
   onSelectionChange?: () => void;
   bookId: string;
@@ -46,6 +47,7 @@ export function EditorSheet(props: Props) {
           initialContent={props.initialContent}
           onChange={props.onContentChange}
           fontSizePt={props.fontSizePt}
+          fontFamily={props.fontFamily}
           lineHeightRatio={props.lineHeightRatio}
           onSelectionChange={props.onSelectionChange}
         />

@@ -7,6 +7,7 @@ import { loadBookCoverUrl, saveBookCoverImage } from "@/lib/api/images";
 import { useBooks } from "@/hooks/useBooks";
 import { useCatalog } from "@/hooks/useCatalog";
 import type { Book } from "@/types/book";
+import { validateBookLayout } from "@/utils/bookMeasurements";
 
 export function useBookSettings(bookId: string) {
   const router = useRouter();
@@ -18,6 +19,7 @@ export function useBookSettings(bookId: string) {
 
   const [title, setTitle] = useState("");
   const [titleError, setTitleError] = useState<string | null>(null);
+  const [layoutError, setLayoutError] = useState<string | null>(null);
   const [author, setAuthor] = useState("");
   const [formatId, setFormatId] = useState("");
   const [fontId, setFontId] = useState("");
@@ -47,10 +49,10 @@ export function useBookSettings(bookId: string) {
         setFontId(b.font_preset_id);
         setFontSize(b.font_size_pt);
         setLineHeight(b.line_height_ratio);
-        setMarginTopMm(Math.round(b.margin_top_um / 1000));
-        setMarginBottomMm(Math.round(b.margin_bottom_um / 1000));
-        setMarginLeftMm(Math.round(b.margin_left_um / 1000));
-        setMarginRightMm(Math.round(b.margin_right_um / 1000));
+        setMarginTopMm(b.margin_top_um / 1000);
+        setMarginBottomMm(b.margin_bottom_um / 1000);
+        setMarginLeftMm(b.margin_left_um / 1000);
+        setMarginRightMm(b.margin_right_um / 1000);
 
         void loadBookCoverUrl(bookId, b.card_image_asset_id).then((url) => {
           if (isMounted) {
@@ -76,10 +78,10 @@ export function useBookSettings(bookId: string) {
       fontId !== book.font_preset_id ||
       fontSize !== book.font_size_pt ||
       lineHeight !== book.line_height_ratio ||
-      marginTopMm !== Math.round(book.margin_top_um / 1000) ||
-      marginBottomMm !== Math.round(book.margin_bottom_um / 1000) ||
-      marginLeftMm !== Math.round(book.margin_left_um / 1000) ||
-      marginRightMm !== Math.round(book.margin_right_um / 1000)
+      marginTopMm !== book.margin_top_um / 1000 ||
+      marginBottomMm !== book.margin_bottom_um / 1000 ||
+      marginLeftMm !== book.margin_left_um / 1000 ||
+      marginRightMm !== book.margin_right_um / 1000
     );
   }, [
     book, coverUrl, originalCoverUrl, title, author, formatId, fontId, fontSize, lineHeight,
@@ -94,6 +96,12 @@ export function useBookSettings(bookId: string) {
       return;
     }
     setTitleError(null);
+    const error = validateBookLayout(
+      formats.find((format) => format.id === formatId), fontSize, lineHeight,
+      [marginTopMm, marginRightMm, marginBottomMm, marginLeftMm],
+    );
+    setLayoutError(error);
+    if (error) return;
     setIsSubmitting(true);
     try {
       let currentAssetId = book?.card_image_asset_id ?? null;
@@ -159,7 +167,7 @@ export function useBookSettings(bookId: string) {
   return {
     book,
     isLoading: isLoadingBook || isCatalogLoading,
-    title, setTitle, titleError,
+    title, setTitle, titleError, layoutError,
     author, setAuthor,
     formatId, setFormatId, formats,
     fontId, setFontId, fonts,

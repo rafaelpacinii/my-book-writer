@@ -29,6 +29,9 @@ export function SettingsForm({ settings: s }: Props) {
             marginLeftMm={s.marginLeftMm} setMarginLeftMm={s.setMarginLeftMm}
             marginRightMm={s.marginRightMm} setMarginRightMm={s.setMarginRightMm}
           />
+          {s.layoutError && (
+            <p role="alert" className="text-sm text-danger">{s.layoutError}</p>
+          )}
           <SettingsDangerZone onDeleteClick={() => s.setIsDeleteModalOpen(true)} />
         </div>
 

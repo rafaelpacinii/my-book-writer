@@ -1,6 +1,6 @@
 import React from "react";
 import { Input } from "@/components/ui/Input";
-import { Select } from "@/components/ui/Select";
+import { BookTypographyFields } from "@/components/shared/BookTypographyFields";
 import type { BookFormat, FontPreset } from "@/types/catalog";
 
 interface Props {
@@ -44,21 +44,10 @@ export function BookInfoFields(props: Props) {
         hint="Use seu nome ou um pseudônimo."
       />
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <Select
-          label="Formato"
-          value={formatId}
-          onChange={(e) => setFormatId(e.target.value)}
-          options={formats.map((f) => ({ value: f.id, label: f.name }))}
-        />
-
-        <Select
-          label="Fonte"
-          value={fontId}
-          onChange={(e) => setFontId(e.target.value)}
-          options={fonts.map((f) => ({ value: f.id, label: f.name }))}
-        />
-      </div>
+      <BookTypographyFields
+        formatId={formatId} setFormatId={setFormatId} formats={formats}
+        fontId={fontId} setFontId={setFontId} fonts={fonts}
+      />
     </div>
   );
 }

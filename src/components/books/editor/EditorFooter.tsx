@@ -3,9 +3,14 @@ import React from "react";
 interface Props {
   wordCount: number;
   readingTime: string;
+  viewMode?: "continuous" | "paged";
 }
 
-export function EditorFooter({ wordCount, readingTime }: Props) {
+export function EditorFooter({
+  wordCount, readingTime, viewMode = "continuous",
+}: Props) {
+  const isPaged = viewMode === "paged";
+
   return (
     <footer className="h-11 px-6 border-t border-border bg-surface flex items-center justify-between text-xs text-muted select-none shrink-0">
       <div>
@@ -18,12 +23,10 @@ export function EditorFooter({ wordCount, readingTime }: Props) {
       </div>
 
       <div className="hidden sm:block">
-        <span>Salvamento automático local</span>
+        <span>{isPaged ? "Diagramação em tempo real" : "Salvamento automático local"}</span>
       </div>
 
-      <div>
-        <span>{readingTime}</span>
-      </div>
+      <span>{readingTime}</span>
     </footer>
   );
 }

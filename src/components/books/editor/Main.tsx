@@ -4,19 +4,14 @@ import React from "react";
 import { EditorHeader } from "./EditorHeader";
 import { EditorToolbar } from "./EditorToolbar";
 import { EditorSidebar } from "./EditorSidebar";
-import { EditorSheet } from "./EditorSheet";
+import { EditorCanvasSwitcher } from "./EditorCanvasSwitcher";
 import { EditorFooter } from "./EditorFooter";
 import { EditorSkeleton } from "./EditorSkeleton";
 import { EditorNotFound } from "./EditorNotFound";
 import { EditorModals } from "./EditorModals";
 import { useChapterEditor } from "./useChapterEditor";
 
-interface Props {
-  bookId: string;
-  chapterId: string;
-}
-
-export function Main({ bookId, chapterId }: Props) {
+export function Main({ bookId, chapterId }: { bookId: string; chapterId: string }) {
   const ed = useChapterEditor(bookId, chapterId);
   const num = `Capítulo ${String(ed.currentIndex + 1).padStart(2, "0")}`;
 
@@ -36,7 +31,8 @@ export function Main({ bookId, chapterId }: Props) {
           <EditorToolbar
             onFormat={ed.handleFormat} onUndo={ed.handleUndo} onRedo={ed.handleRedo}
             isBold={ed.isBold} isItalic={ed.isItalic} isUnderline={ed.isUnderline}
-            fontFamily={ed.book?.font_preset_id || "Merriweather"} fontSizePt={ed.book?.font_size_pt}
+            fontFamily={ed.bookFont?.family_name} fontSizePt={ed.book?.font_size_pt}
+            viewMode={ed.viewMode} onViewModeChange={ed.setViewMode}
           />
         </>
       )}
@@ -48,17 +44,22 @@ export function Main({ bookId, chapterId }: Props) {
             onSelectChapter={ed.handleSelectChapter} onNewChapterClick={() => ed.setIsNewChapterModalOpen(true)}
           />
         )}
-        <EditorSheet
-          chapterNumber={num} title={ed.title} onTitleChange={ed.setTitle}
-          contentRef={ed.contentRef} initialContent={ed.text} onContentChange={ed.setText}
-          fontSizePt={ed.book?.font_size_pt} lineHeightRatio={ed.book?.line_height_ratio}
-          onSelectionChange={ed.updateActiveStyles} bookId={bookId}
+        <EditorCanvasSwitcher
+          viewMode={ed.viewMode} book={ed.book} format={ed.bookFormat} font={ed.bookFont}
+          bookId={bookId} chapterNumber={num}
+          title={ed.title} onTitleChange={ed.setTitle} contentRef={ed.contentRef}
+          text={ed.text} onTextChange={ed.setText} onSelectionChange={ed.updateActiveStyles}
           prevChapter={ed.prevChapter} nextChapter={ed.nextChapter}
           isFocusMode={ed.isFocusMode} onExitFocus={() => ed.setIsFocusMode(false)}
+          isFitMode={ed.isFitMode} onFitModeChange={ed.setIsFitMode}
         />
       </div>
 
-      {!ed.isFocusMode && <EditorFooter wordCount={ed.wordCount} readingTime={ed.readingTime} />}
+      {!ed.isFocusMode && (
+        <EditorFooter
+          wordCount={ed.wordCount} readingTime={ed.readingTime} viewMode={ed.viewMode}
+        />
+      )}
       <EditorModals
         isNewOpen={ed.isNewChapterModalOpen} onCloseNew={() => ed.setIsNewChapterModalOpen(false)} onCreateNew={ed.handleQuickCreateChapter}
         isDeleteOpen={ed.isDeleteModalOpen} onCloseDelete={() => ed.setIsDeleteModalOpen(false)} onConfirmDelete={ed.handleDeleteChapter} chapterTitle={ed.title}

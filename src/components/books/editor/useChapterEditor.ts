@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getBookById } from "@/lib/api/books";
+import { useCatalog } from "@/hooks/useCatalog";
 import {
   createChapter,
   deleteChapter,
@@ -26,6 +27,7 @@ export type SaveStatus = "saved" | "saving" | "unsaved" | "error";
 
 export function useChapterEditor(bookId: string, chapterId: string) {
   const router = useRouter();
+  const { formats, fonts } = useCatalog();
   const [book, setBook] = useState<Book | null>(null);
   const [chapters, setChapters] = useState<ChapterSummary[]>([]);
   const [chapter, setChapter] = useState<Chapter | null>(null);
@@ -44,6 +46,8 @@ export function useChapterEditor(bookId: string, chapterId: string) {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(true);
   const [isNewChapterModalOpen, setIsNewChapterModalOpen] = useState(false);
+  const [viewMode, setViewMode] = useState<"continuous" | "paged">("continuous");
+  const [isFitMode, setIsFitMode] = useState(true);
 
   const [isBold, setIsBold] = useState(false);
   const [isItalic, setIsItalic] = useState(false);
@@ -239,6 +243,8 @@ export function useChapterEditor(bookId: string, chapterId: string) {
 
   return {
     book,
+    bookFormat: formats.find((format) => format.id === book?.format_id),
+    bookFont: fonts.find((font) => font.id === book?.font_preset_id),
     chapter,
     chapters,
     isLoading,
@@ -263,6 +269,10 @@ export function useChapterEditor(bookId: string, chapterId: string) {
     setIsDrawerOpen,
     isNewChapterModalOpen,
     setIsNewChapterModalOpen,
+    viewMode,
+    setViewMode,
+    isFitMode,
+    setIsFitMode,
     handleSelectChapter,
     handleQuickCreateChapter,
     isDeleteModalOpen,
