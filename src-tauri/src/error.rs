@@ -10,4 +10,7 @@ pub enum AppError {
 
     #[error("Recurso não encontrado: {0}")]
     NotFound(String),
+
+    #[error("{0}")]
+    Export(String),
 }

@@ -1,0 +1,26 @@
+/* Shared by the editable page and the native HTML-to-PDF renderer. */
+.editor-content-paged {
+  min-height: 1lh;
+  font-family: inherit;
+  overflow-wrap: anywhere;
+  widows: 1;
+  orphans: 1;
+}
+
+.editor-content-paged p,
+.editor-content-paged>div {
+  margin: 0 0 1.25em;
+}
+
+.editor-content-paged> :last-child {
+  margin-bottom: 0;
+}
+
+.editor-content-paged .scene-break {
+  font-family: inherit;
+}
+
+.paged-chapter-heading {
+  break-inside: avoid;
+  overflow-wrap: anywhere;
+}

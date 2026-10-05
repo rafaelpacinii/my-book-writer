@@ -39,6 +39,10 @@ export function useChapterEditor(bookId: string, chapterId: string) {
   const originalTitleRef = useRef("");
   const originalTextRef = useRef("");
   const revisionRef = useRef(1);
+  const saveInFlightRef = useRef<Promise<boolean> | null>(null);
+  const latestDraftRef = useRef({ chapterId, title, text });
+  latestDraftRef.current = { chapterId, title, text };
+  const [isOpeningExport, setIsOpeningExport] = useState(false);
 
   const [saveStatus, setSaveStatus] = useState<SaveStatus>("saved");
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
@@ -129,42 +133,64 @@ export function useChapterEditor(bookId: string, chapterId: string) {
     };
   }, [bookId, chapterId]);
 
-  // Função central de salvamento
-  const saveNow = useCallback(async () => {
-    if (!chapterId) return;
-    const currentTitle = title.trim();
-    if (!currentTitle) return;
+  // Serialize saves and read the latest draft after an earlier save finishes.
+  const saveNow = useCallback(async (): Promise<boolean> => {
+    if (!chapterId) return false;
+    while (saveInFlightRef.current) await saveInFlightRef.current;
 
-    const hasTitleChanged = currentTitle !== originalTitleRef.current;
-    const hasTextChanged = text !== originalTextRef.current;
-
-    if (!hasTitleChanged && !hasTextChanged) {
-      setSaveStatus("saved");
-      return;
-    }
-
-    setSaveStatus("saving");
+    const operation = (async () => {
+      try {
+        while (true) {
+          const draft = latestDraftRef.current;
+          if (draft.chapterId !== chapterId) return false;
+          const currentTitle = draft.title.trim();
+          if (!currentTitle) {
+            setSaveStatus("error");
+            return false;
+          }
+          const hasTitleChanged = currentTitle !== originalTitleRef.current;
+          const hasTextChanged = draft.text !== originalTextRef.current;
+          if (!hasTitleChanged && !hasTextChanged) {
+            setSaveStatus("saved");
+            return true;
+          }
+          setSaveStatus("saving");
+          if (hasTitleChanged) {
+            await updateChapterTitle(chapterId, currentTitle);
+            originalTitleRef.current = currentTitle;
+          }
+          if (hasTextChanged) {
+            const updated = await saveChapterContent(
+              chapterId, revisionRef.current, serializeChapterText(draft.text),
+            );
+            revisionRef.current = updated.content_revision;
+            originalTextRef.current = draft.text;
+          }
+          setLastSavedAt(new Date());
+        }
+      } catch {
+        setSaveStatus("error");
+        return false;
+      }
+    })();
+    saveInFlightRef.current = operation;
     try {
-      if (hasTitleChanged) {
-        await updateChapterTitle(chapterId, currentTitle);
-        originalTitleRef.current = currentTitle;
-      }
-      if (hasTextChanged) {
-        const payload = serializeChapterText(text);
-        const updated = await saveChapterContent(
-          chapterId,
-          revisionRef.current,
-          payload,
-        );
-        revisionRef.current = updated.content_revision;
-        originalTextRef.current = text;
-      }
-      setSaveStatus("saved");
-      setLastSavedAt(new Date());
-    } catch {
-      setSaveStatus("error");
+      return await operation;
+    } finally {
+      if (saveInFlightRef.current === operation) saveInFlightRef.current = null;
     }
-  }, [chapterId, title, text]);
+  }, [chapterId]);
+
+  const handleExport = useCallback(async () => {
+    setIsOpeningExport(true);
+    try {
+      if (await saveNow()) {
+        router.push(`/books/export?bookId=${encodeURIComponent(bookId)}`);
+      }
+    } finally {
+      setIsOpeningExport(false);
+    }
+  }, [bookId, router, saveNow]);
 
   // Auto-save com debounce de 1200ms
   useEffect(() => {
@@ -263,6 +289,8 @@ export function useChapterEditor(bookId: string, chapterId: string) {
     saveStatus,
     lastSavedAt,
     saveNow,
+    handleExport,
+    isOpeningExport,
     isFocusMode,
     setIsFocusMode,
     isDrawerOpen,

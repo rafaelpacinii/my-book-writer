@@ -55,7 +55,7 @@ export function BookDetailHeader({ book, formatName, fontName }: Props) {
             <span>Ver livro completo</span>
           </Link>
           <Link
-            href={`/books/${book.id}/export`}
+            href={`/books/export?bookId=${encodeURIComponent(book.id)}`}
             className="inline-flex items-center gap-2 h-10 px-4 rounded-lg bg-primary text-primary-foreground font-bold text-xs hover:opacity-90 transition-opacity shadow-xs"
           >
             <FileDown className="w-4 h-4" />

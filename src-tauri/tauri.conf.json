@@ -4,8 +4,8 @@
   "version": "0.1.0",
   "identifier": "com.rafael.my-book-writer",
   "build": {
-    "beforeDevCommand": "npm run dev",
-    "beforeBuildCommand": "npm run build",
+    "beforeDevCommand": "npm run pdf:prepare && npm run dev",
+    "beforeBuildCommand": "npm run pdf:prepare && npm run build",
     "devUrl": "http://localhost:3000",
     "frontendDist": "../out"
   },
@@ -23,6 +23,9 @@
   },
   "bundle": {
     "active": true,
+    "resources": {
+      "resources/chromium/": "chromium/"
+    },
     "targets": "all",
     "icon": [
       "icons/32x32.png",
