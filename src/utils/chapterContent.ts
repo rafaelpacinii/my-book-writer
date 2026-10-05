@@ -1,3 +1,5 @@
+import { removeLegacyPageBreaks } from "@/utils/bookPagination";
+
 export interface ChapterDoc {
   type: string;
   text?: string;
@@ -39,10 +41,10 @@ export function parseChapterText(contentJson: string | null | undefined): string
   try {
     const parsed = JSON.parse(contentJson) as ChapterDoc;
     if (typeof parsed.html === "string" && parsed.html) {
-      return parsed.html;
+      return removeLegacyPageBreaks(parsed.html);
     }
     if (typeof parsed.text === "string" && parsed.text) {
-      return textToHtml(parsed.text);
+      return removeLegacyPageBreaks(textToHtml(parsed.text));
     }
     if (Array.isArray(parsed.content)) {
       const parts: string[] = [];
@@ -57,7 +59,7 @@ export function parseChapterText(contentJson: string | null | undefined): string
     }
     return "<p><br></p>";
   } catch {
-    return textToHtml(contentJson);
+    return removeLegacyPageBreaks(textToHtml(contentJson));
   }
 }
 

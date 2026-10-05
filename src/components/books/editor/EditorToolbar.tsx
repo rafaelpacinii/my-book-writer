@@ -13,14 +13,20 @@ interface Props {
   isUnderline?: boolean;
   fontFamily?: string;
   fontSizePt?: number;
+  viewMode: "continuous" | "paged";
+  onViewModeChange: (mode: "continuous" | "paged") => void;
 }
 
 export function EditorToolbar({
   onFormat, onUndo, onRedo, isBold, isItalic, isUnderline,
-  fontFamily = "Merriweather", fontSizePt = 11,
+  fontFamily = "Merriweather", fontSizePt = 11, viewMode, onViewModeChange,
 }: Props) {
   const btn = (active?: boolean) =>
     `p-1.5 rounded-md transition-colors cursor-pointer text-xs ${active ? "bg-primary-soft text-primary font-bold" : "text-muted hover:text-foreground hover:bg-surface-hover"
+    }`;
+
+  const modeBtn = (active: boolean) =>
+    `px-3 py-1.5 rounded-md font-bold text-xs transition-colors cursor-pointer ${active ? "bg-primary text-primary-foreground" : "text-muted hover:text-foreground"
     }`;
 
   return (
@@ -43,8 +49,8 @@ export function EditorToolbar({
       </div>
 
       <div className="hidden sm:flex items-center gap-1 bg-background/50 p-1 rounded-lg border border-border">
-        <span className="px-3 py-1.5 rounded-md bg-primary text-primary-foreground font-bold text-xs">Contínuo</span>
-        <span className="px-3 py-1.5 rounded-md text-muted hover:text-foreground font-bold text-xs cursor-pointer">Paginado</span>
+        <button type="button" onClick={() => onViewModeChange("continuous")} className={modeBtn(viewMode === "continuous")}>Contínuo</button>
+        <button type="button" onClick={() => onViewModeChange("paged")} className={modeBtn(viewMode === "paged")}>Paginado</button>
       </div>
     </div>
   );

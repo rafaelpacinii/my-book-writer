@@ -6,6 +6,7 @@ import { useProfile } from "@/hooks/useProfile";
 import { useCatalog } from "@/hooks/useCatalog";
 import { useBooks } from "@/hooks/useBooks";
 import { saveBookCoverImage } from "@/lib/api/images";
+import { validateBookLayout } from "@/utils/bookMeasurements";
 
 export function useNewBookForm() {
   const router = useRouter();
@@ -15,6 +16,7 @@ export function useNewBookForm() {
 
   const [title, setTitle] = useState("");
   const [titleError, setTitleError] = useState<string | null>(null);
+  const [layoutError, setLayoutError] = useState<string | null>(null);
   const [author, setAuthor] = useState("");
   const [formatId, setFormatId] = useState("");
   const [fontId, setFontId] = useState("");
@@ -43,6 +45,12 @@ export function useNewBookForm() {
       return;
     }
     setTitleError(null);
+    const error = validateBookLayout(
+      formats.find((format) => format.id === formatId), fontSize, lineHeight,
+      [marginMm, marginMm, marginMm, marginMm],
+    );
+    setLayoutError(error);
+    if (error) return;
     setIsSubmitting(true);
     try {
       const marginUm = Math.round(marginMm * 1000);
@@ -73,7 +81,7 @@ export function useNewBookForm() {
   };
 
   return {
-    title, setTitle, titleError,
+    title, setTitle, titleError, layoutError,
     author, setAuthor,
     formatId, setFormatId, formats,
     fontId, setFontId, fonts,

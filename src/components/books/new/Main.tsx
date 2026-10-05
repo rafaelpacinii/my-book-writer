@@ -40,6 +40,9 @@ export function Main() {
                 marginMm={form.marginMm}
                 setMarginMm={form.setMarginMm}
               />
+              {form.layoutError && (
+                <p role="alert" className="text-sm text-danger">{form.layoutError}</p>
+              )}
             </div>
 
             <div className="lg:col-span-5 bg-surface p-6 sm:p-8 rounded-xl border border-border shadow-xs">

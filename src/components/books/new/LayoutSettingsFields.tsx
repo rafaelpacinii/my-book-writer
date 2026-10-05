@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { Input } from "@/components/ui/Input";
+import { BookMarginInput } from "@/components/shared/BookMarginInput";
 
 interface Props {
   fontSize: number;
@@ -48,13 +49,10 @@ export function LayoutSettingsFields(props: Props) {
             value={lineHeight}
             onChange={(e) => setLineHeight(Number(e.target.value))}
           />
-          <Input
-            label="Margens padrão (mm)"
-            type="number"
-            min="5"
-            max="60"
-            value={marginMm}
-            onChange={(e) => setMarginMm(Number(e.target.value))}
+          <BookMarginInput
+            label="Margens padrão"
+            valueMm={marginMm}
+            onChange={setMarginMm}
           />
         </div>
       )}

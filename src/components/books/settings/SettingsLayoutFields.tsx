@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { Input } from "@/components/ui/Input";
+import { BookMarginInput } from "@/components/shared/BookMarginInput";
 
 interface Props {
   fontSize: number; setFontSize: (v: number) => void;
@@ -39,13 +40,13 @@ export function SettingsLayoutFields(props: Props) {
 
           <div>
             <p className="text-[11px] font-bold text-muted uppercase tracking-wider mb-2.5">
-              Margens em milímetros
+              Margens
             </p>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <Input label="Superior" type="number" min="5" max="60" value={marginTopMm} onChange={(e) => setMarginTopMm(Number(e.target.value))} />
-              <Input label="Inferior" type="number" min="5" max="60" value={marginBottomMm} onChange={(e) => setMarginBottomMm(Number(e.target.value))} />
-              <Input label="Esquerda" type="number" min="5" max="60" value={marginLeftMm} onChange={(e) => setMarginLeftMm(Number(e.target.value))} />
-              <Input label="Direita" type="number" min="5" max="60" value={marginRightMm} onChange={(e) => setMarginRightMm(Number(e.target.value))} />
+              <BookMarginInput label="Superior" valueMm={marginTopMm} onChange={setMarginTopMm} />
+              <BookMarginInput label="Inferior" valueMm={marginBottomMm} onChange={setMarginBottomMm} />
+              <BookMarginInput label="Esquerda" valueMm={marginLeftMm} onChange={setMarginLeftMm} />
+              <BookMarginInput label="Direita" valueMm={marginRightMm} onChange={setMarginRightMm} />
             </div>
           </div>
         </div>
