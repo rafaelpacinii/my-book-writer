@@ -1,6 +1,9 @@
+import { useRef } from "react";
 import type { PagedEditorProps } from "@/types/editor";
+import { usePagedCaret } from "@/hooks/usePagedCaret";
 import type { usePagedEditor } from "./usePagedEditor";
-import { EditorPagedCanvas } from "./EditorPagedCanvas";
+import { EditorPagedFlow } from "./EditorPagedFlow";
+import { EditorPagedCaret } from "./EditorPagedCaret";
 
 interface Props {
   props: PagedEditorProps;
@@ -9,10 +12,13 @@ interface Props {
 
 export function EditorPagedPaper({ props, editor: ed }: Props) {
   const dim = ed.dim;
+  const paperRef = useRef<HTMLDivElement>(null);
+  const caret = usePagedCaret(props.contentRef, paperRef, ed.currentPage, ed.scale);
 
   return (
     <div style={{ width: dim.widthPx * ed.scale, height: dim.heightPx * ed.scale }} className="relative shrink-0">
       <div
+        ref={paperRef}
         data-paged-paper
         style={{
           width: dim.widthPx, height: dim.heightPx, transform: `scale(${ed.scale})`,
@@ -24,31 +30,8 @@ export function EditorPagedPaper({ props, editor: ed }: Props) {
         <div style={{ height: dim.runningMatterHeightPx }} className="text-center text-[9px] tracking-widest uppercase select-none truncate">
           {props.book?.title || "Livro"}
         </div>
-        <div style={{ height: dim.textHeightPx, width: dim.textWidthPx }} className="overflow-hidden">
-          <div
-            ref={ed.flowRef}
-            data-paged-flow
-            style={{
-              width: dim.textWidthPx, height: dim.textHeightPx,
-              columnWidth: dim.textWidthPx, columnGap: dim.widthPx - dim.textWidthPx,
-              columnCount: 1, columnFill: "auto",
-              transform: `translateX(-${(ed.currentPage - 1) * dim.widthPx}px)`,
-            }}
-          >
-            <div className="paged-chapter-heading select-none" aria-hidden="true">
-              <span className="block text-[10px] font-bold uppercase tracking-wider mb-1">{props.chapterNumber}</span>
-              <h2 className="text-xl font-normal mb-3">{props.title}</h2>
-            </div>
-            <EditorPagedCanvas
-              contentRef={props.contentRef}
-              initialContent={props.initialContent}
-              onChange={ed.handleContentChange}
-              onSelectionChange={props.onSelectionChange}
-              fontSizePx={dim.fontSizePx}
-              lineHeight={dim.lineHeight}
-            />
-          </div>
-        </div>
+        <EditorPagedFlow props={props} editor={ed} hasCaret={Boolean(caret)} />
+        <EditorPagedCaret position={caret} />
         <div style={{ height: dim.runningMatterHeightPx }} className="text-center text-[10px] pt-2 select-none">
           {ed.currentPage}
         </div>

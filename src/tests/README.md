@@ -1,32 +1,54 @@
-# Testes do editor paginado
+# Testes do frontend
 
-Os testes usam Node.js 24 ou superior. Os testes de navegador abrem um perfil isolado
-e usam dados fictícios no armazenamento do navegador, sem acessar o SQLite do aplicativo.
+Os testes são escritos em TypeScript. Vitest executa os testes unitários de geometria,
+unidades e conteúdo antigo (`src/**/*.test.ts`). Playwright Test executa as regressões
+do editor e das configurações em navegadores reais (`src/tests/e2e/*.spec.ts`).
 
-Geometria, unidades, precisão das margens e compatibilidade com conteúdo antigo:
+## Preparação
 
-```bash
-node --test --test-isolation=none src/utils/bookPagination.test.mjs
+Ambiente validado: Node.js 24.
+
+```fish
+npm ci
+npx playwright install chromium firefox
 ```
 
-Para executar as regressões de Enter, desfazer, navegação, formatação, salvamento,
-linhas vazias e configurações, instale as ferramentas fora das dependências do aplicativo:
+## Testes unitários
 
-```bash
-npm install --prefix /tmp/my-book-writer-tests playwright@1.57.0
-/tmp/my-book-writer-tests/node_modules/.bin/playwright install chromium firefox
-npm run dev
+```fish
+npm run test
+npm run test:watch
 ```
 
-Com o servidor em execução, use outro terminal:
+## Testes no navegador
 
-```bash
-MBW_PLAYWRIGHT_MODULE=file:///tmp/my-book-writer-tests/node_modules/playwright/index.mjs \
-  node src/tests/pagedEditor.browser.mjs
-
-MBW_PLAYWRIGHT_MODULE=file:///tmp/my-book-writer-tests/node_modules/playwright/index.mjs \
-  MBW_TEST_BROWSER=firefox node src/tests/pagedEditor.browser.mjs
+```fish
+npm run test:e2e -- --project=chromium --project=firefox
+npm run test:e2e:ui -- --project=chromium
+npm run test:e2e:report
 ```
 
-O servidor padrão é `http://localhost:3000`. Para usar outra porta, configure
-`MBW_EDITOR_TEST_URL`. `MBW_BROWSER_PATH` permite usar um navegador já instalado.
+O Playwright inicia e encerra o servidor Next.js automaticamente na porta 3000.
+Localmente, reutiliza um servidor já disponível nessa porta. Cada teste recebe um
+contexto isolado e livros/capítulos fictícios no localStorage; o SQLite do aplicativo
+desktop não é acessado. Falhas geram relatório HTML, captura de tela e trace nas
+pastas ignoradas `src/tests/playwright-report` e `src/tests/test-results`.
+
+O comando `npm run test:e2e` executa os projetos Chromium e Firefox. Em Linux, se
+faltarem bibliotecas do sistema, instale-as junto com esses navegadores:
+
+```fish
+npx playwright install --with-deps chromium firefox
+npm run test:e2e
+```
+
+Para usar um servidor já iniciado, inclusive servindo a exportação de produção,
+informe a URL. Nesse caso, o Playwright não inicia outro servidor:
+
+```fish
+env MBW_EDITOR_TEST_URL=http://localhost:3100 npm run test:e2e -- --project=chromium
+```
+
+O servidor de exportação precisa resolver rotas como `/books/editor` para os arquivos
+HTML correspondentes em `out/`. O Vitest e o Playwright transformam TypeScript;
+execute também `npx tsc --noEmit` para verificar os tipos dos testes e do aplicativo.

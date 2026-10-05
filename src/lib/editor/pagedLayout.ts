@@ -1,3 +1,5 @@
+import { getSelectionRect } from "./pagedCaret";
+
 interface LayoutGeometry {
   left: number;
   stride: number;
@@ -19,26 +21,8 @@ export function measurePagedContent(flow: HTMLElement, content: HTMLElement, pag
 }
 
 export function getSelectionPage(flow: HTMLElement, content: HTMLElement, pageWidth: number): number | null {
-  const selection = window.getSelection();
-  if (!selection?.focusNode || !content.contains(selection.focusNode)) return null;
-  const range = document.createRange();
-  range.setStart(selection.focusNode, selection.focusOffset);
-  range.collapse(true);
-  let rect = range.getClientRects()[0];
-  if (!rect && selection.focusNode instanceof Element) {
-    const children = selection.focusNode.childNodes;
-    const next = children[selection.focusOffset];
-    const adjacent = next ?? children[selection.focusOffset - 1];
-    if (adjacent) {
-      range.selectNodeContents(adjacent);
-      const rects = range.getClientRects();
-      rect = rects[next ? 0 : rects.length - 1];
-    }
-  }
-  if (rect) return pageForRect(rect, getGeometry(flow, pageWidth));
-  const parent = selection.focusNode.parentElement;
-  const fallback = parent?.getClientRects()[0];
-  return fallback ? pageForRect(fallback, getGeometry(flow, pageWidth)) : null;
+  const rect = getSelectionRect(content);
+  return rect ? pageForRect(rect, getGeometry(flow, pageWidth)) : null;
 }
 
 function getWrittenPages(content: HTMLElement, geometry: LayoutGeometry): Set<number> {
