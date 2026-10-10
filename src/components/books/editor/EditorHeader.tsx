@@ -1,6 +1,6 @@
 import React from "react";
 import Link from "next/link";
-import { ArrowLeft, PanelLeftClose, PanelLeft } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { EditorHeaderActions } from "./EditorHeaderActions";
 import type { SaveStatus } from "./useChapterEditor";
 
@@ -11,8 +11,6 @@ interface Props {
   chapterTitle: string;
   saveStatus: SaveStatus;
   isFocusMode: boolean;
-  isSidebarOpen: boolean;
-  onToggleSidebar: () => void;
   onToggleFocus: () => void;
   onSave: () => void;
   onDeleteClick: () => void;
@@ -21,10 +19,17 @@ interface Props {
 }
 
 export function EditorHeader({
-  bookId, bookTitle, chapterNumber, chapterTitle, saveStatus,
-  isFocusMode, isSidebarOpen, onToggleSidebar, onToggleFocus,
-  onSave, onDeleteClick,
-  onExport, isOpeningExport,
+  bookId,
+  bookTitle,
+  chapterNumber,
+  chapterTitle,
+  saveStatus,
+  isFocusMode,
+  onToggleFocus,
+  onSave,
+  onDeleteClick,
+  onExport,
+  isOpeningExport,
 }: Props) {
   return (
     <header className="h-[72px] px-6 border-b border-border bg-surface flex items-center justify-between select-none shrink-0">
@@ -36,14 +41,6 @@ export function EditorHeader({
         >
           <ArrowLeft className="w-5 h-5" />
         </Link>
-        <button
-          type="button"
-          onClick={onToggleSidebar}
-          className="text-muted hover:text-foreground p-1 rounded-md transition-colors cursor-pointer"
-          title={isSidebarOpen ? "Ocultar painel de capítulos" : "Exibir painel de capítulos"}
-        >
-          {isSidebarOpen ? <PanelLeftClose className="w-5 h-5" /> : <PanelLeft className="w-5 h-5" />}
-        </button>
         <div className="flex flex-col min-w-0">
           <span className="text-[13px] font-bold text-foreground truncate">
             {bookTitle || "Sem título"}

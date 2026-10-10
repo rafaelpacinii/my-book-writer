@@ -2,13 +2,14 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { getBookById } from "@/lib/api/books";
+import { getBookById, updateBook } from "@/lib/api/books";
 import { useCatalog } from "@/hooks/useCatalog";
 import {
   createChapter,
   deleteChapter,
   getChapterById,
   listChapters,
+  reorderChapters,
   saveChapterContent,
   updateChapterTitle,
 } from "@/lib/api/chapters";
@@ -20,7 +21,7 @@ import {
   serializeChapterText,
 } from "@/utils/chapterContent";
 import { executeFormatAction, type FormatAction } from "@/utils/textFormatting";
-import type { Book } from "@/types/book";
+import type { Book, UpdateBookInput } from "@/types/book";
 import type { Chapter, ChapterSummary } from "@/types/chapter";
 
 export type SaveStatus = "saved" | "saving" | "unsaved" | "error";
@@ -48,6 +49,7 @@ export function useChapterEditor(bookId: string, chapterId: string) {
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
   const [isFocusMode, setIsFocusMode] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(true);
   const [isNewChapterModalOpen, setIsNewChapterModalOpen] = useState(false);
   const [viewMode, setViewMode] = useState<"continuous" | "paged">("continuous");
@@ -267,8 +269,55 @@ export function useChapterEditor(bookId: string, chapterId: string) {
     }
   };
 
+  const handleReorderChapters = useCallback(
+    async (sourceIndex: number, targetIndex: number) => {
+      if (sourceIndex === targetIndex) return;
+      const reordered = [...chapters];
+      const [moved] = reordered.splice(sourceIndex, 1);
+      reordered.splice(targetIndex, 0, moved);
+      setChapters(reordered);
+
+      try {
+        await reorderChapters(bookId, reordered.map((c) => c.id));
+      } catch {
+        const refreshed = await listChapters(bookId);
+        setChapters(refreshed);
+      }
+    },
+    [bookId, chapters],
+  );
+
+  const handleUpdateBook = useCallback(
+    async (input: UpdateBookInput) => {
+      try {
+        const updated = await updateBook(bookId, input);
+        setBook(updated);
+        return true;
+      } catch {
+        return false;
+      }
+    },
+    [bookId],
+  );
+
+  const handleUpdateFont = useCallback(
+    (fontId: string) => {
+      void handleUpdateBook({ font_preset_id: fontId });
+    },
+    [handleUpdateBook],
+  );
+
+  const handleUpdateFontSize = useCallback(
+    (pt: number) => {
+      void handleUpdateBook({ font_size_pt: pt });
+    },
+    [handleUpdateBook],
+  );
+
   return {
     book,
+    formats,
+    fonts,
     bookFormat: formats.find((format) => format.id === book?.format_id),
     bookFont: fonts.find((font) => font.id === book?.font_preset_id),
     chapter,
@@ -297,12 +346,18 @@ export function useChapterEditor(bookId: string, chapterId: string) {
     setIsDrawerOpen,
     isNewChapterModalOpen,
     setIsNewChapterModalOpen,
+    isSettingsModalOpen,
+    setIsSettingsModalOpen,
     viewMode,
     setViewMode,
     isFitMode,
     setIsFitMode,
     handleSelectChapter,
     handleQuickCreateChapter,
+    handleReorderChapters,
+    handleUpdateBook,
+    handleUpdateFont,
+    handleUpdateFontSize,
     isDeleteModalOpen,
     setIsDeleteModalOpen,
     handleDeleteChapter,

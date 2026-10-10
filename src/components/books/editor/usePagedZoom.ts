@@ -1,6 +1,6 @@
 "use client";
 
-import { useLayoutEffect, useState } from "react";
+import { useLayoutEffect, useState, useEffect, useCallback } from "react";
 import type { RefObject } from "react";
 import type { PageDimensions } from "@/utils/bookPagination";
 
@@ -28,10 +28,29 @@ export function usePagedZoom(
     return () => observer.disconnect();
   }, [containerRef, dim]);
 
-  const changeZoom = (delta: number) => {
-    setZoomScale(Math.max(0.1, Math.min(2, scale + delta)));
+  const changeZoom = useCallback((delta: number) => {
+    setZoomScale((prev) => Math.max(0.1, Math.min(2, (isFitMode ? fitScale : prev) + delta)));
     onFitModeChange(false);
-  };
+  }, [isFitMode, fitScale, onFitModeChange]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!e.ctrlKey && !e.metaKey) return;
+      if (e.key === "+" || e.key === "=" || e.code === "NumpadAdd") {
+        e.preventDefault();
+        changeZoom(0.15);
+      } else if (e.key === "-" || e.key === "_" || e.code === "NumpadSubtract") {
+        e.preventDefault();
+        changeZoom(-0.15);
+      } else if (e.key === "0" || e.code === "Numpad0") {
+        e.preventDefault();
+        setZoomScale(1);
+        onFitModeChange(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [changeZoom, onFitModeChange]);
 
   return {
     scale, isFitMode,

@@ -1,6 +1,6 @@
 "use client";
 
-import { useLayoutEffect, useState } from "react";
+import { useLayoutEffect, useState, useEffect, useCallback } from "react";
 import type { RefObject } from "react";
 import type { PageDimensions } from "@/utils/bookPagination";
 
@@ -32,22 +32,37 @@ export function usePreviewZoom(
 
   const scale = mode === "width" ? widthScale : mode === "height" ? heightScale : customScale;
 
-  const changeZoom = (delta: number) => {
+  const changeZoom = useCallback((delta: number) => {
     const next = Math.max(0.25, Math.min(3, Math.round((scale + delta) * 10) / 10));
     setCustomScale(next);
     setMode("custom");
-  };
+  }, [scale]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!e.ctrlKey && !e.metaKey) return;
+      if (e.key === "+" || e.key === "=" || e.code === "NumpadAdd") {
+        e.preventDefault();
+        changeZoom(0.1);
+      } else if (e.key === "-" || e.key === "_" || e.code === "NumpadSubtract") {
+        e.preventDefault();
+        changeZoom(-0.1);
+      } else if (e.key === "0" || e.code === "Numpad0") {
+        e.preventDefault();
+        setCustomScale(1);
+        setMode("custom");
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [changeZoom]);
 
   return {
-    scale,
-    mode,
+    scale, mode,
     scalePercent: Math.round(scale * 100),
     fitWidth: () => setMode("width"),
     fitHeight: () => setMode("height"),
-    reset100: () => {
-      setCustomScale(1);
-      setMode("custom");
-    },
+    reset100: () => { setCustomScale(1); setMode("custom"); },
     zoomIn: () => changeZoom(0.1),
     zoomOut: () => changeZoom(-0.1),
   };
