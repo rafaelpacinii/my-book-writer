@@ -48,7 +48,7 @@ export function BookDetailHeader({ book, formatName, fontName }: Props) {
             <span>Configurações</span>
           </Link>
           <Link
-            href={`/books/${book.id}/preview`}
+            href={`/books/preview?bookId=${encodeURIComponent(book.id)}`}
             className="inline-flex items-center gap-2 h-10 px-4 rounded-lg border border-border bg-surface text-foreground font-bold text-xs hover:border-primary/40 transition-colors shadow-xs"
           >
             <BookOpen className="w-4 h-4 text-muted" />
