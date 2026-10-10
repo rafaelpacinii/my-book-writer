@@ -1,8 +1,12 @@
 "use client";
 
 import React from "react";
-import { Minus, Quote, Sparkles, Undo2, Redo2 } from "lucide-react";
+import { SlidersHorizontal } from "lucide-react";
 import type { FormatAction } from "@/utils/textFormatting";
+import type { FontPreset } from "@/types/catalog";
+import { EditorFontSelector } from "./EditorFontSelector";
+import { EditorFontSizeSelector } from "./EditorFontSizeSelector";
+import { EditorToolbarFormatting } from "./EditorToolbarFormatting";
 
 interface Props {
   onFormat: (action: FormatAction) => void;
@@ -11,41 +15,43 @@ interface Props {
   isBold?: boolean;
   isItalic?: boolean;
   isUnderline?: boolean;
-  fontFamily?: string;
+  fonts?: FontPreset[];
+  currentFontId?: string;
+  onSelectFont?: (fontId: string) => void;
   fontSizePt?: number;
+  onSelectFontSize?: (pt: number) => void;
+  onOpenSettings?: () => void;
   viewMode: "continuous" | "paged";
   onViewModeChange: (mode: "continuous" | "paged") => void;
 }
 
 export function EditorToolbar({
   onFormat, onUndo, onRedo, isBold, isItalic, isUnderline,
-  fontFamily = "Merriweather", fontSizePt = 11, viewMode, onViewModeChange,
+  fonts = [], currentFontId, onSelectFont, fontSizePt = 11, onSelectFontSize,
+  onOpenSettings, viewMode, onViewModeChange,
 }: Props) {
-  const btn = (active?: boolean) =>
-    `p-1.5 rounded-md transition-colors cursor-pointer text-xs ${active ? "bg-primary-soft text-primary font-bold" : "text-muted hover:text-foreground hover:bg-surface-hover"
-    }`;
-
   const modeBtn = (active: boolean) =>
-    `px-3 py-1.5 rounded-md font-bold text-xs transition-colors cursor-pointer ${active ? "bg-primary text-primary-foreground" : "text-muted hover:text-foreground"
+    `px-3 py-1.5 rounded-md font-bold text-xs transition-colors cursor-pointer ${
+      active ? "bg-primary text-primary-foreground" : "text-muted hover:text-foreground"
     }`;
 
   return (
     <div className="h-[59px] px-6 border-b border-border bg-surface flex items-center justify-between select-none shrink-0 overflow-x-auto">
       <div className="flex items-center gap-2 sm:gap-3 text-xs">
-        <span className="font-bold text-foreground">Parágrafo ⌄</span>
-        <span className="text-muted hidden md:inline">{fontFamily} ⌄</span>
-        <span className="text-muted hidden md:inline">{fontSizePt} pt ⌄</span>
+        <span className="font-bold text-foreground">Parágrafo</span>
+        {fonts.length > 0 && onSelectFont && (
+          <EditorFontSelector fonts={fonts} currentFontId={currentFontId} onSelectFont={onSelectFont} />
+        )}
+        {onSelectFontSize && (
+          <EditorFontSizeSelector fontSizePt={fontSizePt} onSelectFontSize={onSelectFontSize} />
+        )}
+        {onOpenSettings && (
+          <button type="button" onClick={onOpenSettings} className="p-1.5 text-muted hover:text-foreground hover:bg-surface-hover rounded-md transition-colors" title="Configurações de formatação do livro">
+            <SlidersHorizontal className="w-4 h-4" />
+          </button>
+        )}
         <div className="w-[1px] h-4 bg-border mx-1" />
-        <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => onFormat("bold")} className={`${btn(isBold)} font-bold text-sm w-7 h-7 flex items-center justify-center`} title="Negrito (Ctrl+B)">B</button>
-        <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => onFormat("italic")} className={`${btn(isItalic)} font-serif italic text-sm w-7 h-7 flex items-center justify-center`} title="Itálico (Ctrl+I)">I</button>
-        <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => onFormat("underline")} className={`${btn(isUnderline)} underline text-sm w-7 h-7 flex items-center justify-center`} title="Sublinhado (Ctrl+U)">U</button>
-        <div className="w-[1px] h-4 bg-border mx-1" />
-        <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => onFormat("dialogue-dash")} className={btn()} title="Travessão de diálogo (—)"><Minus className="w-3.5 h-3.5" /></button>
-        <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => onFormat("quote")} className={btn()} title="Citação / Destaque"><Quote className="w-3.5 h-3.5" /></button>
-        <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => onFormat("scene-break")} className={btn()} title="Quebra de cena (* * *)"><Sparkles className="w-3.5 h-3.5" /></button>
-        <div className="w-[1px] h-4 bg-border mx-1" />
-        <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={onUndo} className={btn()} title="Desfazer (Ctrl+Z)"><Undo2 className="w-3.5 h-3.5" /></button>
-        <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={onRedo} className={btn()} title="Refazer (Ctrl+Y)"><Redo2 className="w-3.5 h-3.5" /></button>
+        <EditorToolbarFormatting onFormat={onFormat} onUndo={onUndo} onRedo={onRedo} isBold={isBold} isItalic={isItalic} isUnderline={isUnderline} />
       </div>
 
       <div className="hidden sm:flex items-center gap-1 bg-background/50 p-1 rounded-lg border border-border">

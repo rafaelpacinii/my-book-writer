@@ -24,46 +24,38 @@ export function Main({ bookId, chapterId }: { bookId: string; chapterId: string 
         <>
           <EditorHeader
             bookId={bookId} bookTitle={ed.book?.title} chapterNumber={num} chapterTitle={ed.title}
-            saveStatus={ed.saveStatus} isFocusMode={ed.isFocusMode} isSidebarOpen={ed.isDrawerOpen}
-            onToggleSidebar={() => ed.setIsDrawerOpen(!ed.isDrawerOpen)} onToggleFocus={() => ed.setIsFocusMode(true)}
-            onSave={ed.saveNow} onDeleteClick={() => ed.setIsDeleteModalOpen(true)}
-            onExport={() => void ed.handleExport()} isOpeningExport={ed.isOpeningExport}
+            saveStatus={ed.saveStatus} isFocusMode={ed.isFocusMode} onToggleFocus={() => ed.setIsFocusMode(true)}
+            onSave={ed.saveNow} onDeleteClick={() => ed.setIsDeleteModalOpen(true)} onExport={() => void ed.handleExport()} isOpeningExport={ed.isOpeningExport}
           />
           <EditorToolbar
             onFormat={ed.handleFormat} onUndo={ed.handleUndo} onRedo={ed.handleRedo}
             isBold={ed.isBold} isItalic={ed.isItalic} isUnderline={ed.isUnderline}
-            fontFamily={ed.bookFont?.family_name} fontSizePt={ed.book?.font_size_pt}
-            viewMode={ed.viewMode} onViewModeChange={ed.setViewMode}
+            fonts={ed.fonts} currentFontId={ed.book?.font_preset_id} onSelectFont={ed.handleUpdateFont}
+            fontSizePt={ed.book?.font_size_pt} onSelectFontSize={ed.handleUpdateFontSize}
+            onOpenSettings={() => ed.setIsSettingsModalOpen(true)} viewMode={ed.viewMode} onViewModeChange={ed.setViewMode}
           />
         </>
       )}
 
       <div className="flex flex-1 min-h-0 overflow-hidden">
-        {!ed.isFocusMode && ed.isDrawerOpen && (
+        {!ed.isFocusMode && (
           <EditorSidebar
-            chapters={ed.chapters} currentChapterId={chapterId}
-            onSelectChapter={ed.handleSelectChapter} onNewChapterClick={() => ed.setIsNewChapterModalOpen(true)}
+            chapters={ed.chapters} currentChapterId={chapterId} isOpen={ed.isDrawerOpen} onToggleOpen={() => ed.setIsDrawerOpen(!ed.isDrawerOpen)}
+            onSelectChapter={ed.handleSelectChapter} onNewChapterClick={() => ed.setIsNewChapterModalOpen(true)} onReorderChapters={ed.handleReorderChapters}
           />
         )}
         <EditorCanvasSwitcher
-          viewMode={ed.viewMode} book={ed.book} format={ed.bookFormat} font={ed.bookFont}
-          bookId={bookId} chapterNumber={num}
-          title={ed.title} onTitleChange={ed.setTitle} contentRef={ed.contentRef}
-          text={ed.text} onTextChange={ed.setText} onSelectionChange={ed.updateActiveStyles}
-          prevChapter={ed.prevChapter} nextChapter={ed.nextChapter}
-          isFocusMode={ed.isFocusMode} onExitFocus={() => ed.setIsFocusMode(false)}
-          isFitMode={ed.isFitMode} onFitModeChange={ed.setIsFitMode}
+          viewMode={ed.viewMode} book={ed.book} format={ed.bookFormat} font={ed.bookFont} bookId={bookId} chapterNumber={num}
+          title={ed.title} onTitleChange={ed.setTitle} contentRef={ed.contentRef} text={ed.text} onTextChange={ed.setText} onSelectionChange={ed.updateActiveStyles}
+          prevChapter={ed.prevChapter} nextChapter={ed.nextChapter} isFocusMode={ed.isFocusMode} onExitFocus={() => ed.setIsFocusMode(false)} isFitMode={ed.isFitMode} onFitModeChange={ed.setIsFitMode}
         />
       </div>
 
-      {!ed.isFocusMode && (
-        <EditorFooter
-          wordCount={ed.wordCount} readingTime={ed.readingTime} viewMode={ed.viewMode}
-        />
-      )}
+      {!ed.isFocusMode && <EditorFooter wordCount={ed.wordCount} readingTime={ed.readingTime} viewMode={ed.viewMode} />}
       <EditorModals
         isNewOpen={ed.isNewChapterModalOpen} onCloseNew={() => ed.setIsNewChapterModalOpen(false)} onCreateNew={ed.handleQuickCreateChapter}
         isDeleteOpen={ed.isDeleteModalOpen} onCloseDelete={() => ed.setIsDeleteModalOpen(false)} onConfirmDelete={ed.handleDeleteChapter} chapterTitle={ed.title}
+        isSettingsOpen={ed.isSettingsModalOpen} onCloseSettings={() => ed.setIsSettingsModalOpen(false)} book={ed.book} formats={ed.formats} fonts={ed.fonts} onSaveSettings={ed.handleUpdateBook}
       />
     </div>
   );

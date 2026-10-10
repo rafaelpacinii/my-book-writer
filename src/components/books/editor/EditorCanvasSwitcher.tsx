@@ -42,8 +42,6 @@ export function EditorCanvasSwitcher(p: Props) {
     <EditorSheet
       chapterNumber={p.chapterNumber} title={p.title} onTitleChange={p.onTitleChange}
       contentRef={p.contentRef} initialContent={p.text} onContentChange={p.onTextChange}
-      fontSizePt={p.book?.font_size_pt} lineHeightRatio={p.book?.line_height_ratio}
-      fontFamily={p.font?.family_name}
       onSelectionChange={p.onSelectionChange} bookId={p.bookId}
       prevChapter={p.prevChapter} nextChapter={p.nextChapter}
       isFocusMode={p.isFocusMode} onExitFocus={p.onExitFocus}

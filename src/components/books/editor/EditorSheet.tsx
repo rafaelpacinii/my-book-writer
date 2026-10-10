@@ -2,6 +2,7 @@ import React from "react";
 import { EditorTitleInput } from "./EditorTitleInput";
 import { EditorCanvas } from "./EditorCanvas";
 import { EditorNav } from "./EditorNav";
+import { useContinuousZoom } from "./useContinuousZoom";
 import type { ChapterSummary } from "@/types/chapter";
 
 interface Props {
@@ -11,9 +12,6 @@ interface Props {
   contentRef: React.RefObject<HTMLDivElement | null>;
   initialContent: string;
   onContentChange: (v: string) => void;
-  fontSizePt?: number;
-  fontFamily?: string;
-  lineHeightRatio?: number;
   onSelectionChange?: () => void;
   bookId: string;
   prevChapter: ChapterSummary | null;
@@ -23,9 +21,17 @@ interface Props {
 }
 
 export function EditorSheet(props: Props) {
+  const { zoomScale } = useContinuousZoom();
+
   return (
     <main className="flex-1 overflow-y-auto px-6 py-8 flex flex-col items-center">
-      <div className="w-full max-w-[720px] flex-1 flex flex-col">
+      <div
+        style={{
+          transform: zoomScale !== 1 ? `scale(${zoomScale})` : undefined,
+          transformOrigin: "top center",
+        }}
+        className="w-full max-w-[720px] flex-1 flex flex-col transition-transform duration-100"
+      >
         {props.isFocusMode && (
           <div className="flex justify-end mb-4">
             <button
@@ -46,9 +52,6 @@ export function EditorSheet(props: Props) {
           contentRef={props.contentRef}
           initialContent={props.initialContent}
           onChange={props.onContentChange}
-          fontSizePt={props.fontSizePt}
-          fontFamily={props.fontFamily}
-          lineHeightRatio={props.lineHeightRatio}
           onSelectionChange={props.onSelectionChange}
         />
         <EditorNav
