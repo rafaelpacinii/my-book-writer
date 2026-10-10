@@ -2,17 +2,19 @@
 
 import React from "react";
 import Link from "next/link";
-import { ArrowLeft, Settings, BookOpen, FileDown } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import type { Book } from "@/types/book";
+import { BookDetailActions } from "./BookDetailActions";
 
 interface Props {
   book: Book;
   formatName?: string;
   fontName?: string;
+  onOpenFrontMatter: () => void;
 }
 
-export function BookDetailHeader({ book, formatName, fontName }: Props) {
+export function BookDetailHeader({ book, formatName, fontName, onOpenFrontMatter }: Props) {
   return (
     <div className="flex flex-col gap-4 mb-8 select-none">
       <Link
@@ -39,29 +41,7 @@ export function BookDetailHeader({ book, formatName, fontName }: Props) {
           </div>
         </div>
 
-        <div className="flex items-center gap-2.5 flex-wrap">
-          <Link
-            href={`/books/settings?bookId=${encodeURIComponent(book.id)}`}
-            className="inline-flex items-center gap-2 h-10 px-4 rounded-lg border border-border bg-surface text-foreground font-bold text-xs hover:border-primary/40 transition-colors shadow-xs"
-          >
-            <Settings className="w-4 h-4 text-muted" />
-            <span>Configurações</span>
-          </Link>
-          <Link
-            href={`/books/preview?bookId=${encodeURIComponent(book.id)}`}
-            className="inline-flex items-center gap-2 h-10 px-4 rounded-lg border border-border bg-surface text-foreground font-bold text-xs hover:border-primary/40 transition-colors shadow-xs"
-          >
-            <BookOpen className="w-4 h-4 text-muted" />
-            <span>Ver livro completo</span>
-          </Link>
-          <Link
-            href={`/books/export?bookId=${encodeURIComponent(book.id)}`}
-            className="inline-flex items-center gap-2 h-10 px-4 rounded-lg bg-primary text-primary-foreground font-bold text-xs hover:opacity-90 transition-opacity shadow-xs"
-          >
-            <FileDown className="w-4 h-4" />
-            <span>Exportar</span>
-          </Link>
-        </div>
+        <BookDetailActions bookId={book.id} onOpenFrontMatter={onOpenFrontMatter} />
       </div>
     </div>
   );

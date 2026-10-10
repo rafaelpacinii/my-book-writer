@@ -46,6 +46,9 @@ pub fn run() {
             commands::export_commands::export_book_pdf,
             commands::export_commands::export_book_epub,
             commands::export_commands::export_book_docx,
+            // Elementos Pré-textuais (Front Matter)
+            commands::front_matter_commands::get_book_front_matter,
+            commands::front_matter_commands::save_book_front_matter,
             // Perfil
             commands::profile_commands::get_profile,
             commands::profile_commands::update_profile,
