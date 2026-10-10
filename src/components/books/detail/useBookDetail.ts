@@ -22,6 +22,7 @@ export function useBookDetail(bookId: string) {
     isLoading: isChaptersLoading,
     addChapter,
     renameChapter,
+    changeChapterType,
     reorderChaptersList,
     removeChapter,
   } = useChapters(bookId);
@@ -43,8 +44,12 @@ export function useBookDetail(bookId: string) {
   const formatName = formats.find((f) => f.id === book?.format_id)?.name;
   const fontName = fonts.find((f) => f.id === book?.font_preset_id)?.name;
 
-  const handleCreateChapter = async (title: string) => {
-    const chapter = await addChapter(title);
+  const handleCreateChapter = async (
+    title: string,
+    type?: ChapterSummary["chapter_type"],
+    customName?: string
+  ) => {
+    const chapter = await addChapter(title, type, customName);
     router.push(
       `/books/editor?bookId=${encodeURIComponent(bookId)}&chapterId=${encodeURIComponent(chapter.id)}`
     );
@@ -67,9 +72,21 @@ export function useBookDetail(bookId: string) {
     await handleDropReorder(index, targetIndex);
   };
 
-  const handleConfirmRename = async (newTitle: string) => {
+  const handleConfirmRename = async (
+    newTitle: string,
+    type: ChapterSummary["chapter_type"],
+    customName?: string
+  ) => {
     if (!chapterToRename) return;
-    await renameChapter(chapterToRename.id, newTitle);
+    if (chapterToRename.title !== newTitle) {
+      await renameChapter(chapterToRename.id, newTitle);
+    }
+    if (
+      chapterToRename.chapter_type !== type ||
+      chapterToRename.custom_type_name !== customName
+    ) {
+      await changeChapterType(chapterToRename.id, type, customName);
+    }
     setChapterToRename(null);
   };
 

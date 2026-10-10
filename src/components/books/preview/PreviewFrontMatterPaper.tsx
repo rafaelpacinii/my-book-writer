@@ -7,6 +7,7 @@ import { PreviewHalfTitlePage } from "./PreviewHalfTitlePage";
 import { PreviewTitlePage } from "./PreviewTitlePage";
 import { PreviewCopyrightPage } from "./PreviewCopyrightPage";
 import { PreviewSpecialPage } from "./PreviewSpecialPage";
+import { PreviewTableOfContentsPage, type TocChapterEntry } from "./PreviewTableOfContentsPage";
 
 interface Props {
   dim: PageDimensions;
@@ -14,9 +15,10 @@ interface Props {
   item: FrontMatterPageItem;
   book: Book;
   frontMatter: BookFrontMatter;
+  tocEntries?: TocChapterEntry[];
 }
 
-export function PreviewFrontMatterPaper({ dim, scale, item, book, frontMatter }: Props) {
+export function PreviewFrontMatterPaper({ dim, scale, item, book, frontMatter, tocEntries = [] }: Props) {
   return (
     <div style={{ width: dim.widthPx * scale, height: dim.heightPx * scale }} className="relative shrink-0">
       <div
@@ -35,6 +37,7 @@ export function PreviewFrontMatterPaper({ dim, scale, item, book, frontMatter }:
         {item.kind === "copyright" && <PreviewCopyrightPage frontMatter={frontMatter} />}
         {item.kind === "dedication" && <PreviewSpecialPage kind="dedication" text={frontMatter.dedication_text} />}
         {item.kind === "epigraph" && <PreviewSpecialPage kind="epigraph" text={frontMatter.epigraph_text} author={frontMatter.epigraph_author} />}
+        {item.kind === "table-of-contents" && <PreviewTableOfContentsPage entries={tocEntries} />}
         {item.kind === "blank" && <PreviewSpecialPage kind="blank" />}
       </div>
     </div>

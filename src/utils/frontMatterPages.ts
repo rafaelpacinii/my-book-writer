@@ -6,7 +6,8 @@ export type FrontMatterPageKind =
   | "title-page"
   | "copyright"
   | "dedication"
-  | "epigraph";
+  | "epigraph"
+  | "table-of-contents";
 
 export interface FrontMatterPageItem {
   pageNumber: number;
@@ -41,6 +42,11 @@ export function buildFrontMatterPages(
 
   if (frontMatter.include_epigraph && frontMatter.epigraph_text?.trim()) {
     pages.push({ pageNumber: current++, kind: "epigraph", label: "Epígrafe" });
+    pages.push({ pageNumber: current++, kind: "blank", label: "Verso em branco" });
+  }
+
+  if (frontMatter.include_table_of_contents) {
+    pages.push({ pageNumber: current++, kind: "table-of-contents", label: "Sumário" });
     pages.push({ pageNumber: current++, kind: "blank", label: "Verso em branco" });
   }
 

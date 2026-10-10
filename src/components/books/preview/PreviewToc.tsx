@@ -31,11 +31,8 @@ export function PreviewToc({
                 if (item.kind === "blank") return null;
                 const active = isFrontMatter && idx === activeFrontMatterIndex;
                 return (
-                  <button
-                    key={item.pageNumber} type="button" onClick={() => onSelectFrontMatter?.(idx)}
-                    className={itemClass(active)}
-                  >
-                    <span className={`text-[11px] font-medium ${active ? "text-primary font-bold" : "text-foreground"}`}>
+                  <button key={item.pageNumber} type="button" onClick={() => onSelectFrontMatter?.(idx)} className={itemClass(active)}>
+                    <span className={`text-xs truncate ${active ? "text-primary font-bold" : "text-foreground font-normal"}`}>
                       {item.label}
                     </span>
                   </button>
@@ -50,15 +47,17 @@ export function PreviewToc({
           <div className="space-y-1">
             {chapters.map((chapter, index) => {
               const active = !isFrontMatter && index === activeIndex;
+              const hasNum = Boolean(chapter.number);
               return (
-                <button
-                  key={chapter.id} type="button" onClick={() => onSelect(index)}
-                  className={itemClass(active)}
-                >
-                  <span className={`text-xs font-bold ${active ? "text-primary" : "text-muted"}`}>
-                    {String(index + 1).padStart(2, "0")}
+                <button key={chapter.id} type="button" onClick={() => onSelect(index)} className={itemClass(active)}>
+                  {hasNum && (
+                    <span className={`text-[11px] font-bold truncate ${active ? "text-primary" : "text-muted"}`}>
+                      {chapter.number}
+                    </span>
+                  )}
+                  <span className={`text-xs truncate ${hasNum ? "mt-0.5" : ""} ${active ? "text-primary font-bold" : "text-foreground font-normal"}`}>
+                    {chapter.title}
                   </span>
-                  <span className="text-xs text-foreground truncate mt-0.5">{chapter.title}</span>
                 </button>
               );
             })}

@@ -60,6 +60,7 @@ pub fn run() {
             commands::chapter_commands::list_chapters,
             commands::chapter_commands::get_chapter_by_id,
             commands::chapter_commands::update_chapter_title,
+            commands::chapter_commands::update_chapter_type,
             commands::chapter_commands::save_chapter_content,
             commands::chapter_commands::reorder_chapters,
             commands::chapter_commands::delete_chapter,

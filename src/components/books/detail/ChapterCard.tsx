@@ -3,11 +3,13 @@ import Link from "next/link";
 import type { ChapterSummary } from "@/types/chapter";
 import { formatLastEdited } from "@/utils/format";
 import { ChapterCardHeader } from "./ChapterCardHeader";
+import { formatChapterBadge } from "@/utils/chapterType";
 
 interface Props {
   chapter: ChapterSummary;
   bookId: string;
   index: number;
+  standardIndex: number;
   totalChapters: number;
   onRename: () => void;
   onDelete: () => void;
@@ -23,10 +25,8 @@ interface Props {
 }
 
 export function ChapterCard(props: Props) {
-  const { chapter, bookId, index, totalChapters, onRename, onDelete, onMoveUp, onMoveDown } = props;
-  const { isDragging, isDragOver, onDragStart, onDragOver, onDragLeave, onDrop, onDragEnd } = props;
-  const chapterNumber = String(index + 1).padStart(2, "0");
-
+  const { chapter, bookId, index, standardIndex, totalChapters, onRename, onDelete, onMoveUp, onMoveDown, isDragging, isDragOver, onDragStart, onDragOver, onDragLeave, onDrop, onDragEnd } = props;
+  const chapterNumber = formatChapterBadge(chapter, index, standardIndex).badge;
   const dragClass = isDragging
     ? "opacity-35 scale-95 border-dashed border-primary"
     : isDragOver

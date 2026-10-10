@@ -54,4 +54,3 @@ pub struct SaveFrontMatterInput {
     pub epigraph_author: Option<String>,
     pub include_table_of_contents: bool,
 }
-

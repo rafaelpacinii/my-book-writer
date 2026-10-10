@@ -7,6 +7,7 @@ import {
   listChapters,
   reorderChapters,
   updateChapterTitle,
+  updateChapterType,
 } from "@/lib/api/chapters";
 import type { Chapter, ChapterSummary } from "@/types/chapter";
 
@@ -15,8 +16,9 @@ export interface UseChaptersReturn {
   isLoading: boolean;
   error: string | null;
   refreshChapters: () => Promise<void>;
-  addChapter: (title: string) => Promise<Chapter>;
+  addChapter: (title: string, chapterType?: ChapterSummary["chapter_type"], customTypeName?: string | null) => Promise<Chapter>;
   renameChapter: (id: string, newTitle: string) => Promise<Chapter>;
+  changeChapterType: (id: string, chapterType: ChapterSummary["chapter_type"], customTypeName?: string | null) => Promise<Chapter>;
   reorderChaptersList: (newOrderIds: string[]) => Promise<void>;
   removeChapter: (id: string) => Promise<void>;
 }
@@ -46,16 +48,27 @@ export function useChapters(bookId?: string | null): UseChaptersReturn {
   }, [bookId]);
 
   const addChapter = useCallback(
-    async (title: string): Promise<Chapter> => {
+    async (
+      title: string,
+      chapterType: ChapterSummary["chapter_type"] = "standard",
+      customTypeName?: string | null
+    ): Promise<Chapter> => {
       if (!bookId) throw new Error("ID do livro não fornecido");
       setError(null);
       try {
-        const newChapter = await createChapter({ book_id: bookId, title: title.trim() });
+        const newChapter = await createChapter({
+          book_id: bookId,
+          title: title.trim(),
+          chapter_type: chapterType,
+          custom_type_name: customTypeName,
+        });
         const summary: ChapterSummary = {
           id: newChapter.id,
           book_id: newChapter.book_id,
           title: newChapter.title,
           position: newChapter.position,
+          chapter_type: newChapter.chapter_type,
+          custom_type_name: newChapter.custom_type_name,
           content_revision: newChapter.content_revision,
           track_changes_enabled: newChapter.track_changes_enabled,
           created_at: newChapter.created_at,
@@ -80,6 +93,37 @@ export function useChapters(bookId?: string | null): UseChaptersReturn {
         setChapters((prev) =>
           prev.map((c) =>
             c.id === id ? { ...c, title: updated.title, updated_at: updated.updated_at } : c
+          )
+        );
+        return updated;
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        setError(message);
+        throw err;
+      }
+    },
+    []
+  );
+
+  const changeChapterType = useCallback(
+    async (
+      id: string,
+      chapterType: ChapterSummary["chapter_type"],
+      customTypeName?: string | null
+    ): Promise<Chapter> => {
+      setError(null);
+      try {
+        const updated = await updateChapterType(id, chapterType, customTypeName);
+        setChapters((prev) =>
+          prev.map((c) =>
+            c.id === id
+              ? {
+                  ...c,
+                  chapter_type: updated.chapter_type,
+                  custom_type_name: updated.custom_type_name,
+                  updated_at: updated.updated_at,
+                }
+              : c
           )
         );
         return updated;
@@ -142,6 +186,7 @@ export function useChapters(bookId?: string | null): UseChaptersReturn {
     refreshChapters,
     addChapter,
     renameChapter,
+    changeChapterType,
     reorderChaptersList,
     removeChapter,
   };

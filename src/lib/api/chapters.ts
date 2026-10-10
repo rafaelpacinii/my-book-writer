@@ -36,6 +36,8 @@ export async function createChapter(input: CreateChapterInput): Promise<Chapter>
       book_id: input.book_id,
       title: input.title,
       position: bookChapters.length,
+      chapter_type: input.chapter_type || "standard",
+      custom_type_name: input.custom_type_name || null,
       content_json: input.content_json || JSON.stringify({ type: "doc", content: [] }),
       content_schema_version: 1,
       content_revision: 1,
@@ -56,11 +58,13 @@ export async function listChapters(bookId: string): Promise<ChapterSummary[]> {
     return list
       .filter((c) => c.book_id === bookId && !c.deleted_at)
       .sort((a, b) => a.position - b.position)
-      .map(({ id, book_id, title, position, content_revision, track_changes_enabled, created_at, updated_at }) => ({
+      .map(({ id, book_id, title, position, chapter_type, custom_type_name, content_revision, track_changes_enabled, created_at, updated_at }) => ({
         id,
         book_id,
         title,
         position,
+        chapter_type: chapter_type || "standard",
+        custom_type_name: custom_type_name || null,
         content_revision,
         track_changes_enabled,
         created_at,
@@ -92,6 +96,32 @@ export async function updateChapterTitle(id: string, title: string): Promise<Cha
     return updated;
   }
   return invoke<Chapter>("update_chapter_title", { id, title });
+}
+
+export async function updateChapterType(
+  id: string,
+  chapterType: string,
+  customTypeName?: string | null
+): Promise<Chapter> {
+  if (!isTauriEnvironment()) {
+    const list = getStoredChapters();
+    const idx = list.findIndex((c) => c.id === id);
+    if (idx === -1) throw new Error("Capítulo não encontrado");
+    const updated: Chapter = {
+      ...list[idx],
+      chapter_type: chapterType as Chapter["chapter_type"],
+      custom_type_name: customTypeName || null,
+      updated_at: new Date().toISOString(),
+    };
+    list[idx] = updated;
+    saveStoredChapters(list);
+    return updated;
+  }
+  return invoke<Chapter>("update_chapter_type", {
+    id,
+    chapterType,
+    customTypeName: customTypeName || null,
+  });
 }
 
 export async function saveChapterContent(

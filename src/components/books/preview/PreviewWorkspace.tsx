@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import type { usePreviewData } from "./usePreviewData";
 import { usePreviewPages } from "./usePreviewPages";
+import { chapterStarts } from "@/utils/previewPages";
 import { usePreviewZoom } from "./usePreviewZoom";
 import { PreviewHeader } from "./PreviewHeader";
 import { PreviewToolbar } from "./PreviewToolbar";
@@ -13,9 +14,7 @@ import { PreviewScrubber } from "./PreviewScrubber";
 import { PreviewMeasurer } from "./PreviewMeasurer";
 import { PreviewFooter } from "./PreviewFooter";
 
-type Data = ReturnType<typeof usePreviewData>;
-
-export function PreviewWorkspace({ bookId, data }: { bookId: string; data: Data }) {
+export function PreviewWorkspace({ bookId, data }: { bookId: string; data: ReturnType<typeof usePreviewData> }) {
   const { book, chapters, dim, frontMatter, frontMatterPages } = data;
   const stageRef = useRef<HTMLElement>(null);
   const zoom = usePreviewZoom(stageRef, dim);
@@ -24,9 +23,12 @@ export function PreviewWorkspace({ bookId, data }: { bookId: string; data: Data 
   const activeFm = frontMatterPages[pages.frontMatterIndex];
   const currentTitle = pages.isFrontMatter ? activeFm?.label : chapter?.title;
 
-  useEffect(() => {
-    stageRef.current?.scrollTo({ top: 0 });
-  }, [pages.page]);
+  useEffect(() => { stageRef.current?.scrollTo({ top: 0 }); }, [pages.page]);
+
+  const tocEntries = chapters.map((c, idx) => ({
+    chapter: c,
+    startPage: frontMatterPages.length + (chapterStarts(pages.counts)[idx] ?? 0) + 1,
+  }));
 
   return (
     <div className="flex flex-col h-screen overflow-hidden bg-background text-foreground">
@@ -43,16 +45,14 @@ export function PreviewWorkspace({ bookId, data }: { bookId: string; data: Data 
           <main ref={stageRef} className="flex-1 min-h-0 min-w-0 overflow-auto p-4 flex flex-col items-center">
             {pages.ready ? (
               pages.isFrontMatter && activeFm && book && frontMatter ? (
-                <PreviewFrontMatterPaper dim={dim} scale={zoom.scale} item={activeFm} book={book} frontMatter={frontMatter} />
-              ) : chapter ? (
-                <PreviewPaper
-                  bookTitle={book?.title || "Livro"} chapter={chapter} dim={dim}
-                  chapterPage={pages.location.page} bookPage={pages.page} scale={zoom.scale}
+                <PreviewFrontMatterPaper
+                  dim={dim} scale={zoom.scale} item={activeFm} book={book}
+                  frontMatter={frontMatter} tocEntries={tocEntries}
                 />
+              ) : chapter ? (
+                <PreviewPaper bookTitle={book?.title || "Livro"} chapter={chapter} dim={dim} chapterPage={pages.location.page} bookPage={pages.page} scale={zoom.scale} />
               ) : null
-            ) : (
-              <p role="status" className="text-muted mt-16">Calculando páginas…</p>
-            )}
+            ) : <p role="status" className="text-muted mt-16">Calculando páginas…</p>}
           </main>
           {pages.ready && (
             <div className="absolute bottom-0 inset-x-0 select-none opacity-0 group-hover:opacity-100 focus-within:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-opacity duration-300 z-20">

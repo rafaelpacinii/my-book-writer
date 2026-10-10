@@ -7,10 +7,10 @@ import type { ChapterSummary } from "@/types/chapter";
 interface Props {
   isNewOpen: boolean;
   onNewClose: () => void;
-  onNewCreate: (title: string) => Promise<void>;
+  onNewCreate: (title: string, type?: ChapterSummary["chapter_type"], customName?: string) => Promise<void>;
   chapterToRename: ChapterSummary | null;
   onRenameClose: () => void;
-  onRenameConfirm: (newTitle: string) => void;
+  onRenameConfirm: (newTitle: string, type: ChapterSummary["chapter_type"], customName?: string) => void;
   chapterToDelete: ChapterSummary | null;
   onDeleteClose: () => void;
   onDeleteConfirm: () => void;

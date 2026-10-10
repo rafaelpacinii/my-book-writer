@@ -32,6 +32,8 @@ fn chapter(id: &str, title: &str, html: &str) -> Chapter {
         book_id: "export-test".into(),
         title: title.into(),
         position: 0,
+        chapter_type: "standard".into(),
+        custom_type_name: None,
         content_json: json!({"type":"doc", "html":html}).to_string(),
         content_schema_version: 1,
         content_revision: 1,
@@ -188,6 +190,8 @@ fn snapshot_contains_full_content_in_order_and_excludes_deleted_chapters() {
                 "export-test",
                 "Segundo",
                 1,
+                "standard",
+                None,
                 "{\"html\":\"<p>Último</p>\"}",
             )
             .await
@@ -198,12 +202,22 @@ fn snapshot_contains_full_content_in_order_and_excludes_deleted_chapters() {
                 "export-test",
                 "Primeiro",
                 0,
+                "standard",
+                None,
                 "{\"html\":\"<p>Completo</p>\"}",
             )
             .await
             .unwrap();
         chapters
-            .create("deleted", "export-test", "Excluído", 0, "{}")
+            .create(
+                "deleted",
+                "export-test",
+                "Excluído",
+                0,
+                "standard",
+                None,
+                "{}",
+            )
             .await
             .unwrap();
         chapters.soft_delete("deleted").await.unwrap();
@@ -321,10 +335,12 @@ fn chromium_respects_formats_and_fonts_and_keeps_long_paragraphs() {
 fn renders_and_saves_valid_docx() {
     let book = snapshot();
     let bytes = render_docx(&book).unwrap();
-    assert!(bytes.starts_with(b"PK\x03\x04"), "DOCX deve iniciar com cabeçalho ZIP");
+    assert!(
+        bytes.starts_with(b"PK\x03\x04"),
+        "DOCX deve iniciar com cabeçalho ZIP"
+    );
     assert!(bytes.len() > 1000, "DOCX deve conter conteúdo substancial");
 
     let temp = tempfile::NamedTempFile::new().unwrap();
     save_docx(temp.path(), &bytes).unwrap();
 }
-

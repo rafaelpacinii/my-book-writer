@@ -9,19 +9,23 @@ import { useCatalog } from "@/hooks/useCatalog";
 import { countWords, parseChapterText } from "@/utils/chapterContent";
 import { getPhysicalPageDimensions } from "@/utils/bookPagination";
 import { buildFrontMatterPages } from "@/utils/frontMatterPages";
+import { formatChapterHeadingLabel } from "@/utils/chapterType";
 import type { Book } from "@/types/book";
 import type { PreviewChapter } from "@/types/preview";
 import type { BookFrontMatter } from "@/types/frontMatter";
 
 async function loadChapters(bookId: string): Promise<PreviewChapter[]> {
   const summaries = await listChapters(bookId);
-  const full = await Promise.all(summaries.map((summary) => getChapterById(summary.id)));
-  return summaries.map((summary, index) => {
-    const html = sanitizeHtml(parseChapterText(full[index]?.content_json));
+  const full = await Promise.all(summaries.map((s) => getChapterById(s.id)));
+  return summaries.map((s, idx) => {
+    const html = sanitizeHtml(parseChapterText(full[idx]?.content_json));
+    const stdIdx = summaries.slice(0, idx).filter((c) => (c.chapter_type || "standard") === "standard").length;
     return {
-      id: summary.id,
-      number: `Capítulo ${String(index + 1).padStart(2, "0")}`,
-      title: summary.title,
+      id: s.id,
+      number: formatChapterHeadingLabel(s, stdIdx),
+      title: s.title,
+      chapter_type: s.chapter_type,
+      custom_type_name: s.custom_type_name,
       html,
       words: countWords(html),
     };
@@ -43,16 +47,10 @@ export function usePreviewData(bookId: string) {
     Promise.all([getBookById(bookId), loadChapters(bookId), getBookFrontMatter(bookId)])
       .then(([b, chaps, fm]) => {
         if (!active) return;
-        setBook(b);
-        setChapters(chaps);
-        setFrontMatter(fm);
+        setBook(b); setChapters(chaps); setFrontMatter(fm);
       })
-      .catch((r: unknown) => {
-        if (active) setError(r instanceof Error ? r.message : String(r));
-      })
-      .finally(() => {
-        if (active) setIsLoading(false);
-      });
+      .catch((r: unknown) => { if (active) setError(r instanceof Error ? r.message : String(r)); })
+      .finally(() => { if (active) setIsLoading(false); });
     return () => { active = false; };
   }, [bookId]);
 
