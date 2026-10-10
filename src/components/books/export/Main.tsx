@@ -1,12 +1,22 @@
 "use client";
 
+import { useState } from "react";
 import { AppShell } from "@/components/shared/AppShell";
 import { usePdfExport } from "@/hooks/usePdfExport";
+import { useEpubExport } from "@/hooks/useEpubExport";
+import type { ExportFormat } from "@/types/export";
 import { ExportHeader } from "./ExportHeader";
+import { ExportFormatSelector } from "./ExportFormatSelector";
 import { PdfExportCard } from "./PdfExportCard";
+import { EpubExportCard } from "./EpubExportCard";
 
 export function Main({ bookId }: { bookId: string }) {
+  const [format, setFormat] = useState<ExportFormat>("pdf");
   const pdf = usePdfExport(bookId);
+  const epub = useEpubExport(bookId, pdf.info?.chapter_count);
+
+  const error = format === "pdf" ? pdf.error : epub.error;
+  const result = format === "pdf" ? pdf.result : epub.result;
 
   return (
     <AppShell>
@@ -14,11 +24,20 @@ export function Main({ bookId }: { bookId: string }) {
         <ExportHeader bookId={bookId} />
         {pdf.isLoading && <p role="status" className="text-muted">Carregando o livro…</p>}
         {pdf.info && (
-          <PdfExportCard info={pdf.info} isExporting={pdf.isExporting} onExport={() => void pdf.exportPdf()} />
+          <>
+            <ExportFormatSelector format={format} onChange={setFormat} />
+            {format === "pdf" ? (
+              <PdfExportCard info={pdf.info} isExporting={pdf.isExporting} onExport={() => void pdf.exportPdf()} />
+            ) : (
+              <EpubExportCard info={pdf.info} isExporting={epub.isExporting} onExport={() => void epub.exportEpub()} />
+            )}
+          </>
         )}
-        {pdf.error && <p role="alert" className="text-danger mt-4">{pdf.error}</p>}
-        {pdf.result && (
-          <p role="status" className="text-success mt-4 break-words">PDF salvo em: {pdf.result.path}</p>
+        {error && <p role="alert" className="text-danger mt-4">{error}</p>}
+        {result && (
+          <p role="status" className="text-success mt-4 break-words">
+            Arquivo salvo em: {result.path}
+          </p>
         )}
       </main>
     </AppShell>

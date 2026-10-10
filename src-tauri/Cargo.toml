@@ -32,6 +32,7 @@ scraper = "0.24"
 tempfile = "3"
 tungstenite = "0.30"
 tauri-plugin-dialog = "2"
+epub-builder = "0.8.3"
 
 [dev-dependencies]
 lopdf = "0.40"
