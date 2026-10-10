@@ -10,10 +10,14 @@ import { EditorSkeleton } from "./EditorSkeleton";
 import { EditorNotFound } from "./EditorNotFound";
 import { EditorModals } from "./EditorModals";
 import { useChapterEditor } from "./useChapterEditor";
+import { formatChapterHeadingLabel } from "@/utils/chapterType";
 
 export function Main({ bookId, chapterId }: { bookId: string; chapterId: string }) {
   const ed = useChapterEditor(bookId, chapterId);
-  const num = `Capítulo ${String(ed.currentIndex + 1).padStart(2, "0")}`;
+  const standardIndex = ed.chapters
+    .slice(0, ed.currentIndex)
+    .filter((c) => (c.chapter_type || "standard") === "standard").length;
+  const num = formatChapterHeadingLabel(ed.chapter || { chapter_type: "standard" }, standardIndex);
 
   if (ed.isLoading && !ed.chapter) return <EditorSkeleton />;
   if (!ed.chapter) return <EditorNotFound bookId={bookId} />;

@@ -8,7 +8,7 @@ import type { BookFormat, FontPreset } from "@/types/catalog";
 interface Props {
   isNewOpen: boolean;
   onCloseNew: () => void;
-  onCreateNew: (title: string) => Promise<void>;
+  onCreateNew: (title: string, type?: string, customName?: string) => Promise<void>;
   isDeleteOpen: boolean;
   onCloseDelete: () => void;
   onConfirmDelete: () => Promise<void>;

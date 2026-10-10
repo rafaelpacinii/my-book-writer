@@ -9,9 +9,11 @@ interface Props {
 export function EditorTitleInput({ chapterNumber, title, onChange }: Props) {
   return (
     <div className="flex flex-col w-full pt-4">
-      <span className="text-xs font-bold uppercase tracking-wider text-primary mb-2">
-        {chapterNumber}
-      </span>
+      {chapterNumber ? (
+        <span className="text-xs font-bold uppercase tracking-wider text-primary mb-2">
+          {chapterNumber}
+        </span>
+      ) : null}
       <input
         type="text"
         value={title}

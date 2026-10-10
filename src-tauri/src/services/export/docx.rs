@@ -56,46 +56,63 @@ pub fn render_docx(snapshot: &BookExportSnapshot) -> Result<Vec<u8>, AppError> {
         .default_size(font_size_hp)
         .header(
             Header::new().add_paragraph(
-                Paragraph::new()
-                    .align(AlignmentType::Center)
-                    .add_run(
-                        Run::new()
-                            .add_text(&snapshot.book.title)
-                            .fonts(RunFonts::new().ascii(font_family))
-                            .size(18),
-                    ),
+                Paragraph::new().align(AlignmentType::Center).add_run(
+                    Run::new()
+                        .add_text(&snapshot.book.title)
+                        .fonts(RunFonts::new().ascii(font_family))
+                        .size(18),
+                ),
             ),
         );
 
+    let mut std_idx = 0;
     for (index, chapter) in snapshot.chapters.iter().enumerate() {
-        let chapter_num = index + 1;
+        let heading_label = match chapter.chapter_type.as_str() {
+            "standard" => {
+                std_idx += 1;
+                format!("CAPÍTULO {std_idx:02}")
+            }
+            "prologue" => "PRÓLOGO".to_string(),
+            "preface" => "PREFÁCIO".to_string(),
+            "introduction" => "INTRODUÇÃO".to_string(),
+            "epilogue" => "EPÍLOGO".to_string(),
+            "afterword" => "POSFÁCIO".to_string(),
+            "acknowledgments" => "AGRADECIMENTOS".to_string(),
+            "custom" => chapter
+                .custom_type_name
+                .as_deref()
+                .filter(|s| !s.trim().is_empty())
+                .unwrap_or("CAPÍTULO ESPECIAL")
+                .to_uppercase(),
+            _ => {
+                std_idx += 1;
+                format!("CAPÍTULO {std_idx:02}")
+            }
+        };
         let mut first_p = Paragraph::new().align(AlignmentType::Center);
 
         if index > 0 {
             first_p = first_p.add_run(Run::new().add_break(BreakType::Page));
         }
 
-        first_p = first_p
-            .add_run(
-                Run::new()
-                    .add_text(format!("CAPÍTULO {chapter_num:02}"))
-                    .bold()
-                    .fonts(RunFonts::new().ascii(font_family))
-                    .size(font_size_hp),
-            );
+        first_p = first_p.add_run(
+            Run::new()
+                .add_text(heading_label)
+                .bold()
+                .fonts(RunFonts::new().ascii(font_family))
+                .size(font_size_hp),
+        );
         doc = doc.add_paragraph(first_p);
 
         if !chapter.title.trim().is_empty() {
             let title_size = (font_size_hp as f64 * 1.35).round() as usize;
-            let title_p = Paragraph::new()
-                .align(AlignmentType::Center)
-                .add_run(
-                    Run::new()
-                        .add_text(&chapter.title)
-                        .bold()
-                        .fonts(RunFonts::new().ascii(font_family))
-                        .size(title_size),
-                );
+            let title_p = Paragraph::new().align(AlignmentType::Center).add_run(
+                Run::new()
+                    .add_text(&chapter.title)
+                    .bold()
+                    .fonts(RunFonts::new().ascii(font_family))
+                    .size(title_size),
+            );
             doc = doc.add_paragraph(title_p);
         }
 
@@ -129,15 +146,13 @@ fn append_element_to_doc(
     let name = el.value().name();
 
     if el.value().classes().any(|c| c == "scene-break") || name == "hr" {
-        let p = Paragraph::new()
-            .align(AlignmentType::Center)
-            .add_run(
-                Run::new()
-                    .add_text("* * *")
-                    .bold()
-                    .fonts(RunFonts::new().ascii(font))
-                    .size(font_size),
-            );
+        let p = Paragraph::new().align(AlignmentType::Center).add_run(
+            Run::new()
+                .add_text("* * *")
+                .bold()
+                .fonts(RunFonts::new().ascii(font))
+                .size(font_size),
+        );
         *doc = std::mem::take(doc).add_paragraph(p);
         return;
     }
@@ -150,9 +165,13 @@ fn append_element_to_doc(
     if is_heading {
         p = p.align(AlignmentType::Center);
     } else if is_quote {
-        p = p.align(AlignmentType::Both).indent(Some(720), None, None, None);
+        p = p
+            .align(AlignmentType::Both)
+            .indent(Some(720), None, None, None);
     } else {
-        p = p.align(AlignmentType::Both).indent(Some(720), None, None, None);
+        p = p
+            .align(AlignmentType::Both)
+            .indent(Some(720), None, None, None);
     }
 
     let mut runs = Vec::new();
@@ -276,4 +295,3 @@ fn suggested_filename(title: &str) -> String {
     let name = name.trim().trim_matches('.');
     format!("{}.docx", if name.is_empty() { "Livro" } else { name })
 }
-

@@ -30,26 +30,32 @@ export function ChaptersGrid(props: Props) {
           <EmptyChaptersNotice />
         </div>
       ) : (
-        chapters.map((chapter, idx) => (
-          <ChapterCard
-            key={chapter.id}
-            chapter={chapter}
-            bookId={bookId}
-            index={idx}
-            totalChapters={chapters.length}
-            onRename={() => onRename(chapter)}
-            onDelete={() => onDelete(chapter)}
-            onMoveUp={() => onMoveUp(idx)}
-            onMoveDown={() => onMoveDown(idx)}
-            isDragging={dnd.draggedIndex === idx}
-            isDragOver={dnd.dragOverIndex === idx}
-            onDragStart={(e) => dnd.handleDragStart(e, idx)}
-            onDragOver={(e) => dnd.handleDragOver(e, idx)}
-            onDragLeave={dnd.handleDragLeave}
-            onDrop={(e) => dnd.handleDrop(e, idx)}
-            onDragEnd={dnd.handleDragEnd}
-          />
-        ))
+        chapters.map((chapter, idx) => {
+          const standardIndex = chapters
+            .slice(0, idx)
+            .filter((c) => (c.chapter_type || "standard") === "standard").length;
+          return (
+            <ChapterCard
+              key={chapter.id}
+              chapter={chapter}
+              bookId={bookId}
+              index={idx}
+              standardIndex={standardIndex}
+              totalChapters={chapters.length}
+              onRename={() => onRename(chapter)}
+              onDelete={() => onDelete(chapter)}
+              onMoveUp={() => onMoveUp(idx)}
+              onMoveDown={() => onMoveDown(idx)}
+              isDragging={dnd.draggedIndex === idx}
+              isDragOver={dnd.dragOverIndex === idx}
+              onDragStart={(e) => dnd.handleDragStart(e, idx)}
+              onDragOver={(e) => dnd.handleDragOver(e, idx)}
+              onDragLeave={dnd.handleDragLeave}
+              onDrop={(e) => dnd.handleDrop(e, idx)}
+              onDragEnd={dnd.handleDragEnd}
+            />
+          );
+        })
       )}
     </div>
   );

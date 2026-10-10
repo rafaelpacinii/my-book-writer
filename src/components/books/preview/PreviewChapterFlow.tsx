@@ -25,7 +25,9 @@ export function PreviewChapterFlow({ chapter, dim, offsetPage = 0, flowRef, cont
         }}
       >
         <div className="paged-chapter-heading">
-          <span className="block text-[10px] font-bold uppercase tracking-wider mb-1">{chapter.number}</span>
+          {chapter.number ? (
+            <span className="block text-[10px] font-bold uppercase tracking-wider mb-1">{chapter.number}</span>
+          ) : null}
           <h2 className="text-xl font-normal mb-3">{chapter.title}</h2>
         </div>
         <div
@@ -38,4 +40,3 @@ export function PreviewChapterFlow({ chapter, dim, offsetPage = 0, flowRef, cont
     </div>
   );
 }
-

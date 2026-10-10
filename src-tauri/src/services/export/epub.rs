@@ -53,7 +53,31 @@ pub fn render_epub(snapshot: &BookExportSnapshot) -> Result<Vec<u8>, AppError> {
         .stylesheet(css.as_bytes())
         .map_err(|e| super::export_error("Falha ao adicionar folha de estilo.", e))?;
 
+    let mut std_idx = 0;
     for (index, chapter) in snapshot.chapters.iter().enumerate() {
+        let heading_label = match chapter.chapter_type.as_str() {
+            "standard" => {
+                std_idx += 1;
+                format!("Capítulo {std_idx:02}")
+            }
+            "prologue" => "Prólogo".to_string(),
+            "preface" => "Prefácio".to_string(),
+            "introduction" => "Introdução".to_string(),
+            "epilogue" => "Epílogo".to_string(),
+            "afterword" => "Posfácio".to_string(),
+            "acknowledgments" => "Agradecimentos".to_string(),
+            "custom" => chapter
+                .custom_type_name
+                .as_deref()
+                .filter(|s| !s.trim().is_empty())
+                .unwrap_or("Capítulo Especial")
+                .to_string(),
+            _ => {
+                std_idx += 1;
+                format!("Capítulo {std_idx:02}")
+            }
+        };
+        let heading_escaped = escape_html(&heading_label);
         let content_html = chapter_html(&chapter.content_json)?;
         let title_escaped = escape_html(&chapter.title);
         let chapter_num = index + 1;
@@ -68,7 +92,7 @@ pub fn render_epub(snapshot: &BookExportSnapshot) -> Result<Vec<u8>, AppError> {
 <body>
     <section class="chapter" epub:type="chapter">
         <div class="chapter-heading">
-            <span class="chapter-number">Capítulo {chapter_num:02}</span>
+            <span class="chapter-number">{heading_escaped}</span>
             <h2>{title_escaped}</h2>
         </div>
         <div class="chapter-body">

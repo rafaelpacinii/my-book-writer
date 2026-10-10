@@ -31,7 +31,7 @@ test("builds correct front matter pages when all enabled", () => {
   };
 
   const pages = buildFrontMatterPages(fm);
-  expect(pages).toHaveLength(8);
+  expect(pages).toHaveLength(10);
   expect(pages[0]).toEqual({ pageNumber: 1, kind: "half-title", label: "Falsa folha de rosto" });
   expect(pages[1]).toEqual({ pageNumber: 2, kind: "blank", label: "Verso em branco" });
   expect(pages[2]).toEqual({ pageNumber: 3, kind: "title-page", label: "Folha de rosto" });
@@ -40,6 +40,8 @@ test("builds correct front matter pages when all enabled", () => {
   expect(pages[5]).toEqual({ pageNumber: 6, kind: "blank", label: "Verso em branco" });
   expect(pages[6]).toEqual({ pageNumber: 7, kind: "epigraph", label: "Epígrafe" });
   expect(pages[7]).toEqual({ pageNumber: 8, kind: "blank", label: "Verso em branco" });
+  expect(pages[8]).toEqual({ pageNumber: 9, kind: "table-of-contents", label: "Sumário" });
+  expect(pages[9]).toEqual({ pageNumber: 10, kind: "blank", label: "Verso em branco" });
 });
 
 test("returns empty list if frontMatter is null or all disabled", () => {

@@ -8,6 +8,8 @@ pub struct Chapter {
     pub book_id: String,
     pub title: String,
     pub position: i64,
+    pub chapter_type: String,
+    pub custom_type_name: Option<String>,
     pub content_json: String,
     pub content_schema_version: i64,
     pub content_revision: i64,
@@ -24,6 +26,8 @@ pub struct ChapterSummary {
     pub book_id: String,
     pub title: String,
     pub position: i64,
+    pub chapter_type: String,
+    pub custom_type_name: Option<String>,
     pub content_revision: i64,
     pub track_changes_enabled: bool,
     pub created_at: String,
@@ -35,5 +39,7 @@ pub struct ChapterSummary {
 pub struct CreateChapterInput {
     pub book_id: String,
     pub title: String,
+    pub chapter_type: Option<String>,
+    pub custom_type_name: Option<String>,
     pub content_json: Option<String>,
 }

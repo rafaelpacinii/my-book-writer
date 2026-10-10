@@ -5,7 +5,7 @@ import { GripVertical } from "lucide-react";
 
 interface Props {
   id: string;
-  index: number;
+  badge: string;
   title: string;
   isActive: boolean;
   isDragging: boolean;
@@ -19,7 +19,7 @@ interface Props {
 }
 
 export function EditorSidebarItem({
-  index,
+  badge,
   title,
   isActive,
   isDragging,
@@ -50,14 +50,15 @@ export function EditorSidebarItem({
         <GripVertical className="w-3.5 h-3.5" />
       </div>
       <div className="flex-1 min-w-0 flex flex-col justify-center">
-        <span className={`text-xs font-bold ${isActive ? "text-primary" : "text-muted"}`}>
-          {String(index + 1).padStart(2, "0")}
-        </span>
-        <span className="text-xs text-foreground truncate mt-0.5 font-normal">
+        {badge ? (
+          <span className={`text-[11px] font-bold truncate ${isActive ? "text-primary" : "text-muted"}`}>
+            {badge}
+          </span>
+        ) : null}
+        <span className={`text-xs truncate ${badge ? "mt-0.5" : ""} ${isActive ? "text-primary font-bold" : "text-foreground font-normal"}`}>
           {title || "Sem título"}
         </span>
       </div>
     </div>
   );
 }
-

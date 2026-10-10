@@ -24,7 +24,9 @@ export function EditorPagedFlow({ props, editor: ed, hasCaret }: Props) {
         }}
       >
         <div className="paged-chapter-heading select-none" aria-hidden="true">
-          <span className="block text-[10px] font-bold uppercase tracking-wider mb-1">{props.chapterNumber}</span>
+          {props.chapterNumber ? (
+            <span className="block text-[10px] font-bold uppercase tracking-wider mb-1">{props.chapterNumber}</span>
+          ) : null}
           <h2 className="text-xl font-normal mb-3">{props.title}</h2>
         </div>
         <EditorPagedCanvas

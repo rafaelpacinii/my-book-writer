@@ -46,7 +46,7 @@ export function EditorHeader({
             {bookTitle || "Sem título"}
           </span>
           <span className="text-xs text-muted truncate">
-            {chapterNumber} · {chapterTitle || "Sem título"}
+            {chapterNumber ? `${chapterNumber} · ` : ""}{chapterTitle || "Sem título"}
           </span>
         </div>
       </div>

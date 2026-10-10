@@ -22,6 +22,13 @@ impl<'a> ChapterService<'a> {
             ));
         }
 
+        let chapter_type = input.chapter_type.as_deref().unwrap_or("standard").trim();
+        let custom_type_name = input
+            .custom_type_name
+            .as_deref()
+            .map(str::trim)
+            .filter(|s| !s.is_empty());
+
         let repo = ChapterRepository::new(self.pool);
         let position = repo.get_next_position(&input.book_id).await?;
         let chapter_id = Uuid::now_v7().to_string();
@@ -31,8 +38,16 @@ impl<'a> ChapterService<'a> {
             .content_json
             .unwrap_or_else(|| r#"{"version":1,"type":"doc","blocks":[]}"#.to_string());
 
-        repo.create(&chapter_id, &input.book_id, title, position, &content_json)
-            .await
+        repo.create(
+            &chapter_id,
+            &input.book_id,
+            title,
+            position,
+            chapter_type,
+            custom_type_name,
+            &content_json,
+        )
+        .await
     }
 
     pub async fn list_chapters(&self, book_id: &str) -> Result<Vec<ChapterSummary>, AppError> {
@@ -55,6 +70,24 @@ impl<'a> ChapterService<'a> {
 
         let repo = ChapterRepository::new(self.pool);
         repo.update_title(id, trimmed).await
+    }
+
+    pub async fn update_chapter_type(
+        &self,
+        id: &str,
+        chapter_type: &str,
+        custom_type_name: Option<&str>,
+    ) -> Result<Chapter, AppError> {
+        let trimmed_type = chapter_type.trim();
+        if trimmed_type.is_empty() {
+            return Err(AppError::Validation(
+                "O tipo do capítulo não pode ser vazio".into(),
+            ));
+        }
+
+        let trimmed_custom = custom_type_name.map(str::trim).filter(|s| !s.is_empty());
+        let repo = ChapterRepository::new(self.pool);
+        repo.update_type(id, trimmed_type, trimmed_custom).await
     }
 
     /// Salva o conteúdo com verificação de revisão concorrente (optimistic locking)

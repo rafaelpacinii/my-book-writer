@@ -248,9 +248,14 @@ export function useChapterEditor(bookId: string, chapterId: string) {
   );
 
   const handleQuickCreateChapter = useCallback(
-    async (newTitle: string) => {
+    async (newTitle: string, newType?: string, customName?: string) => {
       await saveNow();
-      const created = await createChapter({ book_id: bookId, title: newTitle });
+      const created = await createChapter({
+        book_id: bookId,
+        title: newTitle,
+        chapter_type: newType as Chapter["chapter_type"],
+        custom_type_name: customName,
+      });
       setIsNewChapterModalOpen(false);
       setIsDrawerOpen(false);
       router.push(`/books/editor?bookId=${encodeURIComponent(bookId)}&chapterId=${encodeURIComponent(created.id)}`);

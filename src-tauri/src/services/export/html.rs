@@ -12,11 +12,34 @@ pub fn render_book(snapshot: &BookExportSnapshot) -> Result<String, AppError> {
     let title = escape_html(&book.title);
     let author = escape_html(&book.author_name);
     let mut chapters = String::new();
-    for (index, chapter) in snapshot.chapters.iter().enumerate() {
+    let mut std_idx = 0;
+    for chapter in &snapshot.chapters {
+        let heading_label = match chapter.chapter_type.as_str() {
+            "standard" => {
+                std_idx += 1;
+                format!("Capítulo {std_idx:02}")
+            }
+            "prologue" => "Prólogo".to_string(),
+            "preface" => "Prefácio".to_string(),
+            "introduction" => "Introdução".to_string(),
+            "epilogue" => "Epílogo".to_string(),
+            "afterword" => "Posfácio".to_string(),
+            "acknowledgments" => "Agradecimentos".to_string(),
+            "custom" => chapter
+                .custom_type_name
+                .as_deref()
+                .filter(|s| !s.trim().is_empty())
+                .unwrap_or("Capítulo Especial")
+                .to_string(),
+            _ => {
+                std_idx += 1;
+                format!("Capítulo {std_idx:02}")
+            }
+        };
         let html = chapter_html(&chapter.content_json)?;
         chapters.push_str(&format!(
-            "<section class=\"chapter\"><div class=\"paged-chapter-heading\"><span>Capítulo {:02}</span><h2>{}</h2></div><div class=\"editor-content editor-content-paged\">{html}</div></section>",
-            index + 1, escape_html(&chapter.title),
+            "<section class=\"chapter\"><div class=\"paged-chapter-heading\"><span>{}</span><h2>{}</h2></div><div class=\"editor-content editor-content-paged\">{html}</div></section>",
+            escape_html(&heading_label), escape_html(&chapter.title),
         ));
     }
     let mm = |value: i64| value as f64 / 1000.0;

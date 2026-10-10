@@ -16,6 +16,7 @@ export const book: Book = {
 
 export const chapter: Chapter = {
   id: "chapter-test", book_id: book.id, title: "O começo da história", position: 0,
+  chapter_type: "standard", custom_type_name: null,
   content_json: JSON.stringify({ type: "doc", html: `<p>${paragraph.repeat(5)}</p>`.repeat(25) }),
   content_revision: 1, content_schema_version: 1, track_changes_enabled: false,
   created_at: "2026-10-02", updated_at: "2026-10-02", deleted_at: null,

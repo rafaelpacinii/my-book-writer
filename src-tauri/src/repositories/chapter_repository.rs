@@ -29,17 +29,19 @@ impl<'a> ChapterRepository<'a> {
         book_id: &str,
         title: &str,
         position: i64,
+        chapter_type: &str,
+        custom_type_name: Option<&str>,
         content_json: &str,
     ) -> Result<Chapter, AppError> {
         let mut tx = self.pool.begin().await?;
         let chapter = sqlx::query_as::<_, Chapter>(
             r#"
             INSERT INTO chapters (
-                id, book_id, title, position, content_json,
+                id, book_id, title, position, chapter_type, custom_type_name, content_json,
                 content_schema_version, content_revision, track_changes_enabled,
                 created_at, updated_at
             ) VALUES (
-                ?, ?, ?, ?, ?,
+                ?, ?, ?, ?, ?, ?, ?,
                 1, 0, 0,
                 datetime('now'), datetime('now')
             )
@@ -50,6 +52,8 @@ impl<'a> ChapterRepository<'a> {
         .bind(book_id)
         .bind(title)
         .bind(position)
+        .bind(chapter_type)
+        .bind(custom_type_name)
         .bind(content_json)
         .fetch_one(&mut *tx)
         .await?;
@@ -62,9 +66,9 @@ impl<'a> ChapterRepository<'a> {
     pub async fn list_by_book(&self, book_id: &str) -> Result<Vec<ChapterSummary>, AppError> {
         let chapters = sqlx::query_as::<_, ChapterSummary>(
             r#"
-            SELECT id, book_id, title, position, content_revision, track_changes_enabled, created_at, updated_at
+            SELECT id, book_id, title, position, chapter_type, custom_type_name, content_revision, track_changes_enabled, created_at, updated_at
             FROM chapters
-            WHERE book_id = ? AND deleted_at IS NULL
+            WHERE deleted_at IS NULL AND book_id = ?
             ORDER BY position ASC, id ASC
             "#
         )
@@ -97,6 +101,32 @@ impl<'a> ChapterRepository<'a> {
             "#,
         )
         .bind(title)
+        .bind(id)
+        .fetch_one(&mut *tx)
+        .await?;
+
+        touch_book(&mut *tx, &chapter.book_id).await?;
+        tx.commit().await?;
+        Ok(chapter)
+    }
+
+    pub async fn update_type(
+        &self,
+        id: &str,
+        chapter_type: &str,
+        custom_type_name: Option<&str>,
+    ) -> Result<Chapter, AppError> {
+        let mut tx = self.pool.begin().await?;
+        let chapter = sqlx::query_as::<_, Chapter>(
+            r#"
+            UPDATE chapters
+            SET chapter_type = ?, custom_type_name = ?, updated_at = datetime('now')
+            WHERE id = ? AND deleted_at IS NULL
+            RETURNING *
+            "#,
+        )
+        .bind(chapter_type)
+        .bind(custom_type_name)
         .bind(id)
         .fetch_one(&mut *tx)
         .await?;
@@ -228,7 +258,9 @@ mod tests {
             let pool = setup().await;
             let repo = ChapterRepository::new(&pool);
 
-            repo.create("c1", "b1", "Um", 0, "{}").await.unwrap();
+            repo.create("c1", "b1", "Um", 0, "standard", None, "{}")
+                .await
+                .unwrap();
             assert!(book_touched(&pool).await, "create");
 
             repo.update_title("c1", "Novo").await.unwrap();

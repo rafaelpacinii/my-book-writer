@@ -56,6 +56,21 @@ pub async fn update_chapter_title(
         .map_err(|e| e.to_string())
 }
 
+/// Atualiza o tipo de um capítulo (ex: standard, prologue, preface, epilogue, custom)
+#[tauri::command]
+pub async fn update_chapter_type(
+    state: State<'_, AppState>,
+    id: String,
+    chapter_type: String,
+    custom_type_name: Option<String>,
+) -> Result<Chapter, String> {
+    let service = ChapterService::new(&state.db_pool);
+    service
+        .update_chapter_type(&id, &chapter_type, custom_type_name.as_deref())
+        .await
+        .map_err(|e| e.to_string())
+}
+
 /// Salva o conteúdo do editor com controle de concorrência otimista
 #[tauri::command]
 pub async fn save_chapter_content(

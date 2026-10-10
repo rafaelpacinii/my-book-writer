@@ -1,3 +1,13 @@
+export type ChapterType =
+  | "standard"
+  | "prologue"
+  | "preface"
+  | "introduction"
+  | "epilogue"
+  | "afterword"
+  | "acknowledgments"
+  | "custom";
+
 /**
  * Representa um capítulo completo, incluindo o conteúdo canônico em JSON.
  */
@@ -6,6 +16,8 @@ export interface Chapter {
   book_id: string;
   title: string;
   position: number;
+  chapter_type: ChapterType;
+  custom_type_name?: string | null;
   content_json: string;
   content_schema_version: number;
   content_revision: number;
@@ -24,6 +36,8 @@ export interface ChapterSummary {
   book_id: string;
   title: string;
   position: number;
+  chapter_type: ChapterType;
+  custom_type_name?: string | null;
   content_revision: number;
   track_changes_enabled: boolean;
   created_at: string;
@@ -36,5 +50,7 @@ export interface ChapterSummary {
 export interface CreateChapterInput {
   book_id: string;
   title: string;
+  chapter_type?: ChapterType;
+  custom_type_name?: string | null;
   content_json?: string | null;
 }
