@@ -1,8 +1,9 @@
 use super::{
     content::chapter_html,
+    docx::render_docx,
     epub::render_epub,
     html::render_book,
-    output::{save_epub, save_pdf},
+    output::{save_docx, save_epub, save_pdf},
 };
 use crate::domain::{
     catalog::{BookFormat, FontPreset},
@@ -315,3 +316,15 @@ fn chromium_respects_formats_and_fonts_and_keeps_long_paragraphs() {
         }
     }
 }
+
+#[test]
+fn renders_and_saves_valid_docx() {
+    let book = snapshot();
+    let bytes = render_docx(&book).unwrap();
+    assert!(bytes.starts_with(b"PK\x03\x04"), "DOCX deve iniciar com cabeçalho ZIP");
+    assert!(bytes.len() > 1000, "DOCX deve conter conteúdo substancial");
+
+    let temp = tempfile::NamedTempFile::new().unwrap();
+    save_docx(temp.path(), &bytes).unwrap();
+}
+

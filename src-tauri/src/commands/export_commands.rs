@@ -1,3 +1,4 @@
+use crate::services::export::docx::{self, DocxExportResult};
 use crate::services::export::epub::{self, EpubExportResult};
 use crate::services::export::pdf::{self, PdfExportInfo, PdfExportResult};
 use crate::state::AppState;
@@ -32,6 +33,17 @@ pub async fn export_book_epub(
     book_id: String,
 ) -> Result<Option<EpubExportResult>, String> {
     epub::export(app, &state, &book_id)
+        .await
+        .map_err(crate::services::export::frontend_error)
+}
+
+#[tauri::command]
+pub async fn export_book_docx(
+    app: AppHandle,
+    state: State<'_, AppState>,
+    book_id: String,
+) -> Result<Option<DocxExportResult>, String> {
+    docx::export(app, &state, &book_id)
         .await
         .map_err(crate::services::export::frontend_error)
 }
