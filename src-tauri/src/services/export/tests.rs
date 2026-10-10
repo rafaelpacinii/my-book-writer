@@ -1,4 +1,9 @@
-use super::{content::chapter_html, html::render_book, output::save_pdf};
+use super::{
+    content::chapter_html,
+    epub::render_epub,
+    html::render_book,
+    output::{save_epub, save_pdf},
+};
 use crate::domain::{
     catalog::{BookFormat, FontPreset},
     chapter::Chapter,
@@ -120,6 +125,29 @@ fn failed_pdf_does_not_replace_an_existing_file() {
     let destination = directory.path().join("livro.pdf");
     std::fs::write(&destination, "original").unwrap();
     assert!(save_pdf(&destination, b"invalid").is_err());
+    assert_eq!(std::fs::read(&destination).unwrap(), b"original");
+}
+
+#[test]
+fn render_epub_generates_valid_epub_archive() {
+    let book = snapshot();
+    let bytes = render_epub(&book).unwrap();
+    assert!(
+        bytes.starts_with(b"PK\x03\x04"),
+        "EPUB must be a zip archive"
+    );
+    assert!(
+        bytes.len() > 500,
+        "EPUB must contain required metadata and content"
+    );
+}
+
+#[test]
+fn failed_epub_does_not_replace_an_existing_file() {
+    let directory = tempfile::tempdir().unwrap();
+    let destination = directory.path().join("livro.epub");
+    std::fs::write(&destination, "original").unwrap();
+    assert!(save_epub(&destination, b"invalid").is_err());
     assert_eq!(std::fs::read(&destination).unwrap(), b"original");
 }
 

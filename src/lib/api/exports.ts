@@ -2,7 +2,7 @@ import { invoke, isTauri } from "@tauri-apps/api/core";
 import { getBookById } from "@/lib/api/books";
 import { listChapters } from "@/lib/api/chapters";
 import { listBookFormats, listFontPresets } from "@/lib/api/catalog";
-import type { PdfExportInfo, PdfExportResult } from "@/types/export";
+import type { EpubExportResult, PdfExportInfo, PdfExportResult } from "@/types/export";
 
 export async function getPdfExportInfo(bookId: string): Promise<PdfExportInfo> {
   if (isTauri()) return invoke<PdfExportInfo>("get_pdf_export_info", { bookId });
@@ -22,4 +22,9 @@ export async function getPdfExportInfo(bookId: string): Promise<PdfExportInfo> {
 export async function exportBookPdf(bookId: string): Promise<PdfExportResult | null> {
   if (!isTauri()) throw new Error("Abra o aplicativo desktop para exportar o livro.");
   return invoke<PdfExportResult | null>("export_book_pdf", { bookId });
+}
+
+export async function exportBookEpub(bookId: string): Promise<EpubExportResult | null> {
+  if (!isTauri()) throw new Error("Abra o aplicativo desktop para exportar o livro.");
+  return invoke<EpubExportResult | null>("export_book_epub", { bookId });
 }

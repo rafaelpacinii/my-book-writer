@@ -11,3 +11,9 @@ export interface PdfExportInfo {
 export interface PdfExportResult {
   path: string;
 }
+
+export interface EpubExportResult {
+  path: string;
+}
+
+export type ExportFormat = "pdf" | "epub";

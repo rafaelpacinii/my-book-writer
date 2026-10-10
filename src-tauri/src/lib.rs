@@ -44,6 +44,7 @@ pub fn run() {
             commands::book_commands::delete_book,
             commands::export_commands::get_pdf_export_info,
             commands::export_commands::export_book_pdf,
+            commands::export_commands::export_book_epub,
             // Perfil
             commands::profile_commands::get_profile,
             commands::profile_commands::update_profile,

@@ -12,7 +12,7 @@ export function ExportHeader({ bookId }: { bookId: string }) {
         Voltar ao livro
       </Link>
       <h1 className="font-serif text-3xl text-foreground">Exportar livro</h1>
-      <p className="text-muted mt-2">Gere um PDF com as configurações de diagramação do seu livro.</p>
+      <p className="text-muted mt-2">Exporte seu livro em PDF para impressão ou em EPUB para leitores digitais.</p>
     </div>
   );
 }
