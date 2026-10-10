@@ -2,6 +2,21 @@ use crate::domain::book::{Book, UpdateBookInput};
 use crate::error::AppError;
 use sqlx::SqlitePool;
 
+/// Registra uma alteração relevante no livro (capítulos, exportação etc.).
+/// Aceita um executor para participar da mesma transação da alteração.
+pub async fn touch_book<'e, E>(executor: E, book_id: &str) -> Result<(), AppError>
+where
+    E: sqlx::Executor<'e, Database = sqlx::Sqlite>,
+{
+    sqlx::query(
+        "UPDATE books SET updated_at = datetime('now') WHERE id = ? AND deleted_at IS NULL",
+    )
+    .bind(book_id)
+    .execute(executor)
+    .await?;
+    Ok(())
+}
+
 pub struct BookRepository<'a> {
     pool: &'a SqlitePool,
 }

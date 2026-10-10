@@ -1,5 +1,6 @@
 use super::{chromium, html, output};
 use crate::error::AppError;
+use crate::repositories::book_repository::touch_book;
 use crate::repositories::export_repository::read_snapshot;
 use crate::state::AppState;
 use serde::Serialize;
@@ -65,7 +66,7 @@ pub async fn export(
     let binary = chromium::executable(&resource_dir(&app)?)?;
     let document = html::render_book(&snapshot)?;
     let filename = suggested_filename(&snapshot.book.title);
-    tauri::async_runtime::spawn_blocking(move || {
+    let result = tauri::async_runtime::spawn_blocking(move || {
         let Some(chosen) = app
             .dialog()
             .file()
@@ -94,7 +95,12 @@ pub async fn export(
         }))
     })
     .await
-    .map_err(|e| super::export_error("A exportação foi interrompida. Tente novamente.", e))?
+    .map_err(|e| super::export_error("A exportação foi interrompida. Tente novamente.", e))??;
+
+    if result.is_some() {
+        touch_book(&state.db_pool, book_id).await?;
+    }
+    Ok(result)
 }
 
 fn suggested_filename(title: &str) -> String {
