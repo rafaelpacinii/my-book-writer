@@ -55,3 +55,30 @@ pub fn save_epub(destination: &Path, bytes: &[u8]) -> Result<(), AppError> {
     })?;
     Ok(())
 }
+
+pub fn save_docx(destination: &Path, bytes: &[u8]) -> Result<(), AppError> {
+    if !bytes.starts_with(b"PK\x03\x04") || bytes.len() < 100 {
+        return Err(AppError::Export(
+            "O arquivo gerado não é um documento DOCX válido.".into(),
+        ));
+    }
+    let parent = destination
+        .parent()
+        .filter(|path| path.is_dir())
+        .ok_or_else(|| AppError::Export("A pasta escolhida não está disponível.".into()))?;
+    let mut file = tempfile::NamedTempFile::new_in(parent).map_err(|e| {
+        super::export_error("Não foi possível preparar o arquivo na pasta escolhida.", e)
+    })?;
+    file.write_all(bytes)
+        .and_then(|_| file.as_file().sync_all())
+        .map_err(|e| {
+            super::export_error(
+                "Não foi possível gravar o DOCX. Verifique o espaço disponível.",
+                e,
+            )
+        })?;
+    file.persist(destination).map_err(|e| {
+        super::export_error("Não foi possível salvar o DOCX na pasta escolhida.", e)
+    })?;
+    Ok(())
+}

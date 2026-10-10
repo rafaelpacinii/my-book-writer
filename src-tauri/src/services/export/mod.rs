@@ -1,6 +1,7 @@
 pub mod chromium;
 mod content;
 mod devtools;
+pub mod docx;
 pub mod epub;
 mod fonts;
 pub mod html;

@@ -16,4 +16,8 @@ export interface EpubExportResult {
   path: string;
 }
 
-export type ExportFormat = "pdf" | "epub";
+export interface DocxExportResult {
+  path: string;
+}
+
+export type ExportFormat = "pdf" | "epub" | "docx";
