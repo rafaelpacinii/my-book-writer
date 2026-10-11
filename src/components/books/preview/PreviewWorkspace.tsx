@@ -47,7 +47,7 @@ export function PreviewWorkspace({ bookId, data }: { bookId: string; data: Retur
               pages.isFrontMatter && activeFm && book && frontMatter ? (
                 <PreviewFrontMatterPaper
                   dim={dim} scale={zoom.scale} item={activeFm} book={book}
-                  frontMatter={frontMatter} tocEntries={tocEntries}
+                  frontMatter={frontMatter} tocEntries={tocEntries} onSelectPage={pages.goToPage}
                 />
               ) : chapter ? (
                 <PreviewPaper bookTitle={book?.title || "Livro"} chapter={chapter} dim={dim} chapterPage={pages.location.page} bookPage={pages.page} scale={zoom.scale} />

@@ -23,6 +23,7 @@ fn snapshot() -> BookExportSnapshot {
         format: BookFormat { id:"format".into(), name:"14 × 21 cm".into(), market:"BR".into(), width_um:140000, height_um:210000, is_active:true },
         font: FontPreset { id:"font".into(), name:"Merriweather".into(), family_name:"Merriweather".into(), manifest_path:String::new(), is_active:true },
         chapters: vec![chapter("primeiro", "Primeiro capítulo", "<p>Olá, mundo! <b>Negrito</b>, <i>itálico</i> e <u>sublinhado</u>.</p>")],
+        front_matter: None,
     }
 }
 
@@ -343,4 +344,94 @@ fn renders_and_saves_valid_docx() {
 
     let temp = tempfile::NamedTempFile::new().unwrap();
     save_docx(temp.path(), &bytes).unwrap();
+}
+
+#[test]
+fn exports_front_matter_and_dynamic_toc_across_all_formats() {
+    use crate::domain::front_matter::BookFrontMatter;
+
+    let mut book = snapshot();
+    book.chapters
+        .push(chapter("segundo", "O Retorno", "<p>Segundo capítulo.</p>"));
+    book.front_matter = Some(BookFrontMatter {
+        book_id: "export-test".into(),
+        include_half_title: true,
+        include_title_page: true,
+        subtitle: Some("O Começo".into()),
+        publisher: Some("Editora Alvorada".into()),
+        edition: "1ª edição".into(),
+        publication_year: Some(2026),
+        publication_city: Some("Curitiba".into()),
+        include_copyright_page: true,
+        copyright_text: Some("© 2026 Autora".into()),
+        isbn_print: Some("978-65-00-00000-0".into()),
+        isbn_digital: Some("978-65-00-00000-1".into()),
+        cover_designer: Some("Capista".into()),
+        proofreader: Some("Revisor".into()),
+        layout_designer: None,
+        cataloging_data: None,
+        include_dedication: true,
+        dedication_text: Some("Aos leitores".into()),
+        include_epigraph: true,
+        epigraph_text: Some("Palavras ao vento".into()),
+        epigraph_author: Some("Poeta".into()),
+        include_table_of_contents: true,
+        created_at: String::new(),
+        updated_at: String::new(),
+    });
+
+    // 1. HTML / PDF renderer test
+    let html = render_book(&book).unwrap();
+    assert!(
+        html.contains("half-title-page"),
+        "HTML deve conter falsa folha de rosto"
+    );
+    assert!(
+        html.contains("title-page"),
+        "HTML deve conter folha de rosto"
+    );
+    assert!(
+        html.contains("copyright-page"),
+        "HTML deve conter copyright"
+    );
+    assert!(
+        html.contains("dedication-page"),
+        "HTML deve conter dedicatória"
+    );
+    assert!(html.contains("epigraph-page"), "HTML deve conter epígrafe");
+    assert!(html.contains("toc-page"), "HTML deve conter sumário");
+    assert!(
+        html.contains("Capítulo 01 · Primeiro capítulo"),
+        "Sumário deve listar o capítulo 1"
+    );
+    assert!(
+        html.contains("Capítulo 02 · O Retorno"),
+        "Sumário deve listar o capítulo 2"
+    );
+    assert!(
+        html.contains("id=\"toc-page-0\""),
+        "Sumário deve conter indicador dinâmico de página"
+    );
+
+    // 2. DOCX renderer test
+    let docx_bytes = render_docx(&book).unwrap();
+    assert!(
+        docx_bytes.starts_with(b"PK\x03\x04"),
+        "DOCX com sumário deve ser um arquivo ZIP válido"
+    );
+    assert!(
+        docx_bytes.len() > 1500,
+        "DOCX com sumário deve ter tamanho adequado"
+    );
+
+    // 3. EPUB renderer test
+    let epub_bytes = render_epub(&book).unwrap();
+    assert!(
+        epub_bytes.starts_with(b"PK\x03\x04"),
+        "EPUB com sumário deve ser um arquivo ZIP válido"
+    );
+    assert!(
+        epub_bytes.len() > 1500,
+        "EPUB com sumário deve ter tamanho adequado"
+    );
 }
