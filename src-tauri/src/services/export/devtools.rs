@@ -120,6 +120,24 @@ impl DevTools {
                 "Não foi possível carregar as fontes do livro.".into(),
             ));
         }
+        let _ = self.call(
+            "Runtime.evaluate",
+            json!({
+                "expression": r#"(() => {
+                    const fmCount = document.querySelectorAll('.front-matter-page').length;
+                    const gauge = document.querySelector('.page-height-gauge');
+                    const pageH = gauge && gauge.offsetHeight > 50 ? gauge.offsetHeight : 800;
+                    let cur = fmCount + 1;
+                    document.querySelectorAll('.chapter').forEach((el, idx) => {
+                        const span = document.getElementById('toc-page-' + idx);
+                        if (span) span.textContent = cur;
+                        const h = el.offsetHeight;
+                        cur += Math.max(1, Math.ceil(h / pageH));
+                    });
+                })()"#,
+                "returnByValue": true,
+            }),
+        );
         let result = self.call(
             "Page.printToPDF",
             json!({

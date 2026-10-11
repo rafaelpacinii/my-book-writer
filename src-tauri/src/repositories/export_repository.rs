@@ -2,6 +2,7 @@ use crate::domain::{
     book::Book,
     catalog::{BookFormat, FontPreset},
     chapter::Chapter,
+    front_matter::BookFrontMatter,
 };
 use crate::error::AppError;
 use sqlx::SqlitePool;
@@ -11,6 +12,7 @@ pub struct BookExportSnapshot {
     pub format: BookFormat,
     pub font: FontPreset,
     pub chapters: Vec<Chapter>,
+    pub front_matter: Option<BookFrontMatter>,
 }
 
 pub async fn read_snapshot(
@@ -40,11 +42,17 @@ pub async fn read_snapshot(
     .bind(book_id)
     .fetch_all(&mut *tx)
     .await?;
+    let front_matter =
+        sqlx::query_as::<_, BookFrontMatter>("SELECT * FROM book_front_matter WHERE book_id = ?")
+            .bind(book_id)
+            .fetch_optional(&mut *tx)
+            .await?;
     tx.commit().await?;
     Ok(BookExportSnapshot {
         book,
         format,
         font,
         chapters,
+        front_matter,
     })
 }

@@ -16,9 +16,10 @@ interface Props {
   book: Book;
   frontMatter: BookFrontMatter;
   tocEntries?: TocChapterEntry[];
+  onSelectPage?: (page: number) => void;
 }
 
-export function PreviewFrontMatterPaper({ dim, scale, item, book, frontMatter, tocEntries = [] }: Props) {
+export function PreviewFrontMatterPaper({ dim, scale, item, book, frontMatter, tocEntries = [], onSelectPage }: Props) {
   return (
     <div style={{ width: dim.widthPx * scale, height: dim.heightPx * scale }} className="relative shrink-0">
       <div
@@ -37,10 +38,9 @@ export function PreviewFrontMatterPaper({ dim, scale, item, book, frontMatter, t
         {item.kind === "copyright" && <PreviewCopyrightPage frontMatter={frontMatter} />}
         {item.kind === "dedication" && <PreviewSpecialPage kind="dedication" text={frontMatter.dedication_text} />}
         {item.kind === "epigraph" && <PreviewSpecialPage kind="epigraph" text={frontMatter.epigraph_text} author={frontMatter.epigraph_author} />}
-        {item.kind === "table-of-contents" && <PreviewTableOfContentsPage entries={tocEntries} />}
+        {item.kind === "table-of-contents" && <PreviewTableOfContentsPage entries={tocEntries} onSelectPage={onSelectPage} />}
         {item.kind === "blank" && <PreviewSpecialPage kind="blank" />}
       </div>
     </div>
   );
 }
-

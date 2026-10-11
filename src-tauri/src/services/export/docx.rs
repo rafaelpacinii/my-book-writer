@@ -36,7 +36,7 @@ pub fn render_docx(snapshot: &BookExportSnapshot) -> Result<Vec<u8>, AppError> {
     let margin_left = um_to_twips(snapshot.book.margin_left_um) as i32;
     let margin_right = um_to_twips(snapshot.book.margin_right_um) as i32;
 
-    let mut doc = Docx::new()
+    let doc = Docx::new()
         .page_size(width_twips, height_twips)
         .page_margin(
             PageMargin::new()
@@ -65,6 +65,15 @@ pub fn render_docx(snapshot: &BookExportSnapshot) -> Result<Vec<u8>, AppError> {
             ),
         );
 
+    let content_width_twips = (width_twips as i32 - margin_left - margin_right).max(1000) as u32;
+    let (mut doc, has_front_matter) = add_front_matter_docx(
+        doc,
+        snapshot,
+        font_family,
+        font_size_hp,
+        content_width_twips,
+    );
+
     let mut std_idx = 0;
     for (index, chapter) in snapshot.chapters.iter().enumerate() {
         let heading_label = match chapter.chapter_type.as_str() {
@@ -91,7 +100,7 @@ pub fn render_docx(snapshot: &BookExportSnapshot) -> Result<Vec<u8>, AppError> {
         };
         let mut first_p = Paragraph::new().align(AlignmentType::Center);
 
-        if index > 0 {
+        if has_front_matter || index > 0 {
             first_p = first_p.add_run(Run::new().add_break(BreakType::Page));
         }
 
@@ -294,4 +303,345 @@ fn suggested_filename(title: &str) -> String {
         .collect();
     let name = name.trim().trim_matches('.');
     format!("{}.docx", if name.is_empty() { "Livro" } else { name })
+}
+
+fn add_front_matter_docx(
+    mut doc: Docx,
+    snapshot: &BookExportSnapshot,
+    font_family: &str,
+    font_size_hp: usize,
+    content_width_twips: u32,
+) -> (Docx, bool) {
+    let Some(fm) = &snapshot.front_matter else {
+        return (doc, false);
+    };
+    let mut has_fm = false;
+    let mut fm_page_count = 0;
+    if fm.include_half_title {
+        fm_page_count += 2;
+    }
+    if fm.include_title_page {
+        fm_page_count += 1;
+        if fm.include_copyright_page {
+            fm_page_count += 1;
+        }
+    }
+    if fm.include_dedication
+        && !fm
+            .dedication_text
+            .as_deref()
+            .unwrap_or("")
+            .trim()
+            .is_empty()
+    {
+        fm_page_count += 2;
+    }
+    if fm.include_epigraph && !fm.epigraph_text.as_deref().unwrap_or("").trim().is_empty() {
+        fm_page_count += 2;
+    }
+    if fm.include_table_of_contents {
+        fm_page_count += 2;
+    }
+
+    if fm.include_half_title {
+        has_fm = true;
+        let p1 = Paragraph::new().align(AlignmentType::Center).add_run(
+            Run::new()
+                .add_text(&snapshot.book.title)
+                .bold()
+                .size(font_size_hp + 8)
+                .fonts(RunFonts::new().ascii(font_family)),
+        );
+        let p2 = Paragraph::new().align(AlignmentType::Center).add_run(
+            Run::new()
+                .add_text(&snapshot.book.author_name)
+                .size(font_size_hp)
+                .fonts(RunFonts::new().ascii(font_family)),
+        );
+        doc = doc.add_paragraph(p1);
+        doc = doc.add_paragraph(p2);
+        doc = doc.add_paragraph(Paragraph::new().add_run(Run::new().add_break(BreakType::Page)));
+        doc = doc.add_paragraph(Paragraph::new().add_run(Run::new().add_break(BreakType::Page)));
+    }
+
+    if fm.include_title_page {
+        has_fm = true;
+        let p_title = Paragraph::new().align(AlignmentType::Center).add_run(
+            Run::new()
+                .add_text(&snapshot.book.title)
+                .bold()
+                .size(font_size_hp + 12)
+                .fonts(RunFonts::new().ascii(font_family)),
+        );
+        doc = doc.add_paragraph(p_title);
+
+        if let Some(subtitle) = fm.subtitle.as_deref().filter(|s| !s.trim().is_empty()) {
+            doc = doc.add_paragraph(
+                Paragraph::new().align(AlignmentType::Center).add_run(
+                    Run::new()
+                        .add_text(subtitle)
+                        .italic()
+                        .size(font_size_hp + 2)
+                        .fonts(RunFonts::new().ascii(font_family)),
+                ),
+            );
+        }
+        doc = doc.add_paragraph(Paragraph::new());
+        doc = doc.add_paragraph(
+            Paragraph::new().align(AlignmentType::Center).add_run(
+                Run::new()
+                    .add_text(&snapshot.book.author_name)
+                    .size(font_size_hp + 4)
+                    .fonts(RunFonts::new().ascii(font_family)),
+            ),
+        );
+        doc = doc.add_paragraph(Paragraph::new());
+
+        if let Some(publ) = fm.publisher.as_deref().filter(|s| !s.trim().is_empty()) {
+            doc = doc.add_paragraph(
+                Paragraph::new().align(AlignmentType::Center).add_run(
+                    Run::new()
+                        .add_text(publ)
+                        .bold()
+                        .size(font_size_hp)
+                        .fonts(RunFonts::new().ascii(font_family)),
+                ),
+            );
+        }
+        let mut city_year = Vec::new();
+        if let Some(city) = fm
+            .publication_city
+            .as_deref()
+            .filter(|s| !s.trim().is_empty())
+        {
+            city_year.push(city.to_string());
+        }
+        if let Some(year) = fm.publication_year {
+            city_year.push(year.to_string());
+        }
+        if !city_year.is_empty() {
+            doc = doc.add_paragraph(
+                Paragraph::new().align(AlignmentType::Center).add_run(
+                    Run::new()
+                        .add_text(city_year.join(" · "))
+                        .size(font_size_hp.saturating_sub(2))
+                        .fonts(RunFonts::new().ascii(font_family)),
+                ),
+            );
+        }
+        doc = doc.add_paragraph(Paragraph::new().add_run(Run::new().add_break(BreakType::Page)));
+
+        if fm.include_copyright_page {
+            if let Some(text) = fm
+                .copyright_text
+                .as_deref()
+                .filter(|s| !s.trim().is_empty())
+            {
+                doc = doc.add_paragraph(
+                    Paragraph::new().add_run(
+                        Run::new()
+                            .add_text(text)
+                            .size(font_size_hp.saturating_sub(4))
+                            .fonts(RunFonts::new().ascii(font_family)),
+                    ),
+                );
+            }
+            if !fm.edition.trim().is_empty() {
+                doc = doc.add_paragraph(
+                    Paragraph::new().add_run(
+                        Run::new()
+                            .add_text(&fm.edition)
+                            .size(font_size_hp.saturating_sub(4))
+                            .fonts(RunFonts::new().ascii(font_family)),
+                    ),
+                );
+            }
+            if let Some(isbn_p) = fm.isbn_print.as_deref().filter(|s| !s.trim().is_empty()) {
+                doc = doc.add_paragraph(
+                    Paragraph::new().add_run(
+                        Run::new()
+                            .add_text(format!("ISBN (impresso): {isbn_p}"))
+                            .size(font_size_hp.saturating_sub(4))
+                            .fonts(RunFonts::new().ascii(font_family)),
+                    ),
+                );
+            }
+            if let Some(isbn_d) = fm.isbn_digital.as_deref().filter(|s| !s.trim().is_empty()) {
+                doc = doc.add_paragraph(
+                    Paragraph::new().add_run(
+                        Run::new()
+                            .add_text(format!("ISBN (digital): {isbn_d}"))
+                            .size(font_size_hp.saturating_sub(4))
+                            .fonts(RunFonts::new().ascii(font_family)),
+                    ),
+                );
+            }
+            if let Some(cov) = fm
+                .cover_designer
+                .as_deref()
+                .filter(|s| !s.trim().is_empty())
+            {
+                doc = doc.add_paragraph(
+                    Paragraph::new().add_run(
+                        Run::new()
+                            .add_text(format!("Capa: {cov}"))
+                            .size(font_size_hp.saturating_sub(4))
+                            .fonts(RunFonts::new().ascii(font_family)),
+                    ),
+                );
+            }
+            if let Some(rev) = fm.proofreader.as_deref().filter(|s| !s.trim().is_empty()) {
+                doc = doc.add_paragraph(
+                    Paragraph::new().add_run(
+                        Run::new()
+                            .add_text(format!("Revisão: {rev}"))
+                            .size(font_size_hp.saturating_sub(4))
+                            .fonts(RunFonts::new().ascii(font_family)),
+                    ),
+                );
+            }
+            if let Some(diag) = fm
+                .layout_designer
+                .as_deref()
+                .filter(|s| !s.trim().is_empty())
+            {
+                doc = doc.add_paragraph(
+                    Paragraph::new().add_run(
+                        Run::new()
+                            .add_text(format!("Diagramação: {diag}"))
+                            .size(font_size_hp.saturating_sub(4))
+                            .fonts(RunFonts::new().ascii(font_family)),
+                    ),
+                );
+            }
+            if let Some(cat) = fm
+                .cataloging_data
+                .as_deref()
+                .filter(|s| !s.trim().is_empty())
+            {
+                doc = doc.add_paragraph(
+                    Paragraph::new().add_run(
+                        Run::new()
+                            .add_text(cat)
+                            .size(font_size_hp.saturating_sub(6))
+                            .fonts(RunFonts::new().ascii(font_family)),
+                    ),
+                );
+            }
+            doc =
+                doc.add_paragraph(Paragraph::new().add_run(Run::new().add_break(BreakType::Page)));
+        }
+    }
+
+    if fm.include_dedication {
+        if let Some(text) = fm
+            .dedication_text
+            .as_deref()
+            .filter(|s| !s.trim().is_empty())
+        {
+            has_fm = true;
+            doc = doc.add_paragraph(
+                Paragraph::new().align(AlignmentType::Right).add_run(
+                    Run::new()
+                        .add_text(text)
+                        .italic()
+                        .size(font_size_hp)
+                        .fonts(RunFonts::new().ascii(font_family)),
+                ),
+            );
+            doc =
+                doc.add_paragraph(Paragraph::new().add_run(Run::new().add_break(BreakType::Page)));
+            doc =
+                doc.add_paragraph(Paragraph::new().add_run(Run::new().add_break(BreakType::Page)));
+        }
+    }
+
+    if fm.include_epigraph {
+        if let Some(text) = fm.epigraph_text.as_deref().filter(|s| !s.trim().is_empty()) {
+            has_fm = true;
+            doc = doc.add_paragraph(
+                Paragraph::new().align(AlignmentType::Right).add_run(
+                    Run::new()
+                        .add_text(text)
+                        .italic()
+                        .size(font_size_hp)
+                        .fonts(RunFonts::new().ascii(font_family)),
+                ),
+            );
+            if let Some(author) = fm
+                .epigraph_author
+                .as_deref()
+                .filter(|s| !s.trim().is_empty())
+            {
+                doc = doc.add_paragraph(
+                    Paragraph::new().align(AlignmentType::Right).add_run(
+                        Run::new()
+                            .add_text(format!("— {author}"))
+                            .size(font_size_hp.saturating_sub(2))
+                            .fonts(RunFonts::new().ascii(font_family)),
+                    ),
+                );
+            }
+            doc =
+                doc.add_paragraph(Paragraph::new().add_run(Run::new().add_break(BreakType::Page)));
+            doc =
+                doc.add_paragraph(Paragraph::new().add_run(Run::new().add_break(BreakType::Page)));
+        }
+    }
+
+    if fm.include_table_of_contents {
+        has_fm = true;
+        doc = doc.add_paragraph(
+            Paragraph::new().align(AlignmentType::Center).add_run(
+                Run::new()
+                    .add_text("SUMÁRIO")
+                    .bold()
+                    .size(font_size_hp + 6)
+                    .fonts(RunFonts::new().ascii(font_family)),
+            ),
+        );
+        doc = doc.add_paragraph(Paragraph::new());
+
+        let mut est_page = fm_page_count + 1;
+        let mut std_idx = 0;
+        for chap in &snapshot.chapters {
+            let label = if chap.chapter_type == "standard" {
+                std_idx += 1;
+                if chap.title.trim().is_empty() {
+                    format!("Capítulo {std_idx:02}")
+                } else {
+                    format!("Capítulo {std_idx:02} · {}", chap.title)
+                }
+            } else {
+                chap.title.clone()
+            };
+            let mut p = Paragraph::new().add_tab(
+                Tab::new()
+                    .val(TabValueType::Right)
+                    .leader(TabLeaderType::Dot)
+                    .pos(content_width_twips as usize),
+            );
+            p = p.add_run(
+                Run::new()
+                    .add_text(&label)
+                    .size(font_size_hp)
+                    .fonts(RunFonts::new().ascii(font_family)),
+            );
+            p = p.add_run(Run::new().add_tab());
+            p = p.add_run(
+                Run::new()
+                    .add_text(est_page.to_string())
+                    .size(font_size_hp)
+                    .fonts(RunFonts::new().ascii(font_family)),
+            );
+            doc = doc.add_paragraph(p);
+
+            let char_count = chap.content_json.len();
+            est_page += (char_count / 1500).max(1);
+        }
+        doc = doc.add_paragraph(Paragraph::new().add_run(Run::new().add_break(BreakType::Page)));
+        doc = doc.add_paragraph(Paragraph::new().add_run(Run::new().add_break(BreakType::Page)));
+    }
+
+    (doc, has_fm)
 }

@@ -53,6 +53,8 @@ pub fn render_epub(snapshot: &BookExportSnapshot) -> Result<Vec<u8>, AppError> {
         .stylesheet(css.as_bytes())
         .map_err(|e| super::export_error("Falha ao adicionar folha de estilo.", e))?;
 
+    add_front_matter_epub(&mut builder, snapshot)?;
+
     let mut std_idx = 0;
     for (index, chapter) in snapshot.chapters.iter().enumerate() {
         let heading_label = match chapter.chapter_type.as_str() {
@@ -180,4 +182,243 @@ fn suggested_filename(title: &str) -> String {
         .collect();
     let name = name.trim().trim_matches('.');
     format!("{}.epub", if name.is_empty() { "Livro" } else { name })
+}
+
+fn add_front_matter_epub(
+    builder: &mut EpubBuilder<ZipLibrary>,
+    snapshot: &BookExportSnapshot,
+) -> Result<(), AppError> {
+    let Some(fm) = &snapshot.front_matter else {
+        return Ok(());
+    };
+    let title_escaped = escape_html(&snapshot.book.title);
+    let author_escaped = escape_html(&snapshot.book.author_name);
+
+    if fm.include_half_title {
+        let xhtml = format!(
+            r#"<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="pt-BR" xml:lang="pt-BR">
+<head><title>{title_escaped}</title><link rel="stylesheet" href="stylesheet.css" type="text/css" /></head>
+<body><section class="half-title-page" style="text-align:center;padding-top:30%;">
+    <h1>{title_escaped}</h1><p>{author_escaped}</p>
+</section></body></html>"#
+        );
+        builder
+            .add_content(
+                EpubContent::new("half_title.xhtml", xhtml.as_bytes())
+                    .title("Falsa Folha de Rosto")
+                    .reftype(ReferenceType::TitlePage),
+            )
+            .map_err(|e| {
+                super::export_error("Falha ao adicionar falsa folha de rosto ao EPUB.", e)
+            })?;
+    }
+
+    if fm.include_title_page {
+        let subtitle = fm.subtitle.as_deref().unwrap_or("").trim();
+        let subtitle_html = if subtitle.is_empty() {
+            String::new()
+        } else {
+            format!(
+                "<p style=\"font-style:italic;\">{}</p>",
+                escape_html(subtitle)
+            )
+        };
+        let publisher = fm.publisher.as_deref().unwrap_or("").trim();
+        let publisher_html = if publisher.is_empty() {
+            String::new()
+        } else {
+            format!(
+                "<p style=\"font-weight:bold;\">{}</p>",
+                escape_html(publisher)
+            )
+        };
+        let mut year_city = Vec::new();
+        if let Some(city) = fm
+            .publication_city
+            .as_deref()
+            .filter(|s| !s.trim().is_empty())
+        {
+            year_city.push(escape_html(city));
+        }
+        if let Some(year) = fm.publication_year {
+            year_city.push(year.to_string());
+        }
+        let year_city_html = if year_city.is_empty() {
+            String::new()
+        } else {
+            format!("<p>{}</p>", year_city.join(" · "))
+        };
+
+        let xhtml = format!(
+            r#"<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="pt-BR" xml:lang="pt-BR">
+<head><title>{title_escaped}</title><link rel="stylesheet" href="stylesheet.css" type="text/css" /></head>
+<body><section class="title-page" style="text-align:center;padding-top:20%;">
+    <h1>{title_escaped}</h1>{subtitle_html}
+    <p style="margin-top:2em;">{author_escaped}</p>
+    <div style="margin-top:3em;">{publisher_html}{year_city_html}</div>
+</section></body></html>"#
+        );
+        builder
+            .add_content(
+                EpubContent::new("title_page.xhtml", xhtml.as_bytes())
+                    .title("Folha de Rosto")
+                    .reftype(ReferenceType::TitlePage),
+            )
+            .map_err(|e| super::export_error("Falha ao adicionar folha de rosto ao EPUB.", e))?;
+
+        if fm.include_copyright_page {
+            let mut cp_lines = Vec::new();
+            if let Some(text) = fm
+                .copyright_text
+                .as_deref()
+                .filter(|s| !s.trim().is_empty())
+            {
+                cp_lines.push(format!("<p>{}</p>", escape_html(text)));
+            }
+            if !fm.edition.trim().is_empty() {
+                cp_lines.push(format!("<p>{}</p>", escape_html(&fm.edition)));
+            }
+            if let Some(isbn_p) = fm.isbn_print.as_deref().filter(|s| !s.trim().is_empty()) {
+                cp_lines.push(format!("<p>ISBN (impresso): {}</p>", escape_html(isbn_p)));
+            }
+            if let Some(isbn_d) = fm.isbn_digital.as_deref().filter(|s| !s.trim().is_empty()) {
+                cp_lines.push(format!("<p>ISBN (digital): {}</p>", escape_html(isbn_d)));
+            }
+            if let Some(cov) = fm
+                .cover_designer
+                .as_deref()
+                .filter(|s| !s.trim().is_empty())
+            {
+                cp_lines.push(format!("<p>Capa: {}</p>", escape_html(cov)));
+            }
+            if let Some(rev) = fm.proofreader.as_deref().filter(|s| !s.trim().is_empty()) {
+                cp_lines.push(format!("<p>Revisão: {}</p>", escape_html(rev)));
+            }
+            if let Some(diag) = fm
+                .layout_designer
+                .as_deref()
+                .filter(|s| !s.trim().is_empty())
+            {
+                cp_lines.push(format!("<p>Diagramação: {}</p>", escape_html(diag)));
+            }
+            if let Some(cat) = fm
+                .cataloging_data
+                .as_deref()
+                .filter(|s| !s.trim().is_empty())
+            {
+                cp_lines.push(format!(
+                    "<div style=\"border:1px solid #ccc;padding:8px;font-family:monospace;font-size:0.8em;\"><pre>{}</pre></div>",
+                    escape_html(cat)
+                ));
+            }
+            let xhtml = format!(
+                r#"<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="pt-BR" xml:lang="pt-BR">
+<head><title>Copyright</title><link rel="stylesheet" href="stylesheet.css" type="text/css" /></head>
+<body><section class="copyright-page" style="font-size:0.85em;padding-top:35%;">
+    {}
+</section></body></html>"#,
+                cp_lines.join("")
+            );
+            builder
+                .add_content(
+                    EpubContent::new("copyright.xhtml", xhtml.as_bytes())
+                        .title("Copyright")
+                        .reftype(ReferenceType::Copyright),
+                )
+                .map_err(|e| super::export_error("Falha ao adicionar copyright ao EPUB.", e))?;
+        }
+    }
+
+    if fm.include_dedication {
+        if let Some(text) = fm
+            .dedication_text
+            .as_deref()
+            .filter(|s| !s.trim().is_empty())
+        {
+            let xhtml = format!(
+                r#"<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="pt-BR" xml:lang="pt-BR">
+<head><title>Dedicatória</title><link rel="stylesheet" href="stylesheet.css" type="text/css" /></head>
+<body><section class="dedication-page" style="text-align:right;font-style:italic;padding-top:30%;">
+    <p>{}</p>
+</section></body></html>"#,
+                escape_html(text)
+            );
+            builder
+                .add_content(
+                    EpubContent::new("dedication.xhtml", xhtml.as_bytes()).title("Dedicatória"),
+                )
+                .map_err(|e| super::export_error("Falha ao adicionar dedicatória ao EPUB.", e))?;
+        }
+    }
+
+    if fm.include_epigraph {
+        if let Some(text) = fm.epigraph_text.as_deref().filter(|s| !s.trim().is_empty()) {
+            let author_line = fm
+                .epigraph_author
+                .as_deref()
+                .filter(|s| !s.trim().is_empty())
+                .map(|a| format!("<p style=\"font-style:normal;\">— {}</p>", escape_html(a)))
+                .unwrap_or_default();
+            let xhtml = format!(
+                r#"<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="pt-BR" xml:lang="pt-BR">
+<head><title>Epígrafe</title><link rel="stylesheet" href="stylesheet.css" type="text/css" /></head>
+<body><section class="epigraph-page" style="text-align:right;font-style:italic;padding-top:30%;">
+    <blockquote>{}</blockquote>{}
+</section></body></html>"#,
+                escape_html(text),
+                author_line
+            );
+            builder
+                .add_content(EpubContent::new("epigraph.xhtml", xhtml.as_bytes()).title("Epígrafe"))
+                .map_err(|e| super::export_error("Falha ao adicionar epígrafe ao EPUB.", e))?;
+        }
+    }
+
+    if fm.include_table_of_contents {
+        let mut links = String::new();
+        let mut std_idx = 0;
+        for (i, chap) in snapshot.chapters.iter().enumerate() {
+            let label = if chap.chapter_type == "standard" {
+                std_idx += 1;
+                if chap.title.trim().is_empty() {
+                    format!("Capítulo {std_idx:02}")
+                } else {
+                    format!("Capítulo {std_idx:02} · {}", chap.title)
+                }
+            } else {
+                chap.title.clone()
+            };
+            let chapter_num = i + 1;
+            links.push_str(&format!(
+                "<li><a href=\"chapter_{chapter_num}.xhtml\">{}</a></li>",
+                escape_html(&label)
+            ));
+        }
+        let xhtml = format!(
+            r#"<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops" lang="pt-BR" xml:lang="pt-BR">
+<head><title>Sumário</title><link rel="stylesheet" href="stylesheet.css" type="text/css" /></head>
+<body><nav epub:type="toc"><h2 style="text-align:center;margin-bottom:2em;">Sumário</h2><ol style="list-style:none;padding:0;line-height:2;">{links}</ol></nav></body></html>"#
+        );
+        builder
+            .add_content(
+                EpubContent::new("toc.xhtml", xhtml.as_bytes())
+                    .title("Sumário")
+                    .reftype(ReferenceType::Toc),
+            )
+            .map_err(|e| super::export_error("Falha ao adicionar sumário ao EPUB.", e))?;
+    }
+
+    Ok(())
 }
