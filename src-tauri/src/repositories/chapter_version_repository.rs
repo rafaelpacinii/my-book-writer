@@ -126,4 +126,41 @@ impl<'a> ChapterVersionRepository<'a> {
 
         Ok(chapter)
     }
+
+    /// Busca a versão mais recente de um capítulo (pelo version_number DESC)
+    pub async fn find_latest_by_chapter(
+        &self,
+        chapter_id: &str,
+    ) -> Result<Option<ChapterVersion>, AppError> {
+        let version = sqlx::query_as::<_, ChapterVersion>(
+            r#"
+            SELECT id, chapter_id, version_number, title, content_json, description, word_count, created_at
+            FROM chapter_versions
+            WHERE chapter_id = ?
+            ORDER BY version_number DESC
+            LIMIT 1
+            "#,
+        )
+        .bind(chapter_id)
+        .fetch_optional(self.pool)
+        .await?;
+
+        Ok(version)
+    }
+
+    /// Retorna quantos segundos se passaram desde a criação de uma versão
+    pub async fn seconds_since_version(&self, version_id: &str) -> Result<i64, AppError> {
+        let seconds: Option<i64> = sqlx::query_scalar(
+            r#"
+            SELECT CAST((strftime('%s', 'now') - strftime('%s', created_at)) AS INTEGER)
+            FROM chapter_versions
+            WHERE id = ?
+            "#,
+        )
+        .bind(version_id)
+        .fetch_optional(self.pool)
+        .await?;
+
+        Ok(seconds.unwrap_or(0))
+    }
 }

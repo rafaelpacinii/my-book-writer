@@ -107,7 +107,55 @@ impl<'a> ChapterVersionService<'a> {
         enabled: bool,
     ) -> Result<Chapter, AppError> {
         let repo = ChapterVersionRepository::new(self.pool);
-        repo.set_track_changes(chapter_id, enabled).await
+        let chapter = repo.set_track_changes(chapter_id, enabled).await?;
+
+        if enabled {
+            let latest = repo.find_latest_by_chapter(chapter_id).await?;
+            if latest.is_none() {
+                let word_count = extract_words_from_json(&chapter.content_json);
+                let _ = repo
+                    .create_version(&chapter, Some("Início do rastreamento"), word_count)
+                    .await;
+            }
+        }
+
+        Ok(chapter)
+    }
+
+    /// Cria um snapshot automático se as condições de rastreamento forem atendidas
+    pub async fn maybe_auto_snapshot(
+        &self,
+        chapter: &Chapter,
+    ) -> Result<Option<ChapterVersion>, AppError> {
+        if !chapter.track_changes_enabled {
+            return Ok(None);
+        }
+
+        let repo = ChapterVersionRepository::new(self.pool);
+        let latest = repo.find_latest_by_chapter(&chapter.id).await?;
+        let current_words = extract_words_from_json(&chapter.content_json);
+
+        let should_create = match latest {
+            None => true,
+            Some(ref last) => {
+                if last.content_json == chapter.content_json {
+                    false
+                } else {
+                    let word_diff = (current_words - last.word_count).abs();
+                    let seconds_elapsed = repo.seconds_since_version(&last.id).await.unwrap_or(0);
+                    word_diff >= 30 || seconds_elapsed >= 180
+                }
+            }
+        };
+
+        if should_create {
+            let version = repo
+                .create_version(chapter, Some("Snapshot automático"), current_words)
+                .await?;
+            Ok(Some(version))
+        } else {
+            Ok(None)
+        }
     }
 }
 

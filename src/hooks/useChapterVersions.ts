@@ -87,8 +87,9 @@ export function useChapterVersions(chapterId: string, initialTrackChanges = fals
       if (!chapterId) return;
       await setChapterTrackChanges(chapterId, enabled);
       setTrackChanges(enabled);
+      await loadVersions();
     },
-    [chapterId],
+    [chapterId, loadVersions],
   );
 
   return {

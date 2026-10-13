@@ -88,7 +88,27 @@ export async function deleteChapterVersion(versionId: string): Promise<boolean> 
 
 export async function setChapterTrackChanges(chapterId: string, enabled: boolean): Promise<Chapter> {
   if (!isTauriEnvironment()) {
-    throw new Error("Modo offline nativo necessário");
+    if (enabled) {
+      const list = getStoredVersions().filter((v) => v.chapter_id === chapterId);
+      if (list.length === 0) {
+        await createChapterVersion(chapterId, "Início do rastreamento");
+      }
+    }
+    return {
+      id: chapterId,
+      book_id: "book-1",
+      title: "Capítulo",
+      position: 1,
+      chapter_type: "standard",
+      custom_type_name: null,
+      content_json: "{}",
+      content_schema_version: 1,
+      content_revision: 1,
+      track_changes_enabled: enabled,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      deleted_at: null,
+    };
   }
   return invoke<Chapter>("set_chapter_track_changes", { chapterId, enabled });
 }
