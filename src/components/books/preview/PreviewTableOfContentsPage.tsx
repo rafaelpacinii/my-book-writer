@@ -23,13 +23,13 @@ export function PreviewTableOfContentsPage({ entries, onSelectPage }: Props) {
             key={chapter.id}
             type="button"
             onClick={() => onSelectPage?.(startPage)}
-            className="w-full flex items-baseline justify-between text-sm group hover:text-primary transition-colors cursor-pointer text-left"
+            className="w-full flex items-baseline justify-between text-sm cursor-pointer text-left"
           >
-            <span className="text-ink group-hover:text-primary truncate max-w-[80%] transition-colors">
+            <span className="text-ink truncate max-w-[80%]">
               {chapter.number ? `${chapter.number} · ${chapter.title}` : chapter.title}
             </span>
-            <span className="flex-1 border-b border-dotted border-ink/30 group-hover:border-primary/50 mx-2 transition-colors" />
-            <span className="text-ink/80 group-hover:text-primary text-xs tabular-nums transition-colors">
+            <span className="flex-1 border-b border-dotted border-ink/30 mx-2" />
+            <span className="text-ink/80 text-xs tabular-nums">
               {startPage}
             </span>
           </button>

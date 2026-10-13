@@ -33,7 +33,7 @@ export function VersionDiffModal({ version, currentContentHtml, onClose, onResto
         <button
           type="button"
           onClick={onRestore}
-          className="px-2.5 py-1 text-xs rounded bg-primary text-surface font-bold hover:bg-primary-hover flex items-center gap-1 cursor-pointer"
+          className="px-2.5 py-1 text-xs rounded-lg bg-primary text-primary-foreground font-bold hover:bg-primary-hover flex items-center gap-1.5 cursor-pointer"
         >
           <RotateCcw className="w-3.5 h-3.5" />
           <span>Restaurar versão #{version.version_number}</span>

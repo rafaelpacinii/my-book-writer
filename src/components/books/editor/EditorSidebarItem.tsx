@@ -20,7 +20,7 @@ export function EditorSidebarItem(props: EditorSidebarItemProps) {
       onDrop={onDrop}
       onDragEnd={onDragEnd}
       onClick={onClick}
-      className={`group relative w-full h-16 rounded-lg px-3 py-2 flex items-center gap-2 text-left transition-all cursor-pointer border ${
+      className={`group relative w-full h-16 rounded-lg px-3 py-2 flex items-center gap-2 text-left transition-colors duration-150 cursor-pointer border ${
         isDragOver ? "border-dashed border-primary bg-primary-soft/40" : "border-transparent"
       } ${isDragging ? "opacity-40 scale-95" : ""} ${
         isActive ? "bg-primary-soft shadow-2xs" : "bg-transparent hover:bg-surface-hover"
@@ -48,7 +48,7 @@ export function EditorSidebarItem(props: EditorSidebarItemProps) {
             e.stopPropagation();
             onDeleteClick();
           }}
-          className="opacity-0 group-hover:opacity-100 p-1.5 rounded-md text-muted hover:text-danger hover:bg-danger/10 transition-all cursor-pointer shrink-0"
+          className="opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto p-1.5 rounded-md text-muted hover:text-danger hover:bg-danger/10 transition-colors duration-150 cursor-pointer shrink-0"
           title="Excluir capítulo"
         >
           <Trash2 className="w-3.5 h-3.5" />

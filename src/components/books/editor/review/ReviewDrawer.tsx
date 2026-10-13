@@ -20,7 +20,7 @@ export function ReviewDrawer(props: ReviewDrawerProps) {
   if (!isOpen) return null;
 
   return (
-    <aside className="w-80 sm:w-88 border-l border-border bg-surface flex flex-col shrink-0 h-full z-20">
+    <aside className="w-80 sm:w-96 border-l border-border bg-surface flex flex-col shrink-0 h-full z-20">
       <ReviewDrawerHeader openCommentsCount={openCommentsCount} onClose={onClose} />
 
       <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-4">

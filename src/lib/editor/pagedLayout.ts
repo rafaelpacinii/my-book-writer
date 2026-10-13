@@ -25,6 +25,13 @@ export function getSelectionPage(flow: HTMLElement, content: HTMLElement, pageWi
   return rect ? pageForRect(rect, getGeometry(flow, pageWidth)) : null;
 }
 
+export function getPageForElement(flow: HTMLElement, target: HTMLElement, pageWidth: number): number {
+  const geometry = getGeometry(flow, pageWidth);
+  const rects = target.getClientRects();
+  const rect = rects[0] ?? target.getBoundingClientRect();
+  return pageForRect(rect, geometry);
+}
+
 function getWrittenPages(content: HTMLElement, geometry: LayoutGeometry): Set<number> {
   const pages = new Set<number>();
   const walker = document.createTreeWalker(content, NodeFilter.SHOW_TEXT);
