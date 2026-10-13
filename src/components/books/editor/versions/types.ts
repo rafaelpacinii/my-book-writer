@@ -4,16 +4,18 @@ export interface VersionDrawerProps {
   isOpen: boolean;
   onClose: () => void;
   versions: ChapterVersionSummary[];
-  selectedVersion: ChapterVersion | null;
+  selectedVersion?: ChapterVersion | null;
   trackChanges: boolean;
   onToggleTrackChanges: (enabled: boolean) => void;
   onCreateSnapshot: (desc?: string) => Promise<void>;
-  onSelectVersion: (versionId: string) => Promise<void>;
-  onRestoreVersion: (versionId: string) => Promise<void>;
+  onSelectVersion?: (versionId: string) => Promise<void>;
+  onRestoreVersion?: (versionId: string) => Promise<void>;
   onDeleteVersion: (versionId: string) => Promise<void>;
-  isComparing: boolean;
-  onCloseDiff: () => void;
-  currentContentHtml: string;
+  isComparing?: boolean;
+  onCloseDiff?: () => void;
+  currentContentHtml?: string;
+  bookId?: string;
+  chapterId?: string;
 }
 
 export interface VersionCardProps {

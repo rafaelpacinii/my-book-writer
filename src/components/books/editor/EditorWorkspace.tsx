@@ -51,7 +51,8 @@ export function EditorWorkspace(props: EditorWorkspaceProps) {
         pendingExcerpt={pendingExcerpt} onClearPendingExcerpt={() => setPendingExcerpt("")}
       />
       <EditorVersionPanel
-        ver={ver} ed={ed} isOpen={isVersionOpen && !ed.isFocusMode} onClose={onCloseVersion}
+        ver={ver} ed={ed} bookId={bookId} chapterId={chapterId}
+        isOpen={isVersionOpen && !ed.isFocusMode} onClose={onCloseVersion}
       />
     </div>
   );
