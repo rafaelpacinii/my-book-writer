@@ -1,12 +1,15 @@
 import React from "react";
-import { History, X } from "lucide-react";
+import Link from "next/link";
+import { History, Maximize2, X } from "lucide-react";
 
 interface Props {
   count: number;
   onClose: () => void;
+  bookId?: string;
+  chapterId?: string;
 }
 
-export function VersionDrawerHeader({ count, onClose }: Props) {
+export function VersionDrawerHeader({ count, onClose, bookId, chapterId }: Props) {
   return (
     <div className="h-[72px] px-5 border-b border-border bg-surface flex items-center justify-between shrink-0 select-none">
       <div className="flex items-center gap-2.5">
@@ -20,14 +23,25 @@ export function VersionDrawerHeader({ count, onClose }: Props) {
           </span>
         </div>
       </div>
-      <button
-        type="button"
-        onClick={onClose}
-        className="p-1.5 rounded-lg text-muted hover:text-foreground hover:bg-surface-hover transition-colors cursor-pointer"
-        title="Fechar histórico"
-      >
-        <X className="w-4 h-4" />
-      </button>
+      <div className="flex items-center gap-1">
+        {bookId && chapterId && (
+          <Link
+            href={`/books/versions?bookId=${encodeURIComponent(bookId)}&chapterId=${encodeURIComponent(chapterId)}`}
+            className="p-1.5 rounded-lg text-muted hover:text-foreground hover:bg-surface-hover transition-colors cursor-pointer"
+            title="Abrir em tela cheia"
+          >
+            <Maximize2 className="w-4 h-4" />
+          </Link>
+        )}
+        <button
+          type="button"
+          onClick={onClose}
+          className="p-1.5 rounded-lg text-muted hover:text-foreground hover:bg-surface-hover transition-colors cursor-pointer"
+          title="Fechar histórico"
+        >
+          <X className="w-4 h-4" />
+        </button>
+      </div>
     </div>
   );
 }

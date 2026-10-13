@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { computeWordDiff } from "./textDiff";
+import { computeWordDiff, indexDiffChanges } from "./textDiff";
 
 describe("computeWordDiff", () => {
   it("identifica texto inalterado", () => {
@@ -22,5 +22,14 @@ describe("computeWordDiff", () => {
     expect(computeWordDiff("", "novo")).toEqual([{ type: "added", value: "novo" }]);
     expect(computeWordDiff("antigo", "")).toEqual([{ type: "removed", value: "antigo" }]);
   });
-});
 
+  it("indexa alterações corretamente", () => {
+    const diff = computeWordDiff("O gato dormia", "O cão dormia rápido");
+    const indexed = indexDiffChanges(diff);
+    expect(indexed.totalChanges).toBeGreaterThan(0);
+    expect(indexed.additions).toBeGreaterThan(0);
+    expect(indexed.deletions).toBeGreaterThan(0);
+    const nonUnchanged = indexed.parts.filter((p) => p.type !== "unchanged");
+    expect(nonUnchanged[0].changeIndex).toBe(1);
+  });
+});
