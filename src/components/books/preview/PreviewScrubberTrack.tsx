@@ -25,7 +25,10 @@ export function PreviewScrubberTrack({ page, totalPages, chapters, markers, onPa
     if (rect.width <= 0) return;
     const fraction = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
     const target = Math.max(1, Math.min(totalPages, Math.round(1 + fraction * (totalPages - 1))));
-    setHover({ page: target, percent: fraction * 100 });
+    const pct = fraction * 100;
+    if (!hover || hover.page !== target || Math.abs(hover.percent - pct) > 0.5) {
+      setHover({ page: target, percent: pct });
+    }
   };
 
   const hoverMarker = hover ? markers.slice().reverse().find((m) => m.startPage <= hover.page) ?? markers[0] : null;
@@ -46,12 +49,12 @@ export function PreviewScrubberTrack({ page, totalPages, chapters, markers, onPa
         />
       )}
       <div className="relative w-full h-1.5 bg-border rounded-full overflow-hidden">
-        <div className="h-full bg-primary transition-all duration-75" style={{ width: `${thumbPercent}%` }} />
+        <div className="h-full bg-primary transition-[width] duration-75 ease-out" style={{ width: `${thumbPercent}%` }} />
       </div>
       <PreviewChapterMarkers markers={markers} chapters={chapters} onPageChange={onPageChange} />
       <div
         style={{ left: `${thumbPercent}%` }}
-        className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-3.5 h-3.5 bg-primary border-2 border-surface rounded-full shadow pointer-events-none z-10"
+        className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-3.5 h-3.5 bg-primary border-2 border-surface rounded-full shadow pointer-events-none z-10 transition-[left] duration-75 ease-out"
       />
       <input
         type="range" min={1} max={Math.max(1, totalPages)} value={page} disabled={totalPages <= 1}

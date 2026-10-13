@@ -8,7 +8,7 @@ interface Props {
 
 export function TrackChangesToggle({ enabled, onToggle }: Props) {
   return (
-    <div className="p-3.5 rounded-lg border border-border bg-surface-hover/30 flex items-center justify-between">
+    <div className="p-3.5 rounded-xl border border-border bg-surface-hover/30 flex items-center justify-between">
       <div className="flex items-center gap-2.5">
         <GitCommit className={`w-4 h-4 ${enabled ? "text-primary" : "text-muted"}`} />
         <div>

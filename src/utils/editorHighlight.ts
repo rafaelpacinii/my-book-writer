@@ -1,6 +1,6 @@
 /**
  * Localiza um trecho de texto no editor, rola suavemente até ele e aplica
- * um destaque visual (grifado) temporário por 1 segundo.
+ * um destaque visual (grifado) temporário por 1 segundo sem quebra de layout.
  */
 export function highlightAndScrollToExcerpt(
   excerpt: string,
@@ -37,9 +37,18 @@ export function highlightAndScrollToExcerpt(
 
         const mark = document.createElement("mark");
         mark.className =
-          "bg-warning/50 text-foreground rounded px-1 py-0.5 transition-all duration-300 ring-2 ring-warning/60 shadow-xs";
+          "bg-amber-400 text-stone-950 rounded-[2px] transition-colors duration-200 p-0 m-0 border-0 ring-0 shadow-none";
+        mark.style.cssText = "padding: 0; margin: 0; border: 0; line-height: inherit; font-weight: inherit; display: inline;";
 
         range.surroundContents(mark);
+
+        // Notifica o modo paginado para navegar até a página correta
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(
+            new CustomEvent("editor:jump-to-element", { detail: { element: mark } }),
+          );
+        }
+
         mark.scrollIntoView({ behavior: "smooth", block: "center" });
 
         setTimeout(() => {
@@ -55,7 +64,7 @@ export function highlightAndScrollToExcerpt(
 
         return true;
       } catch {
-        // Fallback below if surroundContents throws (e.g. boundary split)
+        // Fallback abaixo
       }
     }
     currentNode = walker.nextNode();
@@ -68,10 +77,15 @@ export function highlightAndScrollToExcerpt(
         child.textContent?.includes(cleanExcerpt),
       );
       if (!hasDeeper) {
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(
+            new CustomEvent("editor:jump-to-element", { detail: { element: el as HTMLElement } }),
+          );
+        }
         el.scrollIntoView({ behavior: "smooth", block: "center" });
-        el.classList.add("bg-warning/40", "transition-colors", "duration-300");
+        el.classList.add("bg-amber-400", "text-stone-950", "transition-colors", "duration-200");
         setTimeout(() => {
-          el.classList.remove("bg-warning/40", "transition-colors", "duration-300");
+          el.classList.remove("bg-amber-400", "text-stone-950", "transition-colors", "duration-200");
         }, durationMs);
         return true;
       }

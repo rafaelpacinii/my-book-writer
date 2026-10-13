@@ -11,7 +11,7 @@ export function PreviewScrubberTooltip({ page, totalPages, chapterTitle, percent
   return (
     <div
       style={{ left: `${percent}%` }}
-      className="absolute bottom-full mb-2 -translate-x-1/2 pointer-events-none z-30 flex flex-col items-center"
+      className="absolute bottom-full mb-2 -translate-x-1/2 pointer-events-none z-30 flex flex-col items-center transition-[left] duration-75 ease-out"
     >
       <div className="bg-surface text-foreground border border-border shadow-lg px-3 py-1.5 rounded-lg text-xs whitespace-nowrap flex flex-col items-center gap-0.5">
         {chapterTitle && (

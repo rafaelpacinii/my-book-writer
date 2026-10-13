@@ -5,6 +5,7 @@ import type { PagedEditorProps } from "@/types/editor";
 import { getPhysicalPageDimensions } from "@/utils/bookPagination";
 import {
   measurePagedContent, getSelectionPage, preventBlankPageInput, removeRedundantBlankPages,
+  getPageForElement,
 } from "@/lib/editor/pagedLayout";
 import { usePagedZoom } from "./usePagedZoom";
 
@@ -64,9 +65,24 @@ export function usePagedEditor(props: PagedEditorProps) {
       if (flowRef.current && content) preventBlankPageInput(event, flowRef.current, content, dim.widthPx);
     };
     content?.addEventListener("beforeinput", beforeInput);
+
+    const onJumpToElement = (e: Event) => {
+      const customEvent = e as CustomEvent<{ element?: HTMLElement }>;
+      const el = customEvent.detail?.element;
+      const flow = flowRef.current;
+      if (el && flow) {
+        const targetPage = getPageForElement(flow, el, dim.widthPx);
+        if (targetPage > 0) {
+          setCurrentPage(targetPage);
+        }
+      }
+    };
+    window.addEventListener("editor:jump-to-element", onJumpToElement);
+
     return () => {
       document.removeEventListener("selectionchange", follow);
       content?.removeEventListener("beforeinput", beforeInput);
+      window.removeEventListener("editor:jump-to-element", onJumpToElement);
     };
   }, [updateLayout, props.contentRef, dim.widthPx]);
 
