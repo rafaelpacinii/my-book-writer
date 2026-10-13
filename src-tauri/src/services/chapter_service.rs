@@ -1,6 +1,7 @@
 use crate::domain::chapter::{Chapter, ChapterSummary, CreateChapterInput};
 use crate::error::AppError;
 use crate::repositories::chapter_repository::ChapterRepository;
+use crate::services::chapter_version_service::ChapterVersionService;
 use sqlx::SqlitePool;
 use uuid::Uuid;
 
@@ -110,7 +111,13 @@ impl<'a> ChapterService<'a> {
             .await?;
 
         match updated {
-            Some(chapter) => Ok(chapter),
+            Some(chapter) => {
+                if chapter.track_changes_enabled {
+                    let version_service = ChapterVersionService::new(self.pool);
+                    let _ = version_service.maybe_auto_snapshot(&chapter).await;
+                }
+                Ok(chapter)
+            }
             None => Err(AppError::Validation(
                 "Conflito de edição: o capítulo foi modificado por outra operação ou não existe."
                     .into(),

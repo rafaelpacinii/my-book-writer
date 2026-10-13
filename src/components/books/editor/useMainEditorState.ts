@@ -14,6 +14,12 @@ export function useMainEditorState(bookId: string, chapterId: string): MainEdito
   const [isReviewOpen, setIsReviewOpen] = useState(false);
   const [isVersionOpen, setIsVersionOpen] = useState(false);
 
+  React.useEffect(() => {
+    if (ed.lastSavedAt && ver.trackChanges) {
+      void ver.refreshVersions();
+    }
+  }, [ed.lastSavedAt, ver.trackChanges, ver.refreshVersions]);
+
   const standardIndex = ed.chapters
     .slice(0, ed.currentIndex)
     .filter((c) => (c.chapter_type || "standard") === "standard").length;
