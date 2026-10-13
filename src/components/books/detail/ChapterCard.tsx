@@ -1,31 +1,18 @@
 import React from "react";
 import Link from "next/link";
-import type { ChapterSummary } from "@/types/chapter";
-import { formatLastEdited } from "@/utils/format";
 import { ChapterCardHeader } from "./ChapterCardHeader";
+import { ChapterCardFooter } from "./ChapterCardFooter";
+import { useChapterReviewStatus } from "@/hooks/useChapterReviewStatus";
 import { formatChapterBadge } from "@/utils/chapterType";
+import type { ChapterCardProps } from "./chapterCardTypes";
 
-interface Props {
-  chapter: ChapterSummary;
-  bookId: string;
-  index: number;
-  standardIndex: number;
-  totalChapters: number;
-  onRename: () => void;
-  onDelete: () => void;
-  onMoveUp: () => void;
-  onMoveDown: () => void;
-  isDragging?: boolean;
-  isDragOver?: boolean;
-  onDragStart?: (e: React.DragEvent) => void;
-  onDragOver?: (e: React.DragEvent) => void;
-  onDragLeave?: (e: React.DragEvent) => void;
-  onDrop?: (e: React.DragEvent) => void;
-  onDragEnd?: (e: React.DragEvent) => void;
-}
-
-export function ChapterCard(props: Props) {
-  const { chapter, bookId, index, standardIndex, totalChapters, onRename, onDelete, onMoveUp, onMoveDown, isDragging, isDragOver, onDragStart, onDragOver, onDragLeave, onDrop, onDragEnd } = props;
+export function ChapterCard(props: ChapterCardProps) {
+  const {
+    chapter, bookId, index, standardIndex, totalChapters,
+    onRename, onDelete, onMoveUp, onMoveDown, isDragging,
+    isDragOver, onDragStart, onDragOver, onDragLeave, onDrop, onDragEnd,
+  } = props;
+  const { needsRecheck, openCommentsCount } = useChapterReviewStatus(chapter.id);
   const chapterNumber = formatChapterBadge(chapter, index, standardIndex).badge;
   const dragClass = isDragging
     ? "opacity-35 scale-95 border-dashed border-primary"
@@ -59,11 +46,11 @@ export function ChapterCard(props: Props) {
         </h3>
       </div>
 
-      <div className="border-t border-border/70 pt-3 mt-4">
-        <p className="text-xs text-muted">
-          Última edição {formatLastEdited(chapter.updated_at)}
-        </p>
-      </div>
+      <ChapterCardFooter
+        updatedAt={chapter.updated_at}
+        needsRecheck={needsRecheck}
+        openCommentsCount={openCommentsCount}
+      />
     </Link>
   );
 }

@@ -1,7 +1,7 @@
 import React from "react";
-import { Maximize2, Minimize2, Trash2 } from "lucide-react";
+import { Maximize2, Minimize2 } from "lucide-react";
 import { EditorSaveIndicator } from "./EditorSaveIndicator";
-import { EditorExportButton } from "./EditorExportButton";
+import { EditorReviewButton } from "./EditorReviewButton";
 import type { SaveStatus } from "./useChapterEditor";
 
 interface Props {
@@ -9,32 +9,31 @@ interface Props {
   isFocusMode: boolean;
   onToggleFocus: () => void;
   onSave: () => void;
-  onDeleteClick: () => void;
-  onExport: () => void;
-  isOpeningExport: boolean;
+  isReviewOpen?: boolean;
+  onToggleReview?: () => void;
+  openCommentsCount?: number;
+  needsRecheck?: boolean;
 }
 
-export function EditorHeaderActions({
-  saveStatus,
-  isFocusMode,
-  onToggleFocus,
-  onDeleteClick,
-  onExport,
-  isOpeningExport,
-}: Props) {
+export function EditorHeaderActions(props: Props) {
+  const {
+    saveStatus, isFocusMode, onToggleFocus,
+    isReviewOpen = false, onToggleReview,
+    openCommentsCount = 0, needsRecheck = false,
+  } = props;
+
   return (
     <div className="flex items-center gap-3">
       <EditorSaveIndicator status={saveStatus} />
-      <EditorExportButton onExport={onExport} isOpeningExport={isOpeningExport} />
 
-      <button
-        type="button"
-        onClick={onDeleteClick}
-        className="p-2 rounded-lg text-muted hover:text-danger hover:bg-danger/10 transition-colors cursor-pointer"
-        title="Excluir capítulo"
-      >
-        <Trash2 className="w-4 h-4" />
-      </button>
+      {onToggleReview && (
+        <EditorReviewButton
+          isOpen={isReviewOpen}
+          onToggle={onToggleReview}
+          openCommentsCount={openCommentsCount}
+          needsRecheck={needsRecheck}
+        />
+      )}
 
       <button
         type="button"

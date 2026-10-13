@@ -49,6 +49,7 @@ export function useChapterEditor(bookId: string, chapterId: string) {
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
   const [isFocusMode, setIsFocusMode] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [chapterToDelete, setChapterToDelete] = useState<ChapterSummary | null>(null);
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(true);
   const [isNewChapterModalOpen, setIsNewChapterModalOpen] = useState(false);
@@ -263,14 +264,26 @@ export function useChapterEditor(bookId: string, chapterId: string) {
     [bookId, saveNow, router],
   );
 
+  const requestDeleteChapter = useCallback((chap: ChapterSummary) => {
+    setChapterToDelete(chap);
+    setIsDeleteModalOpen(true);
+  }, []);
+
   const handleDeleteChapter = async () => {
-    if (!chapterId) return;
+    const targetId = chapterToDelete?.id || chapterId;
+    if (!targetId) return;
     try {
-      await deleteChapter(chapterId);
+      await deleteChapter(targetId);
       setIsDeleteModalOpen(false);
-      router.push(`/books/view?bookId=${encodeURIComponent(bookId)}`);
+      if (targetId === chapterId) {
+        router.push(`/books/view?bookId=${encodeURIComponent(bookId)}`);
+      } else {
+        setChapters((prev) => prev.filter((c) => c.id !== targetId));
+      }
     } catch {
       // erro tratado no hook
+    } finally {
+      setChapterToDelete(null);
     }
   };
 
@@ -365,6 +378,9 @@ export function useChapterEditor(bookId: string, chapterId: string) {
     handleUpdateFontSize,
     isDeleteModalOpen,
     setIsDeleteModalOpen,
+    chapterToDelete,
+    setChapterToDelete,
+    requestDeleteChapter,
     handleDeleteChapter,
     wordCount,
     charCount,

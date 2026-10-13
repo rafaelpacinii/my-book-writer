@@ -1,36 +1,16 @@
 "use client";
 
 import React from "react";
-import { GripVertical } from "lucide-react";
+import { GripVertical, Trash2 } from "lucide-react";
+import type { EditorSidebarItemProps } from "./editorSidebarTypes";
 
-interface Props {
-  id: string;
-  badge: string;
-  title: string;
-  isActive: boolean;
-  isDragging: boolean;
-  isDragOver: boolean;
-  onClick: () => void;
-  onDragStart: (e: React.DragEvent) => void;
-  onDragOver: (e: React.DragEvent) => void;
-  onDragLeave: () => void;
-  onDrop: (e: React.DragEvent) => void;
-  onDragEnd: () => void;
-}
+export function EditorSidebarItem(props: EditorSidebarItemProps) {
+  const {
+    badge, title, isActive, isDragging, isDragOver,
+    onClick, onDeleteClick, onDragStart, onDragOver,
+    onDragLeave, onDrop, onDragEnd,
+  } = props;
 
-export function EditorSidebarItem({
-  badge,
-  title,
-  isActive,
-  isDragging,
-  isDragOver,
-  onClick,
-  onDragStart,
-  onDragOver,
-  onDragLeave,
-  onDrop,
-  onDragEnd,
-}: Props) {
   return (
     <div
       draggable
@@ -49,6 +29,7 @@ export function EditorSidebarItem({
       <div className="shrink-0 text-muted/40 group-hover:text-muted cursor-grab active:cursor-grabbing">
         <GripVertical className="w-3.5 h-3.5" />
       </div>
+
       <div className="flex-1 min-w-0 flex flex-col justify-center">
         {badge ? (
           <span className={`text-[11px] font-bold truncate ${isActive ? "text-primary" : "text-muted"}`}>
@@ -59,6 +40,20 @@ export function EditorSidebarItem({
           {title || "Sem título"}
         </span>
       </div>
+
+      {onDeleteClick && (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onDeleteClick();
+          }}
+          className="opacity-0 group-hover:opacity-100 p-1.5 rounded-md text-muted hover:text-danger hover:bg-danger/10 transition-all cursor-pointer shrink-0"
+          title="Excluir capítulo"
+        >
+          <Trash2 className="w-3.5 h-3.5" />
+        </button>
+      )}
     </div>
   );
 }

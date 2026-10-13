@@ -73,6 +73,8 @@ pub fn run() {
             // Revisão e Comentários
             commands::review_commands::create_review_comment,
             commands::review_commands::list_review_comments,
+            commands::review_commands::update_review_comment,
+            commands::review_commands::delete_review_comment,
             commands::review_commands::resolve_review_comment,
             commands::review_commands::reopen_review_comment,
             commands::review_commands::get_review_progress,
