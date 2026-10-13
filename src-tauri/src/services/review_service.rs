@@ -67,6 +67,22 @@ impl<'a> ReviewService<'a> {
         repo.reopen_comment(id).await
     }
 
+    pub async fn update_comment(&self, id: &str, body: &str) -> Result<ReviewComment, AppError> {
+        let trimmed = body.trim();
+        if trimmed.is_empty() {
+            return Err(AppError::Validation(
+                "O comentário não pode ser vazio".into(),
+            ));
+        }
+        let repo = ReviewRepository::new(self.pool);
+        repo.update_comment_body(id, trimmed).await
+    }
+
+    pub async fn delete_comment(&self, id: &str) -> Result<(), AppError> {
+        let repo = ReviewRepository::new(self.pool);
+        repo.delete_comment(id).await
+    }
+
     pub async fn get_progress(&self, chapter_id: &str) -> Result<Option<ReviewProgress>, AppError> {
         let repo = ReviewRepository::new(self.pool);
         repo.get_progress(chapter_id).await

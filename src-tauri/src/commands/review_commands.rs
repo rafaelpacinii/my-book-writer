@@ -52,6 +52,27 @@ pub async fn reopen_review_comment(
     service.reopen_comment(&id).await.map_err(|e| e.to_string())
 }
 
+/// Atualiza o texto de um comentário de revisão
+#[tauri::command]
+pub async fn update_review_comment(
+    state: State<'_, AppState>,
+    id: String,
+    body: String,
+) -> Result<ReviewComment, String> {
+    let service = ReviewService::new(&state.db_pool);
+    service
+        .update_comment(&id, &body)
+        .await
+        .map_err(|e| e.to_string())
+}
+
+/// Exclui um comentário de revisão
+#[tauri::command]
+pub async fn delete_review_comment(state: State<'_, AppState>, id: String) -> Result<(), String> {
+    let service = ReviewService::new(&state.db_pool);
+    service.delete_comment(&id).await.map_err(|e| e.to_string())
+}
+
 /// Obtém a marcação de progresso de revisão de um capítulo
 #[tauri::command]
 pub async fn get_review_progress(

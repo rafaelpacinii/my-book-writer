@@ -2,35 +2,15 @@ import React from "react";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { EditorHeaderActions } from "./EditorHeaderActions";
-import type { SaveStatus } from "./useChapterEditor";
+import type { EditorHeaderProps } from "./editorHeaderTypes";
 
-interface Props {
-  bookId: string;
-  bookTitle?: string;
-  chapterNumber: string;
-  chapterTitle: string;
-  saveStatus: SaveStatus;
-  isFocusMode: boolean;
-  onToggleFocus: () => void;
-  onSave: () => void;
-  onDeleteClick: () => void;
-  onExport: () => void;
-  isOpeningExport: boolean;
-}
+export function EditorHeader(props: EditorHeaderProps) {
+  const {
+    bookId, bookTitle, chapterNumber, chapterTitle,
+    saveStatus, isFocusMode, onToggleFocus, onSave,
+    isReviewOpen, onToggleReview, openCommentsCount, needsRecheck,
+  } = props;
 
-export function EditorHeader({
-  bookId,
-  bookTitle,
-  chapterNumber,
-  chapterTitle,
-  saveStatus,
-  isFocusMode,
-  onToggleFocus,
-  onSave,
-  onDeleteClick,
-  onExport,
-  isOpeningExport,
-}: Props) {
   return (
     <header className="h-[72px] px-6 border-b border-border bg-surface flex items-center justify-between select-none shrink-0">
       <div className="flex items-center gap-4 min-w-0">
@@ -56,9 +36,10 @@ export function EditorHeader({
         isFocusMode={isFocusMode}
         onToggleFocus={onToggleFocus}
         onSave={onSave}
-        onDeleteClick={onDeleteClick}
-        onExport={onExport}
-        isOpeningExport={isOpeningExport}
+        isReviewOpen={isReviewOpen}
+        onToggleReview={onToggleReview}
+        openCommentsCount={openCommentsCount}
+        needsRecheck={needsRecheck}
       />
     </header>
   );

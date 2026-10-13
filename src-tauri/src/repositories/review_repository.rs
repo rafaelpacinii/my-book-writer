@@ -101,6 +101,37 @@ impl<'a> ReviewRepository<'a> {
         Ok(comment)
     }
 
+    pub async fn update_comment_body(
+        &self,
+        id: &str,
+        body: &str,
+    ) -> Result<ReviewComment, AppError> {
+        let comment = sqlx::query_as::<_, ReviewComment>(
+            r#"
+            UPDATE review_comments
+            SET body = ?,
+                updated_at = datetime('now')
+            WHERE id = ?
+            RETURNING *
+            "#,
+        )
+        .bind(body)
+        .bind(id)
+        .fetch_one(self.pool)
+        .await?;
+
+        Ok(comment)
+    }
+
+    pub async fn delete_comment(&self, id: &str) -> Result<(), AppError> {
+        sqlx::query("DELETE FROM review_comments WHERE id = ?")
+            .bind(id)
+            .execute(self.pool)
+            .await?;
+
+        Ok(())
+    }
+
     pub async fn get_progress(&self, chapter_id: &str) -> Result<Option<ReviewProgress>, AppError> {
         let progress = sqlx::query_as::<_, ReviewProgress>(
             "SELECT * FROM review_progress WHERE chapter_id = ?",

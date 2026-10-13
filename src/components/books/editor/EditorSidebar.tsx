@@ -1,24 +1,14 @@
 "use client";
 
 import React from "react";
-import type { ChapterSummary } from "@/types/chapter";
 import { useChapterDragDrop } from "@/hooks/useChapterDragDrop";
 import { EditorSidebarCollapsed } from "./EditorSidebarCollapsed";
 import { EditorSidebarHeader } from "./EditorSidebarHeader";
 import { EditorSidebarItem } from "./EditorSidebarItem";
 import { formatChapterBadge } from "@/utils/chapterType";
+import type { EditorSidebarProps } from "./editorSidebarTypes";
 
-interface Props {
-  chapters: ChapterSummary[];
-  currentChapterId: string;
-  isOpen: boolean;
-  onToggleOpen: () => void;
-  onSelectChapter: (id: string) => void;
-  onNewChapterClick: () => void;
-  onReorderChapters: (sourceIndex: number, targetIndex: number) => void;
-}
-
-export function EditorSidebar(p: Props) {
+export function EditorSidebar(p: EditorSidebarProps) {
   const dnd = useChapterDragDrop(p.onReorderChapters);
   if (!p.isOpen) return <EditorSidebarCollapsed onToggleOpen={p.onToggleOpen} />;
 
@@ -42,6 +32,7 @@ export function EditorSidebar(p: Props) {
                 isDragging={dnd.draggedIndex === idx}
                 isDragOver={dnd.dragOverIndex === idx}
                 onClick={() => p.onSelectChapter(chap.id)}
+                onDeleteClick={p.onDeleteChapter ? () => p.onDeleteChapter?.(chap) : undefined}
                 onDragStart={(e) => dnd.handleDragStart(e, idx)}
                 onDragOver={(e) => dnd.handleDragOver(e, idx)}
                 onDragLeave={dnd.handleDragLeave}
