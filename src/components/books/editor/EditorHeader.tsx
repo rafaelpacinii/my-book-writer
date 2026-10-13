@@ -9,6 +9,7 @@ export function EditorHeader(props: EditorHeaderProps) {
     bookId, bookTitle, chapterNumber, chapterTitle,
     saveStatus, isFocusMode, onToggleFocus, onSave,
     isReviewOpen, onToggleReview, openCommentsCount, needsRecheck,
+    isVersionOpen, onToggleVersion, versionsCount,
   } = props;
 
   return (
@@ -40,6 +41,9 @@ export function EditorHeader(props: EditorHeaderProps) {
         onToggleReview={onToggleReview}
         openCommentsCount={openCommentsCount}
         needsRecheck={needsRecheck}
+        isVersionOpen={isVersionOpen}
+        onToggleVersion={onToggleVersion}
+        versionsCount={versionsCount}
       />
     </header>
   );
