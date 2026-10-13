@@ -79,6 +79,13 @@ pub fn run() {
             commands::review_commands::reopen_review_comment,
             commands::review_commands::get_review_progress,
             commands::review_commands::mark_review_progress,
+            // Histórico de Versões e Track Changes
+            commands::chapter_version_commands::create_chapter_version,
+            commands::chapter_version_commands::list_chapter_versions,
+            commands::chapter_version_commands::get_chapter_version,
+            commands::chapter_version_commands::restore_chapter_version,
+            commands::chapter_version_commands::delete_chapter_version,
+            commands::chapter_version_commands::set_chapter_track_changes,
         ])
         .run(tauri::generate_context!())
         .expect("Erro ao executar aplicação Tauri");

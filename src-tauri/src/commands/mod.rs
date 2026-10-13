@@ -1,6 +1,7 @@
 pub mod book_commands;
 pub mod catalog_commands;
 pub mod chapter_commands;
+pub mod chapter_version_commands;
 pub mod export_commands;
 pub mod front_matter_commands;
 pub mod image_asset_commands;

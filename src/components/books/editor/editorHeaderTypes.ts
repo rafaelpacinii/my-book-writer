@@ -13,4 +13,7 @@ export interface EditorHeaderProps {
   onToggleReview?: () => void;
   openCommentsCount?: number;
   needsRecheck?: boolean;
+  isVersionOpen?: boolean;
+  onToggleVersion?: () => void;
+  versionsCount?: number;
 }

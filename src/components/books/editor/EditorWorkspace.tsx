@@ -4,12 +4,17 @@ import React, { useState } from "react";
 import { EditorSidebar } from "./EditorSidebar";
 import { EditorCanvasSwitcher } from "./EditorCanvasSwitcher";
 import { EditorReviewPanel } from "./review/EditorReviewPanel";
+import { EditorVersionPanel } from "./EditorVersionPanel";
 import { EditorFloatingToolbar } from "./EditorFloatingToolbar";
 import { useSelectionToolbar } from "@/hooks/useSelectionToolbar";
 import type { EditorWorkspaceProps } from "./editorWorkspaceTypes";
 
 export function EditorWorkspace(props: EditorWorkspaceProps) {
-  const { ed, rev, chapterId, bookId, headingNumber, isReviewOpen, onOpenReview, onCloseReview } = props;
+  const {
+    ed, rev, ver, chapterId, bookId, headingNumber,
+    isReviewOpen, onOpenReview, onCloseReview,
+    isVersionOpen, onCloseVersion,
+  } = props;
   const [pendingExcerpt, setPendingExcerpt] = useState("");
   const { position, selectedText, clearSelection } = useSelectionToolbar();
 
@@ -44,6 +49,9 @@ export function EditorWorkspace(props: EditorWorkspaceProps) {
       <EditorReviewPanel
         rev={rev} isOpen={isReviewOpen && !ed.isFocusMode} onClose={onCloseReview}
         pendingExcerpt={pendingExcerpt} onClearPendingExcerpt={() => setPendingExcerpt("")}
+      />
+      <EditorVersionPanel
+        ver={ver} ed={ed} isOpen={isVersionOpen && !ed.isFocusMode} onClose={onCloseVersion}
       />
     </div>
   );

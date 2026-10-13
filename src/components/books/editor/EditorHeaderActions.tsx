@@ -2,6 +2,7 @@ import React from "react";
 import { Maximize2, Minimize2 } from "lucide-react";
 import { EditorSaveIndicator } from "./EditorSaveIndicator";
 import { EditorReviewButton } from "./EditorReviewButton";
+import { EditorHistoryButton } from "./EditorHistoryButton";
 import type { SaveStatus } from "./useChapterEditor";
 
 interface Props {
@@ -13,6 +14,9 @@ interface Props {
   onToggleReview?: () => void;
   openCommentsCount?: number;
   needsRecheck?: boolean;
+  isVersionOpen?: boolean;
+  onToggleVersion?: () => void;
+  versionsCount?: number;
 }
 
 export function EditorHeaderActions(props: Props) {
@@ -20,11 +24,21 @@ export function EditorHeaderActions(props: Props) {
     saveStatus, isFocusMode, onToggleFocus,
     isReviewOpen = false, onToggleReview,
     openCommentsCount = 0, needsRecheck = false,
+    isVersionOpen = false, onToggleVersion,
+    versionsCount = 0,
   } = props;
 
   return (
     <div className="flex items-center gap-3">
       <EditorSaveIndicator status={saveStatus} />
+
+      {onToggleVersion && (
+        <EditorHistoryButton
+          isOpen={isVersionOpen}
+          onToggle={onToggleVersion}
+          count={versionsCount}
+        />
+      )}
 
       {onToggleReview && (
         <EditorReviewButton
