@@ -19,7 +19,7 @@ export function EditorTitleInput({ chapterNumber, title, onChange }: Props) {
         value={title}
         onChange={(e) => onChange(e.target.value)}
         placeholder="Título do capítulo..."
-        className="w-full font-serif text-3xl font-normal text-foreground bg-transparent border-none outline-none focus:ring-0 p-0 placeholder:text-muted/40 mb-4"
+        className="w-full font-serif text-3xl font-normal text-foreground bg-transparent border-none outline-none focus:ring-0 p-0 placeholder:text-muted mb-4"
       />
       <div className="w-full border-b border-border mb-6" />
     </div>

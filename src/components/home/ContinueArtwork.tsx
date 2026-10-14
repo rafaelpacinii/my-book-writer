@@ -2,7 +2,7 @@ import React from "react";
 
 export function ContinueArtwork() {
   return (
-    <div className="relative w-full md:w-72 lg:w-84 h-52 md:h-auto shrink-0 overflow-hidden bg-primary-soft/40">
+    <div className="w-full h-full bg-primary-soft/40 select-none">
       <svg
         viewBox="0 0 600 400"
         preserveAspectRatio="xMidYMid slice"

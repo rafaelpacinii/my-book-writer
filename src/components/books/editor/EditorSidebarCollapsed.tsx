@@ -19,7 +19,7 @@ export function EditorSidebarCollapsed({ onToggleOpen }: Props) {
         <PanelLeft className="w-5 h-5" />
       </button>
       <div className="mt-6 flex-1 flex flex-col items-center">
-        <span className="text-[10px] font-bold text-muted/60 uppercase tracking-widest [writing-mode:vertical-rl] rotate-180">
+        <span className="text-[10px] font-bold text-muted uppercase tracking-widest [writing-mode:vertical-rl] rotate-180">
           Capítulos
         </span>
       </div>

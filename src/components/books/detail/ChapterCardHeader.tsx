@@ -24,13 +24,13 @@ export function ChapterCardHeader({
   return (
     <div className="flex items-center justify-between">
       <div className="flex items-center gap-1.5 min-w-0 pr-2">
-        <GripVertical className="w-4 h-4 text-muted/30 group-hover:text-muted transition-colors cursor-grab shrink-0" />
+        <GripVertical className="w-4 h-4 text-muted/60 group-hover:text-foreground transition-colors cursor-grab shrink-0" />
         {chapterNumber ? (
-          <span className="font-serif text-lg sm:text-2xl font-light text-primary/80 group-hover:text-primary transition-colors truncate">
+          <span className="font-serif text-lg sm:text-2xl font-light text-primary truncate">
             {chapterNumber}
           </span>
         ) : (
-          <span className="text-[11px] font-bold uppercase tracking-wider text-primary/70">
+          <span className="text-[11px] font-bold uppercase tracking-wider text-primary">
             Especial
           </span>
         )}

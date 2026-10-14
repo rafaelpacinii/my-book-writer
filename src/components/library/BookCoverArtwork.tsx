@@ -18,7 +18,7 @@ export function BookCoverArtwork({ index = 0, className }: Props) {
   const gradId = `art-grad-${p}`;
 
   return (
-    <div className={className || "w-full h-44 rounded-t-xl overflow-hidden relative border-b border-border/50 select-none"}>
+    <div className={className || "w-full h-full select-none"}>
       <svg viewBox="0 0 600 400" preserveAspectRatio="xMidYMid slice" className="w-full h-full" aria-hidden="true">
         <defs>
           <linearGradient id={gradId} x1="0" y1="0" x2="1" y2="1">

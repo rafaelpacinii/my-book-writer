@@ -20,8 +20,8 @@ export function DiffMetricsAndStepper(p: Props) {
     <div className="flex items-center gap-4">
       <div className="flex items-center gap-2 text-xs">
         <span className="font-bold text-foreground">{p.totalChanges} alterações</span>
-        {p.additions > 0 && <span className="px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-600 font-bold">+{p.additions}</span>}
-        {p.deletions > 0 && <span className="px-1.5 py-0.5 rounded bg-rose-500/10 text-rose-600 font-bold">-{p.deletions}</span>}
+        {p.additions > 0 && <span className="px-1.5 py-0.5 rounded bg-success-soft text-success font-bold">+{p.additions}</span>}
+        {p.deletions > 0 && <span className="px-1.5 py-0.5 rounded bg-danger-soft text-danger font-bold">-{p.deletions}</span>}
       </div>
 
       <div className="flex items-center gap-1 border-l border-border pl-4">

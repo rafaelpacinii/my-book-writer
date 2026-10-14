@@ -32,7 +32,7 @@ export function SettingsLayoutFields(props: Props) {
       </button>
 
       {isOpen && (
-        <div className="flex flex-col gap-4 mt-3 pt-3 border-t border-border/60">
+        <div className="flex flex-col gap-4 mt-3 pt-3 border-t border-border">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Input label="Tamanho da fonte (pt)" type="number" step="0.5" min="8" max="32" value={fontSize} onChange={(e) => setFontSize(Number(e.target.value))} />
             <Input label="Entrelinha" type="number" step="0.1" min="1" max="3" value={lineHeight} onChange={(e) => setLineHeight(Number(e.target.value))} />

@@ -7,7 +7,7 @@ import { useCatalog } from "@/hooks/useCatalog";
 import type { Book } from "@/types/book";
 
 export function useLibrary() {
-  const { profile } = useProfile();
+  const { profile, isLoading: isProfileLoading } = useProfile();
   const { books, isLoading: isBooksLoading } = useBooks(profile?.id);
   const { formats, fonts, isLoading: isCatalogLoading } = useCatalog();
 
@@ -76,6 +76,6 @@ export function useLibrary() {
     setSortOrder,
     isFiltered,
     handleClearFilters,
-    isLoading: isBooksLoading || isCatalogLoading,
+    isLoading: isProfileLoading || isBooksLoading || isCatalogLoading,
   };
 }

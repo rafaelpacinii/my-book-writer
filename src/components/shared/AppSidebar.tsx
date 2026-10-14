@@ -1,27 +1,36 @@
 "use client";
 
-import React from "react";
-import { useProfile } from "@/hooks/useProfile";
+import React, { useEffect, useState } from "react";
+import { useSidebarCollapse } from "@/hooks/useSidebarCollapse";
+import { SidebarHeader } from "./SidebarHeader";
 import { SidebarNav } from "./SidebarNav";
+import { SidebarFooter } from "./SidebarFooter";
 
 export function AppSidebar() {
-  const { profile } = useProfile();
+  const { isCollapsed, toggle } = useSidebarCollapse();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   return (
-    <aside className="w-52 h-[calc(100vh-72px)] border-r border-border bg-surface shrink-0 hidden md:flex flex-col justify-between p-4 select-none">
-      <div>
-        <p className="px-2 pb-3 text-[11px] font-bold tracking-wider text-muted uppercase">
-          Seu espaço
-        </p>
-        <SidebarNav />
+    <aside
+      className={`h-screen border-r border-border bg-surface shrink-0 flex flex-col justify-between select-none ${
+        mounted ? "transition-all duration-200 ease-in-out" : ""
+      } ${isCollapsed ? "w-18 p-2.5" : "w-64 p-4"}`}
+    >
+      <div className="flex flex-col gap-4">
+        <SidebarHeader isCollapsed={isCollapsed} onToggle={toggle} />
+        {!isCollapsed && (
+          <p className="px-2 text-[11px] font-bold tracking-wider text-muted uppercase">
+            Seu espaço
+          </p>
+        )}
+        <SidebarNav isCollapsed={isCollapsed} />
       </div>
 
-      <div className="pt-4 border-t border-border px-2">
-        <p className="text-[13px] font-bold text-foreground truncate">
-          {profile?.display_name || "Autor"}
-        </p>
-        <p className="text-xs text-muted">Seu espaço de escrita</p>
-      </div>
+      <SidebarFooter isCollapsed={isCollapsed} />
     </aside>
   );
 }

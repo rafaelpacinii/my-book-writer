@@ -26,7 +26,7 @@ export function EditorSidebarItem(props: EditorSidebarItemProps) {
         isActive ? "bg-primary-soft shadow-2xs" : "bg-transparent hover:bg-surface-hover"
       }`}
     >
-      <div className="shrink-0 text-muted/40 group-hover:text-muted cursor-grab active:cursor-grabbing">
+      <div className="shrink-0 text-muted/60 group-hover:text-foreground cursor-grab active:cursor-grabbing">
         <GripVertical className="w-3.5 h-3.5" />
       </div>
 
@@ -48,7 +48,7 @@ export function EditorSidebarItem(props: EditorSidebarItemProps) {
             e.stopPropagation();
             onDeleteClick();
           }}
-          className="opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto p-1.5 rounded-md text-muted hover:text-danger hover:bg-danger/10 transition-colors duration-150 cursor-pointer shrink-0"
+          className="opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto p-1.5 rounded-md text-muted hover:text-danger hover:bg-danger-soft transition-colors duration-150 cursor-pointer shrink-0"
           title="Excluir capítulo"
         >
           <Trash2 className="w-3.5 h-3.5" />

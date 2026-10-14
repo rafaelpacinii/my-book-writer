@@ -187,52 +187,58 @@
 
 :root {
   color-scheme: light;
-  --background: #F3F2EE;
+  --background: #F4F3EF;
   --surface: #FAF9F6;
-  --foreground: #292D28;
-  --muted: #64695F;
-  --primary: #52664E;
+  --surface-hover: #ECEAE4;
+  --surface-elevated: #E5E3DC;
+  --foreground: #222621;
+  --muted: #545A50;
+  --primary: #4B5E47;
   --primary-foreground: #FFFFFF;
-  --primary-hover: #435840;
-  --primary-soft: #E6EBDD;
-  --border: #D6D9D0;
-  --control-border: #818779;
-  --success: #426A51;
-  --success-soft: #E9F0E9;
-  --warning: #866021;
-  --warning-soft: #F3ECDE;
-  --danger: #A04444;
-  --danger-soft: #F7E8E5;
+  --primary-hover: #3C4D38;
+  --primary-soft: #E2E8D9;
+  --border: #CFD4C8;
+  --control-border: #757B6C;
+  --success: #366345;
+  --success-soft: #E5EFE6;
+  --warning: #805B1E;
+  --warning-soft: #F4ECDC;
+  --danger: #9B3D3D;
+  --danger-soft: #F7E5E2;
   --paper: #FAF9F6;
-  --ink: #292D28;
+  --ink: #222621;
 }
 
 .dark,
 [data-theme="dark"] {
   color-scheme: dark;
-  --background: #1C1D1B;
-  --surface: #252723;
-  --foreground: #E6E7E1;
-  --muted: #A7ACA1;
-  --primary: #ACBFA4;
-  --primary-foreground: #1C2519;
-  --primary-hover: #BED0B7;
-  --primary-soft: #333E2F;
-  --border: #42463E;
-  --control-border: #79816F;
-  --success: #A5C6AC;
-  --success-soft: #2F3C31;
-  --warning: #D9BD83;
-  --warning-soft: #403A2A;
-  --danger: #DFA3A0;
-  --danger-soft: #422F2E;
+  --background: #171816;
+  --surface: #212320;
+  --surface-hover: #2C3029;
+  --surface-elevated: #353A31;
+  --foreground: #ECEEE8;
+  --muted: #B4BAAD;
+  --primary: #ADC2A5;
+  --primary-foreground: #182015;
+  --primary-hover: #C0D3B8;
+  --primary-soft: #2E382A;
+  --border: #444A3F;
+  --control-border: #828B78;
+  --success: #A8C9AF;
+  --success-soft: #263829;
+  --warning: #DEC288;
+  --warning-soft: #3D3524;
+  --danger: #E4A6A3;
+  --danger-soft: #3F2928;
   --paper: #FAF9F6;
-  --ink: #292D28;
+  --ink: #222621;
 }
 
 @theme {
   --color-background: var(--background);
   --color-surface: var(--surface);
+  --color-surface-hover: var(--surface-hover);
+  --color-surface-elevated: var(--surface-elevated);
   --color-foreground: var(--foreground);
   --color-muted: var(--muted);
   --color-primary: var(--primary);
@@ -338,4 +344,53 @@ select option {
 .editor-content-paged svg {
   max-width: 100%;
   height: auto;
+}
+
+@keyframes skeleton-diagonal {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.skeleton-diagonal {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--surface-hover);
+}
+
+.skeleton-diagonal::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    115deg,
+    transparent 0%,
+    transparent 30%,
+    rgba(255, 255, 255, 0.45) 50%,
+    transparent 70%,
+    transparent 100%
+  );
+  animation: skeleton-diagonal 1.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.dark .skeleton-diagonal::after,
+[data-theme="dark"] .skeleton-diagonal::after {
+  background: linear-gradient(
+    115deg,
+    transparent 0%,
+    transparent 30%,
+    rgba(255, 255, 255, 0.08) 50%,
+    transparent 70%,
+    transparent 100%
+  );
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-diagonal::after {
+    animation: none;
+  }
 }

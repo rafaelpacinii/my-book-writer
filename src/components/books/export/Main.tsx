@@ -23,7 +23,7 @@ export function Main({ bookId }: { bookId: string }) {
 
   return (
     <AppShell>
-      <main className="max-w-3xl mx-auto pb-16">
+      <div className="max-w-4xl mx-auto pb-16">
         <ExportHeader bookId={bookId} />
         {pdf.isLoading && <p role="status" className="text-muted">Carregando o livro…</p>}
         {pdf.info && (
@@ -46,7 +46,7 @@ export function Main({ bookId }: { bookId: string }) {
             Arquivo salvo em: {result.path}
           </p>
         )}
-      </main>
+      </div>
     </AppShell>
   );
 }

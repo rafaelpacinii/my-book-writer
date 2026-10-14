@@ -19,7 +19,7 @@ const SHORTCUT_LABELS: Array<{ key: keyof EditorShortcuts; label: string; desc: 
 
 export function KeyboardShortcutsSection({ shortcuts, onReset }: Props) {
   return (
-    <div className="flex flex-col gap-5 max-w-2xl select-none">
+    <div className="flex flex-col gap-5 max-w-3xl select-none">
       <div className="p-5 rounded-xl border border-border bg-surface flex flex-col gap-4">
         <div className="flex items-center justify-between">
           <div>

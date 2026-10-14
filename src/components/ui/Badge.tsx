@@ -7,11 +7,11 @@ export interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
 }
 
 const toneStyles: Record<BadgeTone, string> = {
-  neutral: "bg-primary-soft/40 text-muted",
-  primary: "bg-primary-soft text-primary font-medium",
-  success: "bg-success-soft text-success font-medium",
-  warning: "bg-warning-soft text-warning font-medium",
-  danger: "bg-danger-soft text-danger font-medium",
+  neutral: "bg-surface-elevated text-foreground border border-border font-medium",
+  primary: "bg-primary-soft text-primary font-semibold",
+  success: "bg-success-soft text-success font-semibold",
+  warning: "bg-warning-soft text-warning font-semibold",
+  danger: "bg-danger-soft text-danger font-semibold",
 };
 
 export function Badge({

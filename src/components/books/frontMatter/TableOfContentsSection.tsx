@@ -28,7 +28,7 @@ export function TableOfContentsSection({ enabled, onToggle, chapterCount }: Prop
         </div>
       </div>
 
-      <div className="p-4 rounded-lg border border-border/80 bg-background/50 text-xs text-muted space-y-1">
+      <div className="p-4 rounded-lg border border-border bg-surface-elevated/40 text-xs text-muted space-y-1">
         <p className="font-semibold text-foreground">Status do Sumário:</p>
         <p>• {chapterCount} capítulo(s) atualmente incluído(s) no livro.</p>
         <p>• A numeração e pontilhados são atualizados em tempo real na diagramação.</p>

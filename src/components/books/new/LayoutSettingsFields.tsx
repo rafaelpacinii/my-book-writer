@@ -30,7 +30,7 @@ export function LayoutSettingsFields(props: Props) {
       </button>
 
       {isOpen && (
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-3.5 pt-3 border-t border-border/60">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-3.5 pt-3 border-t border-border">
           <Input
             label="Tamanho da fonte (pt)"
             type="number"
