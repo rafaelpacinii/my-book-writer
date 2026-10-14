@@ -1,3 +1,4 @@
+pub mod backup_commands;
 pub mod book_commands;
 pub mod catalog_commands;
 pub mod chapter_commands;

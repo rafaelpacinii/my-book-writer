@@ -86,6 +86,10 @@ pub fn run() {
             commands::chapter_version_commands::restore_chapter_version,
             commands::chapter_version_commands::delete_chapter_version,
             commands::chapter_version_commands::set_chapter_track_changes,
+            // Backup & Banco de Dados SQLite
+            commands::backup_commands::get_database_stats,
+            commands::backup_commands::export_database_backup,
+            commands::backup_commands::import_database_backup,
         ])
         .run(tauri::generate_context!())
         .expect("Erro ao executar aplicação Tauri");

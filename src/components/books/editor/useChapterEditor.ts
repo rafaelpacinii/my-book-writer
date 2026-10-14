@@ -21,6 +21,8 @@ import {
   serializeChapterText,
 } from "@/utils/chapterContent";
 import { executeFormatAction, type FormatAction } from "@/utils/textFormatting";
+import { useEditorPreferences } from "@/hooks/useEditorPreferences";
+import { matchesShortcut } from "@/utils/keyboardShortcuts";
 import type { Book, UpdateBookInput } from "@/types/book";
 import type { Chapter, ChapterSummary } from "@/types/chapter";
 
@@ -29,6 +31,7 @@ export type SaveStatus = "saved" | "saving" | "unsaved" | "error";
 export function useChapterEditor(bookId: string, chapterId: string) {
   const router = useRouter();
   const { formats, fonts } = useCatalog();
+  const { preferences } = useEditorPreferences();
   const [book, setBook] = useState<Book | null>(null);
   const [chapters, setChapters] = useState<ChapterSummary[]>([]);
   const [chapter, setChapter] = useState<Chapter | null>(null);
@@ -195,7 +198,7 @@ export function useChapterEditor(bookId: string, chapterId: string) {
     }
   }, [bookId, router, saveNow]);
 
-  // Auto-save com debounce de 1200ms
+  // Auto-save com debounce configurável
   useEffect(() => {
     const hasTitleChanged = title.trim() !== originalTitleRef.current;
     const hasTextChanged = text !== originalTextRef.current;
@@ -205,24 +208,26 @@ export function useChapterEditor(bookId: string, chapterId: string) {
     }
 
     setSaveStatus("unsaved");
+    if (!preferences.autosaveEnabled) return;
+
     const timer = setTimeout(() => {
       void saveNow();
-    }, 1200);
+    }, preferences.autosaveIntervalMs);
 
     return () => clearTimeout(timer);
-  }, [title, text, saveNow]);
+  }, [title, text, saveNow, preferences.autosaveEnabled, preferences.autosaveIntervalMs]);
 
-  // Atalho global Ctrl+S / Cmd+S para salvar
+  // Atalho customizável para salvar capítulo
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === "s") {
+      if (matchesShortcut(e, preferences.shortcuts.save)) {
         e.preventDefault();
         void saveNow();
       }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [saveNow]);
+  }, [saveNow, preferences.shortcuts.save]);
 
   // Métricas do texto em tempo real (extrai texto limpo do HTML)
   const wordCount = useMemo(() => countWords(text), [text]);
@@ -388,5 +393,6 @@ export function useChapterEditor(bookId: string, chapterId: string) {
     prevChapter,
     nextChapter,
     currentIndex,
+    preferences,
   };
 }
