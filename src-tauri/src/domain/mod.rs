@@ -1,3 +1,4 @@
+pub mod backup;
 pub mod book;
 pub mod catalog;
 pub mod chapter;

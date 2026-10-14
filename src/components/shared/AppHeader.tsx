@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { BookOpen, Check, Moon, Sun } from "lucide-react";
+import { BookOpen, Check, Moon, Settings, Sun } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
 import { ProfileAvatarButton } from "./ProfileAvatarButton";
 
@@ -37,6 +37,15 @@ export function AppHeader() {
             <Moon className="w-5 h-5" strokeWidth={1.8} />
           )}
         </button>
+
+        <Link
+          href="/settings"
+          aria-label="Configurações globais"
+          title="Configurações globais"
+          className="p-1.5 rounded-lg text-muted hover:text-foreground hover:bg-surface-elevated transition-colors cursor-pointer"
+        >
+          <Settings className="w-5 h-5" strokeWidth={1.8} />
+        </Link>
 
         <ProfileAvatarButton />
       </div>

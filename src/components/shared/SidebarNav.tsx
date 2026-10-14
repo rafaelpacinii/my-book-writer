@@ -3,7 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, LayoutGrid, Plus } from "lucide-react";
+import { Home, LayoutGrid, Plus, Settings } from "lucide-react";
 
 const NAV_ITEMS = [
   {
@@ -20,6 +20,11 @@ const NAV_ITEMS = [
     label: "Novo livro",
     href: "/books/new",
     icon: <Plus className="w-5 h-5" strokeWidth={1.8} />,
+  },
+  {
+    label: "Configurações",
+    href: "/settings",
+    icon: <Settings className="w-5 h-5" strokeWidth={1.8} />,
   },
 ];
 

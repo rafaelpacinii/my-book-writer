@@ -1,3 +1,4 @@
+pub mod backup_service;
 pub mod book_service;
 pub mod catalog_service;
 pub mod chapter_service;
