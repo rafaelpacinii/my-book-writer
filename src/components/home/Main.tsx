@@ -4,6 +4,7 @@ import React from "react";
 import { useProfile } from "@/hooks/useProfile";
 import { useBooks } from "@/hooks/useBooks";
 import { AppShell } from "@/components/shared/AppShell";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { Greeting } from "./Greeting";
 import { ContinueCard } from "./ContinueCard";
 import { EmptyHomeCard } from "./EmptyHomeCard";
@@ -11,8 +12,9 @@ import { ActionCards } from "./ActionCards";
 import { PersistenceNotice } from "./PersistenceNotice";
 
 export function Main() {
-  const { profile } = useProfile();
-  const { books, isLoading } = useBooks(profile?.id);
+  const { profile, isLoading: isProfileLoading } = useProfile();
+  const { books, isLoading: isBooksLoading } = useBooks(profile?.id);
+  const isLoading = isProfileLoading || isBooksLoading;
 
   const latestBook = React.useMemo(() => {
     if (!books || books.length === 0) return null;
@@ -25,11 +27,11 @@ export function Main() {
 
   return (
     <AppShell>
-      <div className="max-w-6xl mx-auto flex flex-col gap-6 pb-8">
+      <div className="max-w-6xl mx-auto flex flex-col gap-6 pb-16">
         <Greeting />
 
         {isLoading ? (
-          <div className="w-full h-64 rounded-2xl bg-surface border border-border animate-pulse" />
+          <Skeleton className="w-full h-56 rounded-2xl border border-border" />
         ) : latestBook ? (
           <ContinueCard book={latestBook} />
         ) : (

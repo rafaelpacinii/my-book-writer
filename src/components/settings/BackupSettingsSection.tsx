@@ -17,7 +17,7 @@ export function BackupSettingsSection(props: Props) {
   const { stats, isLoading, isExporting, onExport, onRequestRestore, feedback } = props;
 
   return (
-    <div className="flex flex-col gap-5 max-w-2xl">
+    <div className="flex flex-col gap-5 max-w-3xl">
       <DatabaseStatsCard stats={stats} isLoading={isLoading} />
 
       {feedback && (

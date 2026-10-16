@@ -9,26 +9,30 @@ const NAV_ITEMS = [
   {
     label: "Início",
     href: "/home",
-    icon: <Home className="w-5 h-5" strokeWidth={1.8} />,
+    icon: <Home className="w-5 h-5 shrink-0" strokeWidth={1.8} />,
   },
   {
     label: "Biblioteca",
     href: "/library",
-    icon: <LayoutGrid className="w-5 h-5" strokeWidth={1.8} />,
+    icon: <LayoutGrid className="w-5 h-5 shrink-0" strokeWidth={1.8} />,
   },
   {
     label: "Novo livro",
     href: "/books/new",
-    icon: <Plus className="w-5 h-5" strokeWidth={1.8} />,
+    icon: <Plus className="w-5 h-5 shrink-0" strokeWidth={1.8} />,
   },
   {
     label: "Configurações",
     href: "/settings",
-    icon: <Settings className="w-5 h-5" strokeWidth={1.8} />,
+    icon: <Settings className="w-5 h-5 shrink-0" strokeWidth={1.8} />,
   },
 ];
 
-export function SidebarNav() {
+interface Props {
+  isCollapsed?: boolean;
+}
+
+export function SidebarNav({ isCollapsed = false }: Props) {
   const pathname = usePathname();
 
   return (
@@ -39,13 +43,17 @@ export function SidebarNav() {
           <Link
             key={item.href}
             href={item.href}
-            className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13px] transition-colors ${isActive
+            title={isCollapsed ? item.label : undefined}
+            className={`flex items-center rounded-lg transition-colors ${
+              isCollapsed ? "justify-center p-2.5" : "gap-3 px-3 py-2.5 text-[13px]"
+            } ${
+              isActive
                 ? "bg-primary-soft text-primary font-bold"
                 : "text-muted hover:text-foreground hover:bg-surface-elevated font-medium"
-              }`}
+            }`}
           >
             {item.icon}
-            <span>{item.label}</span>
+            {!isCollapsed && <span className="truncate">{item.label}</span>}
           </Link>
         );
       })}

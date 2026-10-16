@@ -17,7 +17,7 @@ const INTERVAL_OPTIONS = [
 
 export function EditorPreferencesSection({ preferences, onToggleAutosave, onIntervalChange }: Props) {
   return (
-    <div className="flex flex-col gap-6 max-w-2xl select-none">
+    <div className="flex flex-col gap-6 max-w-3xl select-none">
       <ThemePreferencesCard />
 
       <div className="p-5 rounded-xl border border-border bg-surface flex flex-col gap-4">

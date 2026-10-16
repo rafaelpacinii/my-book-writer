@@ -30,8 +30,8 @@ export function HalfTitleSection({ enabled, onToggle, title, author }: Props) {
       </div>
 
       {enabled && (
-        <div className="p-4 rounded-lg border border-border/80 bg-background/50 flex flex-col items-center justify-center py-8 text-center">
-          <p className="text-[11px] font-bold text-muted/60 uppercase tracking-widest mb-3">Prévia do Conteúdo</p>
+        <div className="p-4 rounded-lg border border-border bg-surface-elevated/40 flex flex-col items-center justify-center py-8 text-center">
+          <p className="text-[11px] font-bold text-muted uppercase tracking-widest mb-3">Prévia do Conteúdo</p>
           <h4 className="font-serif text-lg font-bold text-foreground">{title || "Título do Livro"}</h4>
           <p className="font-serif text-xs text-muted mt-2">{author || "Nome do Autor"}</p>
         </div>

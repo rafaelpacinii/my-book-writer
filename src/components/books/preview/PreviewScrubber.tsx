@@ -13,7 +13,7 @@ interface Props {
 
 export function PreviewScrubber({ page, totalPages, chapters, counts, onPageChange }: Props) {
   const markers = useMemo(() => getChapterMarkers(counts), [counts]);
-  const btn = "w-7 h-7 flex items-center justify-center rounded text-sm text-muted hover:text-foreground hover:bg-surface/50 disabled:opacity-30 disabled:pointer-events-none transition-colors";
+  const btn = "w-7 h-7 flex items-center justify-center rounded text-sm text-muted hover:text-foreground hover:bg-surface-elevated disabled:opacity-30 disabled:pointer-events-none transition-colors cursor-pointer";
 
   return (
     <div className="w-full bg-gradient-to-t from-surface/90 via-surface/60 to-transparent pt-10 pb-3 px-4 flex justify-center select-none">

@@ -16,7 +16,7 @@ export function ChapterCardFooter({
   openCommentsCount,
 }: Props) {
   return (
-    <div className="border-t border-border/70 pt-3 mt-4 flex items-center justify-between gap-2">
+    <div className="border-t border-border pt-3 mt-4 flex items-center justify-between gap-2">
       <p className="text-xs text-muted truncate">
         Última edição {formatLastEdited(updatedAt)}
       </p>
@@ -24,7 +24,7 @@ export function ChapterCardFooter({
       <div className="flex items-center gap-1.5 shrink-0">
         {openCommentsCount > 0 && (
           <span
-            className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-primary/15 text-primary flex items-center gap-1"
+            className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-primary-soft text-primary flex items-center gap-1"
             title={`${openCommentsCount} comentário(s) em aberto`}
           >
             <MessageSquare className="w-3 h-3" />
@@ -34,7 +34,7 @@ export function ChapterCardFooter({
 
         {needsRecheck && (
           <span
-            className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-warning/15 text-warning flex items-center gap-1"
+            className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-warning-soft text-warning flex items-center gap-1"
             title="Capítulo sinalizado para revisão"
           >
             <AlertCircle className="w-3 h-3" />
