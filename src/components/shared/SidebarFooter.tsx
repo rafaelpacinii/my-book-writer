@@ -1,54 +1,18 @@
-"use client";
+import Link from "next/link";
+import { BookOpen, ShieldCheck } from "lucide-react";
 
-import React from "react";
-import { Check, Moon, Sun } from "lucide-react";
-import { useTheme } from "@/hooks/useTheme";
-import { SidebarUserProfile } from "./SidebarUserProfile";
-
-interface Props {
-  isCollapsed: boolean;
-}
-
-export function SidebarFooter({ isCollapsed }: Props) {
-  const { resolvedTheme, toggleTheme } = useTheme();
-
+export function SidebarFooter({ onNavigate }: { onNavigate: () => void }) {
   return (
-    <div className="pt-3 border-t border-border flex flex-col gap-2">
-      <div
-        className={`flex items-center text-muted px-2 py-1 select-none ${
-          isCollapsed ? "justify-center" : "gap-2"
-        }`}
-        title="Salvo neste dispositivo"
+    <footer className="shrink-0 border-t border-border pt-5">
+      <Link data-sidebar-item href="/home" onClick={onNavigate} aria-label="my book writer — início"
+        className="flex items-center gap-2.5 rounded-md px-2 py-2 text-muted hover:text-foreground"
       >
-        <Check className="w-4 h-4 text-success shrink-0" strokeWidth={2.5} />
-        {!isCollapsed && (
-          <span className="text-xs font-normal truncate">
-            Salvo no dispositivo
-          </span>
-        )}
-      </div>
-
-      <button
-        type="button"
-        onClick={toggleTheme}
-        title={resolvedTheme === "dark" ? "Mudar para tema claro" : "Mudar para tema escuro"}
-        aria-label="Alternar tema"
-        className={`flex items-center rounded-lg p-2 text-muted hover:text-foreground hover:bg-surface-elevated transition-colors cursor-pointer select-none ${
-          isCollapsed ? "justify-center" : "gap-2.5 text-xs font-medium px-2.5"
-        }`}
-      >
-        {resolvedTheme === "dark" ? (
-          <Sun className="w-4.5 h-4.5 shrink-0" strokeWidth={1.8} />
-        ) : (
-          <Moon className="w-4.5 h-4.5 shrink-0" strokeWidth={1.8} />
-        )}
-        {!isCollapsed && (
-          <span>{resolvedTheme === "dark" ? "Tema Claro" : "Tema Escuro"}</span>
-        )}
-      </button>
-
-      <SidebarUserProfile isCollapsed={isCollapsed} />
-    </div>
+        <BookOpen className="h-5 w-5 shrink-0" strokeWidth={1.5} />
+        <span data-sidebar-expanded className="font-display text-[20px] leading-none">my book writer.</span>
+      </Link>
+      <p data-sidebar-expanded className="mt-2 flex items-center gap-1.5 px-2 text-[10px] text-muted">
+        <ShieldCheck className="h-3 w-3 shrink-0" />Seu espaço, mesmo sem internet.
+      </p>
+    </footer>
   );
 }
-

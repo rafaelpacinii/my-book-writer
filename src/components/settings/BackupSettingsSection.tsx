@@ -1,7 +1,7 @@
 import React from "react";
 import { Download, Upload } from "lucide-react";
 import { Button } from "@/components/ui/Button";
-import { DatabaseStatsCard } from "./DatabaseStatsCard";
+import { DatabaseStatsCard } from "@/components/settings/DatabaseStatsCard";
 import type { DatabaseStats } from "@/types/settings";
 
 interface Props {
@@ -17,11 +17,12 @@ export function BackupSettingsSection(props: Props) {
   const { stats, isLoading, isExporting, onExport, onRequestRestore, feedback } = props;
 
   return (
-    <div className="flex flex-col gap-5 max-w-3xl">
+    <div className="flex flex-col gap-5 w-full">
       <DatabaseStatsCard stats={stats} isLoading={isLoading} />
 
       {feedback && (
         <div
+          role="status"
           className={`p-3.5 rounded-xl text-xs font-medium border ${
             feedback.type === "success"
               ? "bg-success/10 border-success/30 text-success"
@@ -34,21 +35,22 @@ export function BackupSettingsSection(props: Props) {
 
       <div className="p-5 rounded-xl border border-border bg-surface flex flex-col gap-4">
         <div>
-          <h3 className="text-sm font-bold text-foreground">Ações de Backup</h3>
+          <h3 className="text-sm font-bold text-foreground">Backup dos seus livros</h3>
           <p className="text-xs text-muted">
             Exporte uma cópia completa de segurança ou restaure seus dados a qualquer momento.
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <Button
             variant="primary"
             onClick={onExport}
-            disabled={isExporting}
+            isLoading={isExporting}
+            loadingLabel="Exportando backup…"
             className="flex items-center gap-2"
           >
             <Download className="w-4 h-4" />
-            <span>{isExporting ? "Exportando..." : "Exportar Backup (.sqlite)"}</span>
+            <span>{isExporting ? "Exportando..." : "Exportar backup"}</span>
           </Button>
 
           <Button
@@ -57,7 +59,7 @@ export function BackupSettingsSection(props: Props) {
             className="flex items-center gap-2"
           >
             <Upload className="w-4 h-4" />
-            <span>Restaurar Backup</span>
+            <span>Restaurar backup</span>
           </Button>
         </div>
       </div>

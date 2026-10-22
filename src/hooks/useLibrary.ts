@@ -4,16 +4,16 @@ import { useMemo, useState } from "react";
 import { useProfile } from "@/hooks/useProfile";
 import { useBooks } from "@/hooks/useBooks";
 import { useCatalog } from "@/hooks/useCatalog";
-import type { Book } from "@/types/book";
 
 export function useLibrary() {
-  const { profile, isLoading: isProfileLoading } = useProfile();
-  const { books, isLoading: isBooksLoading } = useBooks(profile?.id);
-  const { formats, fonts, isLoading: isCatalogLoading } = useCatalog();
+  const { profile, isLoading: isProfileLoading, error: profileError, refreshProfile } = useProfile();
+  const { books, isLoading: isBooksLoading, error: booksError, refreshBooks } = useBooks(profile?.id);
+  const { formats, fonts, isLoading: isCatalogLoading, error: catalogError, refreshCatalog } = useCatalog();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [formatFilter, setFormatFilter] = useState("");
-  const [sortOrder, setSortOrder] = useState<"recent" | "title">("recent");
+  const [sortOrder, setSortOrder] = useState<"recent" | "title" | "author">("recent");
+  const [view, setView] = useState<"grid" | "list">("grid");
 
   const formatMap = useMemo(() => {
     const map = new Map<string, string>();
@@ -43,7 +43,9 @@ export function useLibrary() {
       list = list.filter((b) => b.format_id === formatFilter);
     }
 
-    if (sortOrder === "title") {
+    if (sortOrder === "author") {
+      list.sort((a, b) => a.author_name.localeCompare(b.author_name, "pt-BR"));
+    } else if (sortOrder === "title") {
       list.sort((a, b) => a.title.localeCompare(b.title, "pt-BR"));
     } else {
       list.sort(
@@ -64,6 +66,8 @@ export function useLibrary() {
 
   return {
     books,
+    error: profileError || booksError || catalogError,
+    retry: () => { void refreshProfile(); void refreshBooks(); void refreshCatalog(); },
     filteredBooks,
     formats,
     formatMap,
@@ -74,6 +78,8 @@ export function useLibrary() {
     setFormatFilter,
     sortOrder,
     setSortOrder,
+    view,
+    setView,
     isFiltered,
     handleClearFilters,
     isLoading: isProfileLoading || isBooksLoading || isCatalogLoading,

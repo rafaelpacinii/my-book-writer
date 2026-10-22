@@ -1,53 +1,39 @@
 "use client";
 
-import React from "react";
-import Link from "next/link";
-import { BookOpen, Check, Moon, Settings, Sun } from "lucide-react";
+import { usePathname } from "next/navigation";
+import { Menu, Moon, ShieldCheck, Sun } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
-import { ProfileAvatarButton } from "./ProfileAvatarButton";
 
-export function AppHeader() {
+const names: Record<string, string> = {
+  "/home": "Início", "/library": "Biblioteca",
+  "/books/new": "Novo livro", "/settings": "Configurações",
+};
+
+export function AppHeader({ onOpenMenu }: { onOpenMenu: () => void }) {
+  const pathname = usePathname();
   const { resolvedTheme, toggleTheme } = useTheme();
 
   return (
-    <header className="flex items-center justify-between h-18 px-6 lg:px-8 border-b border-border bg-surface select-none shrink-0">
-      <Link href="/home" className="flex items-center gap-3 group">
-        <BookOpen className="w-6.5 h-6.5 text-primary" strokeWidth={1.7} />
-        <span className="font-bold text-sm tracking-tight text-foreground">
-          my book writer
-        </span>
-      </Link>
-
-      <div className="flex items-center gap-5 sm:gap-6">
-        <div className="flex items-center gap-2 text-muted">
-          <Check className="w-4 h-4 text-success" strokeWidth={2.5} />
-          <span className="text-xs font-normal hidden sm:inline">
-            Salvo neste dispositivo
-          </span>
-        </div>
-
-        <button
-          onClick={toggleTheme}
-          aria-label="Alternar tema"
-          className="p-1.5 rounded-lg text-muted hover:text-foreground hover:bg-surface-elevated transition-colors cursor-pointer"
+    <header className="workspace-header flex shrink-0 items-center justify-between gap-4 border-b border-border">
+      <div className="flex min-w-0 items-center gap-3 text-[11px]">
+        <button type="button" onClick={onOpenMenu} aria-label="Abrir menu"
+          className="rounded p-2 text-muted min-[700px]:hidden"
         >
-          {resolvedTheme === "dark" ? (
-            <Sun className="w-5 h-5" strokeWidth={1.8} />
-          ) : (
-            <Moon className="w-5 h-5" strokeWidth={1.8} />
-          )}
+          <Menu className="h-4 w-4" />
         </button>
-
-        <Link
-          href="/settings"
-          aria-label="Configurações globais"
-          title="Configurações globais"
-          className="p-1.5 rounded-lg text-muted hover:text-foreground hover:bg-surface-elevated transition-colors cursor-pointer"
+        <span className="hidden text-muted sm:inline">Seu espaço</span>
+        <span className="hidden text-muted sm:inline" aria-hidden="true">/</span>
+        <span className="truncate">{names[pathname] || "Seu livro"}</span>
+      </div>
+      <div className="flex shrink-0 items-center gap-4 text-muted">
+        <span className="hidden items-center gap-1.5 text-[10px] min-[430px]:flex">
+          <ShieldCheck className="h-3.5 w-3.5" />Armazenamento local
+        </span>
+        <button type="button" onClick={toggleTheme} aria-label="Alternar tema"
+          className="rounded-md p-2 hover:bg-surface-hover hover:text-foreground"
         >
-          <Settings className="w-5 h-5" strokeWidth={1.8} />
-        </Link>
-
-        <ProfileAvatarButton />
+          {resolvedTheme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+        </button>
       </div>
     </header>
   );

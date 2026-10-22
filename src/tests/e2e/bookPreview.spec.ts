@@ -1,5 +1,5 @@
 import { book } from "@/tests/fixtures/book";
-import { expect, test } from "./fixtures";
+import { expect, test } from "@/tests/e2e/fixtures";
 
 const previewURL = `/books/preview?bookId=${book.id}`;
 
@@ -12,14 +12,17 @@ test("preview shows the whole book page by page, read-only", async ({ page }) =>
   await expect(page.getByText("Livro completo · somente leitura")).toBeVisible();
   await expect(page.getByRole("navigation", { name: "Sumário" })).toContainText("O começo da história");
   await expect(page.locator("[contenteditable]")).toHaveCount(0);
-  await expect(page.getByRole("heading", { name: "O começo da história" }).last()).toBeVisible();
+  await expect(page.locator("main").getByRole("heading", { name: book.title, exact: true })).toBeVisible();
 
-  await page.getByRole("button", { name: "Próxima página" }).click();
+  await page.getByRole("button", { name: "Próxima página", exact: true }).first().click();
   await expect(navigation).toHaveValue("2");
   await expect(page.getByRole("status").filter({ hasText: "Página 2 de" })).toBeVisible();
 
   await page.keyboard.press("ArrowLeft");
   await expect(navigation).toHaveValue("1");
+  await page.getByRole("navigation", { name: "Sumário" }).getByRole("button")
+    .filter({ hasText: "O começo da história" }).click();
+  await expect(page.locator("main").getByRole("heading", { name: "O começo da história" })).toBeVisible();
 });
 
 test("preview links lead back to the book and to PDF export", async ({ page }) => {
@@ -39,7 +42,7 @@ test("preview of a missing book offers a way back", async ({ page }) => {
 test("preview scrubber allows page navigation with Kindle-style slider", async ({ page }) => {
   await page.goto(previewURL);
   await page.evaluate(() => document.fonts.ready.then(() => undefined));
-  await page.locator("article").first().hover();
+  await page.locator("main").hover();
   const slider = page.getByRole("slider", { name: "Barra de progresso de páginas do livro" });
   await expect(slider).toBeVisible();
   await expect(slider).toHaveValue("1");

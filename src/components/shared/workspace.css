@@ -1,0 +1,50 @@
+/* Editorial workspace from the supplied design. Manuscript typography stays separate. */
+.workspace-main { padding: 37px 42px 24px; }
+.workspace-header { height: 66px; padding-inline: 42px; }
+.editorial-eyebrow { font: 10px var(--font-mono); letter-spacing: .13em; text-transform: uppercase; color: var(--muted); }
+.editorial-heading { font-family: var(--font-display); font-size: clamp(40px, 3.6vw, 58px); font-weight: 400; line-height: 1.05; letter-spacing: -.025em; overflow-wrap: anywhere; }
+.resume-card { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(180px, .8fr); gap: 24px; min-height: 235px; padding: 28px 32px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+.resume-visual { position: relative; display: flex; justify-content: center; align-items: center; min-height: 170px; }
+.resume-visual::before { content: ''; position: absolute; width: 210px; height: 210px; border: 1px solid var(--border); border-radius: 50%; box-shadow: 0 0 0 25px color-mix(in srgb, var(--foreground) 2%, transparent), 0 0 0 26px var(--border); opacity: .65; }
+.resume-visual .book-object { width: 112px; transform: rotate(8deg); box-shadow: -7px 11px 17px color-mix(in srgb, var(--foreground) 15%, transparent); }
+.book-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
+.book-stage { height: 184px; display: flex; align-items: center; justify-content: center; border: 1px solid color-mix(in srgb, var(--border) 60%, transparent); border-radius: 7px; background: color-mix(in srgb, var(--muted) 7%, var(--surface)); position: relative; }
+.book-stage .book-object { width: 95px; }
+.book-card:hover .book-stage { border-color: var(--muted); }
+.book-card:hover .book-stage .book-object { transform: translateY(-4px) rotate(-3deg); }
+.book-list { display: flex; flex-direction: column; gap: 18px; }
+.book-list .book-card { display: grid; grid-template-columns: 112px minmax(0, 1fr); gap: 24px; align-items: center; padding-bottom: 18px; border-bottom: 1px solid var(--border); }
+.book-list .book-stage { height: 140px; }
+.book-list .book-object { width: 73px; }
+.book-list .book-info { padding-top: 0; }
+.book-list .book-index { display: none; }
+
+@media (max-width: 1100px) {
+  .workspace-main { padding: 30px 28px 24px; }
+  .workspace-header { padding-inline: 28px; }
+  .book-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px; }
+}
+@media (max-width: 699px) {
+  .workspace-navigation { position: fixed; inset: 0 auto 0 0; z-index: 50; visibility: hidden; }
+  .workspace-navigation[data-open="true"] { visibility: visible; }
+  .workspace-sidebar { box-shadow: 12px 0 40px #0004; }
+  .workspace-main { padding: 28px 20px 24px; }
+  .workspace-header { padding-inline: 20px; }
+  .resume-card { grid-template-columns: minmax(0, 1fr) 110px; gap: 10px; padding: 23px 20px; }
+  .resume-visual .book-object { width: 82px; }
+  .resume-visual::before { width: 130px; height: 130px; }
+}
+@media (max-width: 430px) {
+  .book-grid { gap: 22px 14px; }
+  .book-stage { height: 160px; }
+  .book-stage .book-object { width: 80px; }
+  .book-info h2 { font-size: 21px; }
+}
+@media (max-width: 380px) {
+  .resume-card { grid-template-columns: 1fr; }
+  .resume-visual { display: none; }
+}
+
+/* Cover recovery controls sit above the card's stretched navigation link. */
+.book-stage .book-object { z-index: 20; pointer-events: none; }
+.book-object button { pointer-events: auto; }

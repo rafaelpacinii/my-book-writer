@@ -1,43 +1,27 @@
-"use client";
-
-import React from "react";
-import Link from "next/link";
+import { ArrowUpRight } from "lucide-react";
 import type { Book } from "@/types/book";
 import { formatLastEdited } from "@/utils/format";
-import { ContinueCover } from "./ContinueCover";
+import { LinkButton } from "@/components/ui/LinkButton";
+import { ContinueCover } from "@/components/home/ContinueCover";
 
-interface Props {
-  book: Book;
-}
-
-export function ContinueCard({ book }: Props) {
+export function ContinueCard({ book }: { book: Book }) {
   return (
-    <div className="flex flex-col md:flex-row w-full rounded-2xl border border-border bg-surface overflow-hidden shadow-xs hover:border-primary/40 transition-colors">
-      <ContinueCover
-        bookId={book.id}
-        assetId={book.card_image_asset_id}
-        title={book.title}
-      />
-
-      <div className="flex flex-col justify-center p-6 lg:p-8 flex-1 min-w-0">
-        <p className="text-xs font-bold tracking-wider text-primary uppercase">
-          Continuar escrevendo
-        </p>
-        <h2 className="font-serif text-2xl lg:text-[27px] font-normal text-foreground leading-snug line-clamp-2 mt-2.5">
+    <section aria-label="Retomar seu livro" className="resume-card">
+      <div className="relative z-10 min-w-0">
+        <p className="editorial-eyebrow">Uma história esperando por você</p>
+        <h2 className="mt-3 mb-3 max-w-[17ch] font-display text-[32px] leading-[1.05] wrap-anywhere">
           {book.title}
         </h2>
-        <p className="text-sm text-muted mt-2 truncate">
+        <p className="text-[10px] leading-relaxed text-muted">
           {book.author_name || "Autor"} · Última alteração {formatLastEdited(book.updated_at)}
         </p>
-        <div className="mt-6">
-          <Link
-            href={`/books/view?bookId=${encodeURIComponent(book.id)}`}
-            className="inline-flex items-center justify-center h-11 px-6 rounded-lg bg-primary text-primary-foreground font-bold text-[13px] hover:opacity-90 transition-opacity shadow-xs"
-          >
-            Abrir meu livro
-          </Link>
-        </div>
+        <LinkButton href={`/books/view?bookId=${encodeURIComponent(book.id)}`}
+          className="mt-[18px] !min-h-[39px] !px-3 !text-[11px]"
+        >
+          Retomar meu livro<ArrowUpRight className="h-3.5 w-3.5" />
+        </LinkButton>
       </div>
-    </div>
+      <ContinueCover book={book} />
+    </section>
   );
 }

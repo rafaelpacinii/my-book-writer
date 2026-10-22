@@ -59,6 +59,8 @@ export function useBookSettings(bookId: string) {
             setCoverUrl(url);
             setOriginalCoverUrl(url);
           }
+        }).catch((error: unknown) => {
+          if (isMounted) setLayoutError(error instanceof Error ? error.message : "Não foi possível carregar a capa.");
         });
       }
       setIsLoadingBook(false);

@@ -1,4 +1,4 @@
-import type { ZoomMode } from "./usePreviewZoom";
+import type { ZoomMode } from "@/components/books/preview/usePreviewZoom";
 
 interface Props {
   mode: ZoomMode;
@@ -40,6 +40,7 @@ export function PreviewZoomControls(props: Props) {
         type="button" onClick={props.onReset100}
         className={`${btn} min-w-[44px] text-center font-mono ${is100 ? active : idle}`}
         title="Redefinir para 100%"
+        aria-label="Redefinir para 100%"
       >
         {props.scalePercent}%
       </button>

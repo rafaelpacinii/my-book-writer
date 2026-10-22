@@ -1,9 +1,10 @@
 import { Suspense } from "react";
-import { EditorContent } from "./EditorContent";
+import { RouteLoading } from "@/components/shared/RouteLoading";
+import { EditorContent } from "@/app/books/editor/EditorContent";
 
 export default function BookEditorPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-background" />}>
+    <Suspense fallback={<RouteLoading />}>
       <EditorContent />
     </Suspense>
   );

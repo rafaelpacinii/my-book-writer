@@ -1,13 +1,10 @@
-import React from "react";
-import { Check } from "lucide-react";
+import { ShieldCheck } from "lucide-react";
 
 export function PersistenceNotice() {
   return (
-    <div className="flex items-center gap-2.5 mt-8 select-none">
-      <Check className="w-4 h-4 text-success shrink-0" strokeWidth={2.5} />
-      <p className="text-xs text-muted">
-        Seu trabalho é salvo neste dispositivo. Escreva mesmo sem internet.
-      </p>
-    </div>
+    <footer className="mt-1 flex items-center gap-2 border-t border-border pt-5 text-[10px] text-muted">
+      <ShieldCheck className="h-3.5 w-3.5 shrink-0" />
+      <p>Local por princípio. Seu, por inteiro.</p>
+    </footer>
   );
 }

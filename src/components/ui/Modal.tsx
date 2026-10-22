@@ -1,6 +1,8 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useId } from "react";
+import { createPortal } from "react-dom";
+import { useModalFocus } from "@/hooks/useModalFocus";
 import { X } from "lucide-react";
 
 export interface ModalProps {
@@ -12,20 +14,18 @@ export interface ModalProps {
 }
 
 export function Modal({ isOpen, onClose, title, children, footer }: ModalProps) {
-  useEffect(() => {
-    if (!isOpen) return;
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, onClose]);
+  const titleId = useId();
+  const dialogRef = useModalFocus(isOpen, onClose);
 
-  if (!isOpen) return null;
+  if (!isOpen || typeof document === "undefined") return null;
 
-  return (
+  return createPortal(
     <div
+      ref={dialogRef}
+      tabIndex={-1}
       role="dialog"
+      aria-labelledby={title ? titleId : undefined}
+      aria-label={title ? undefined : "Diálogo"}
       aria-modal="true"
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs"
       onClick={(e) => e.target === e.currentTarget && onClose()}
@@ -33,7 +33,7 @@ export function Modal({ isOpen, onClose, title, children, footer }: ModalProps) 
       <div className="bg-surface rounded-xl border border-border shadow-xl max-w-lg w-full max-h-[90vh] flex flex-col overflow-hidden">
         {title && (
           <div className="flex items-center justify-between px-6 py-4 border-b border-border">
-            <h2 className="text-lg font-bold text-foreground">{title}</h2>
+            <h2 id={titleId} className="text-lg font-bold text-foreground">{title}</h2>
             <button
               onClick={onClose}
               aria-label="Fechar diálogo"
@@ -50,6 +50,6 @@ export function Modal({ isOpen, onClose, title, children, footer }: ModalProps) 
           </div>
         )}
       </div>
-    </div>
+    </div>, document.body,
   );
 }

@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import { useCoverPreview } from "@/hooks/useCoverPreview";
+import { DecodedImage } from "@/components/ui/DecodedImage";
 import { X } from "lucide-react";
 import { BookCoverArtwork } from "@/components/library/BookCoverArtwork";
-import { CoverDropZone } from "./CoverDropZone";
+import { CoverDropZone } from "@/components/books/new/CoverDropZone";
 
 interface Props {
   coverUrl?: string | null;
@@ -11,19 +12,7 @@ interface Props {
 }
 
 export function CoverPreview({ coverUrl, onCoverChange }: Props) {
-  const [internalUrl, setInternalUrl] = useState<string | null>(coverUrl ?? null);
-  const activeUrl = coverUrl !== undefined ? coverUrl : internalUrl;
-
-  const handleLoaded = (dataUrl: string) => {
-    setInternalUrl(dataUrl);
-    onCoverChange?.(dataUrl);
-  };
-
-  const handleRemove = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setInternalUrl(null);
-    onCoverChange?.(null);
-  };
+  const { activeUrl, handleLoaded, handleRemove } = useCoverPreview(coverUrl, onCoverChange);
 
   return (
     <div className="flex flex-col gap-3 select-none w-full">
@@ -43,7 +32,7 @@ export function CoverPreview({ coverUrl, onCoverChange }: Props) {
 
       <div className="w-full h-48 rounded-xl overflow-hidden border border-border bg-surface relative">
         {activeUrl ? (
-          <img src={activeUrl} alt="Capa do livro" className="w-full h-full object-cover" />
+          <DecodedImage key={activeUrl} src={activeUrl} alt="Capa do livro" />
         ) : (
           <BookCoverArtwork className="w-full h-full" />
         )}

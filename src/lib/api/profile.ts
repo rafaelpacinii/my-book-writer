@@ -1,3 +1,4 @@
+import { publishDataChange } from "@/lib/data/changes";
 import { invoke } from "@tauri-apps/api/core";
 import type { LocalProfile } from "@/types/profile";
 
@@ -29,7 +30,7 @@ export async function getProfile(): Promise<LocalProfile> {
   return invoke<LocalProfile>("get_profile");
 }
 
-export async function updateProfile(displayName: string): Promise<LocalProfile> {
+async function persistProfile(displayName: string): Promise<LocalProfile> {
   if (!isTauriEnvironment()) {
     const updated: LocalProfile = {
       ...DEFAULT_PROFILE,
@@ -42,4 +43,10 @@ export async function updateProfile(displayName: string): Promise<LocalProfile> 
     return updated;
   }
   return invoke<LocalProfile>("update_profile", { displayName });
+}
+
+export async function updateProfile(displayName: string): Promise<LocalProfile> {
+  const profile = await persistProfile(displayName);
+  publishDataChange("profile");
+  return profile;
 }

@@ -1,0 +1,82 @@
+name: UI quality
+
+on:
+  pull_request:
+    branches: [develop, main]
+  push:
+    branches: [develop, main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ui-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  browser:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium firefox
+      - run: npx next typegen
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm run check:ui
+      - run: npm test
+      - run: npm run build -- --webpack
+      - name: Test production export
+        shell: bash
+        run: |
+          npm run preview:static > /tmp/mbw-static.log 2>&1 &
+          preview_pid=$!
+          trap 'kill "$preview_pid"' EXIT
+          for attempt in {1..60}; do
+            if curl -sf http://127.0.0.1:3100/home > /dev/null; then break; fi
+            sleep 1
+          done
+          MBW_EDITOR_TEST_URL=http://127.0.0.1:3100 npm run test:e2e
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: browser-ui-results
+          path: |
+            src/tests/playwright-report
+            src/tests/test-results
+
+  windows-native:
+    runs-on: windows-latest
+    env:
+      CARGO_TARGET_DIR: ${{ github.workspace }}/src-tauri/target/ui-tests
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - uses: dtolnay/rust-toolchain@stable
+      - run: npm ci
+      - run: npx playwright install chromium
+      - run: cargo install tauri-driver --locked
+      - name: Install Edge WebDriver matching the installed Edge browser
+        shell: pwsh
+        run: |
+          $edge = "${env:ProgramFiles(x86)}/Microsoft/Edge/Application/msedge.exe"
+          $version = (Get-Item $edge).VersionInfo.ProductVersion
+          Invoke-WebRequest "https://msedgedriver.microsoft.com/$version/edgedriver_win64.zip" -OutFile "$env:RUNNER_TEMP/edge-driver.zip"
+          Expand-Archive "$env:RUNNER_TEMP/edge-driver.zip" "$env:RUNNER_TEMP/edge-driver"
+          "MBW_EDGE_DRIVER=$env:RUNNER_TEMP/edge-driver/msedgedriver.exe" >> $env:GITHUB_ENV
+      - name: Build the isolated production application
+        run: npm run tauri build -- --no-bundle --config src-tauri/tauri.ui-test.conf.json
+      - run: npm run test:native
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: windows-native-ui-results
+          path: src/tests/test-results/native

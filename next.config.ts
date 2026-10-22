@@ -1,19 +1,11 @@
-const isProd = process.env.NODE_ENV === 'production';
+import type { NextConfig } from "next";
 
-const internalHost = process.env.TAURI_DEV_HOST || 'localhost';
-
-/** @type {import('next').NextConfig} */
-const nextConfig = {
-  // Ensure Next.js uses SSG instead of SSR
-  // https://nextjs.org/docs/pages/building-your-application/deploying/static-exports
-  output: 'export',
-  // Note: This feature is required to use the Next.js Image component in SSG mode.
-  // See https://nextjs.org/docs/messages/export-image-api for different workarounds.
-  images: {
-    unoptimized: true,
-  },
-  // Configure assetPrefix or else the server won't properly resolve your assets.
-  assetPrefix: isProd ? undefined : `http://${internalHost}:3000`,
+const nextConfig: NextConfig = {
+  output: "export",
+  // Isolate browser tests from the developer's running Next instance.
+  distDir: process.env.MBW_NEXT_DIST_DIR || ".next",
+  images: { unoptimized: true },
+  // Use same-origin assets: development and production can run on different ports.
 };
 
 export default nextConfig;

@@ -1,4 +1,4 @@
-import { test, expect } from "./fixtures";
+import { test, expect } from "@/tests/e2e/fixtures";
 import { book, chapter } from "@/tests/fixtures/book";
 
 const exportURL = `/books/export?bookId=${book.id}`;
@@ -22,6 +22,7 @@ async function mockDesktop(page: import("@playwright/test").Page, mode: string) 
           case "list_books": return [book];
           case "get_book_by_id": return book;
           case "list_chapters": return [currentChapter];
+          case "list_chapter_versions": return [];
           case "get_chapter_by_id": return currentChapter;
           case "list_book_formats": return [{ id: book.format_id, name: "14 × 21 cm", width_um: 140000, height_um: 210000, market: "BR", is_active: true }];
           case "list_font_presets": return [{ id: book.font_preset_id, name: "Merriweather", family_name: "Merriweather", manifest_path: "", is_active: true }];
@@ -61,7 +62,7 @@ test("book menu opens the export route and browser development explains desktop 
   await page.getByRole("link", { name: "Exportar", exact: true }).click();
   await expect(page).toHaveURL(new RegExp(exportURL.replace("?", "\\?")));
   await expect(page.getByRole("heading", { name: "Exportar livro" })).toBeVisible();
-  await expect(page.getByText("A exportação PDF está disponível no aplicativo desktop.")).toBeVisible();
+  await expect(page.getByText("A exportação está disponível no aplicativo desktop.")).toBeVisible();
   await expect(page.getByRole("button", { name: "Exportar PDF" })).toBeDisabled();
 });
 
@@ -70,7 +71,7 @@ test("desktop export reports the saved file and prevents duplicate operations", 
   await page.goto(exportURL);
   await page.getByRole("button", { name: "Exportar PDF" }).click();
   await expect(page.getByRole("button", { name: "Gerando PDF…" })).toBeDisabled();
-  await expect(page.getByRole("status")).toHaveText("PDF salvo em: /livros/Meu livro.pdf");
+  await expect(page.getByRole("status")).toHaveText("Arquivo salvo em: /livros/Meu livro.pdf");
   await expect(page.getByRole("button", { name: "Exportar PDF" })).toBeEnabled();
   expect(await page.evaluate(() => (window as unknown as { pdfExportCalls: number }).pdfExportCalls)).toBe(1);
 });
@@ -81,7 +82,7 @@ test("canceling the native save dialog is not reported as success or failure", a
   await page.getByRole("button", { name: "Exportar PDF" }).click();
   await expect(page.getByRole("button", { name: "Exportar PDF" })).toBeEnabled();
   await expect(page.locator("main").getByRole("alert")).toHaveCount(0);
-  await expect(page.getByText("PDF salvo em:")).toHaveCount(0);
+  await expect(page.getByText("Arquivo salvo em:")).toHaveCount(0);
 });
 
 test("native errors are visible and allow a retry", async ({ page }) => {
@@ -101,28 +102,31 @@ for (const mode of ["empty", "missing"]) {
   });
 }
 
-test("export from the editor saves the most recent text before navigating", async ({ page }) => {
+test("manually saved editor text is available before opening export from the book menu", async ({ page }) => {
   await mockDesktop(page, "success");
   await page.goto(`/books/editor?bookId=${book.id}&chapterId=${chapter.id}`);
   const editor = page.locator("[contenteditable=true]");
   await expect(editor).toBeVisible();
   await editor.fill("Texto escrito imediatamente antes da exportação.");
-  await page.getByRole("button", { name: "Exportar", exact: true }).click();
+  await page.keyboard.press("Control+s");
+  await expect(page.getByText("Salvo neste dispositivo", { exact: true })).toBeVisible();
+  await page.getByRole("link", { name: "Voltar ao menu do livro" }).click();
+  await page.getByRole("link", { name: "Exportar", exact: true }).click();
   await expect(page).toHaveURL(new RegExp("/books/export\\?"));
   const saved = await page.evaluate(() => localStorage.getItem("pdf_saved_chapter"));
   expect(saved).toContain("Texto escrito imediatamente antes da exportação.");
 });
 
-test("export stays in the editor if saving fails", async ({ page }) => {
+test("manual save failure keeps the draft in the editor and shows an error", async ({ page }) => {
   await mockDesktop(page, "save-error");
   await page.goto(`/books/editor?bookId=${book.id}&chapterId=${chapter.id}`);
   await page.locator("[contenteditable=true]").fill("Alteração pendente.");
-  await page.getByRole("button", { name: "Exportar", exact: true }).click();
+  await page.keyboard.press("Control+s");
   await expect(page.getByText("Erro ao salvar")).toBeVisible();
   await expect(page).toHaveURL(new RegExp("/books/editor\\?"));
 });
 
-test("export includes edits made while an earlier save is still running", async ({ page }) => {
+test("a second manual save includes edits made while the first save is still running", async ({ page }) => {
   await mockDesktop(page, "delayed-save");
   await page.goto(`/books/editor?bookId=${book.id}&chapterId=${chapter.id}`);
   const editor = page.locator("[contenteditable=true]");
@@ -130,7 +134,10 @@ test("export includes edits made while an earlier save is still running", async 
   await page.keyboard.press("Control+s");
   await expect.poll(() => page.evaluate(() => (window as unknown as { pdfSaveCalls: number }).pdfSaveCalls)).toBe(1);
   await editor.fill("Versão mais recente escrita durante o salvamento.");
-  await page.getByRole("button", { name: "Exportar", exact: true }).click();
+  await page.keyboard.press("Control+s");
+  await expect(page.getByText("Salvo neste dispositivo", { exact: true })).toBeVisible();
+  await page.getByRole("link", { name: "Voltar ao menu do livro" }).click();
+  await page.getByRole("link", { name: "Exportar", exact: true }).click();
   await expect(page).toHaveURL(new RegExp("/books/export\\?"));
   const saved = await page.evaluate(() => localStorage.getItem("pdf_saved_chapter"));
   expect(saved).toContain("Versão mais recente escrita durante o salvamento.");

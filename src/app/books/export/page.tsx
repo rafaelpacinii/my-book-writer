@@ -1,9 +1,10 @@
 import { Suspense } from "react";
+import { RouteLoading } from "@/components/shared/RouteLoading";
 import { ExportContent } from "@/components/books/export/ExportContent";
 
 export default function BookExportPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-background" />}>
+    <Suspense fallback={<RouteLoading />}>
       <ExportContent />
     </Suspense>
   );

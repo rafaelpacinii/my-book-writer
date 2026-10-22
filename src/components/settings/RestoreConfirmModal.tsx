@@ -12,7 +12,7 @@ interface Props {
 
 export function RestoreConfirmModal({ isOpen, onClose, onConfirm, isRestoring }: Props) {
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Restaurar backup do SQLite">
+    <Modal isOpen={isOpen} onClose={onClose} title="Restaurar backup dos seus livros">
       <div className="flex flex-col gap-4">
         <div className="flex items-start gap-3 p-3.5 rounded-lg bg-danger/10 border border-danger/20 text-danger text-xs leading-relaxed">
           <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
@@ -25,7 +25,7 @@ export function RestoreConfirmModal({ isOpen, onClose, onConfirm, isRestoring }:
           <Button variant="outline" onClick={onClose} disabled={isRestoring}>
             Cancelar
           </Button>
-          <Button variant="danger" onClick={onConfirm} disabled={isRestoring}>
+          <Button variant="danger" onClick={onConfirm} isLoading={isRestoring} loadingLabel="Restaurando backup…">
             {isRestoring ? "Restaurando..." : "Selecionar arquivo e restaurar"}
           </Button>
         </div>

@@ -1,62 +1,45 @@
 "use client";
 
-import React from "react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { Home, LayoutGrid, Plus, Settings } from "lucide-react";
+import { ChevronDown, Home, Library, Plus, Settings } from "lucide-react";
+import { useSidebarNavigation } from "@/hooks/useSidebarNavigation";
+import { SidebarNavLink } from "@/components/shared/SidebarNavLink";
+import { SidebarRecentBooks } from "@/components/shared/SidebarRecentBooks";
 
-const NAV_ITEMS = [
-  {
-    label: "Início",
-    href: "/home",
-    icon: <Home className="w-5 h-5 shrink-0" strokeWidth={1.8} />,
-  },
-  {
-    label: "Biblioteca",
-    href: "/library",
-    icon: <LayoutGrid className="w-5 h-5 shrink-0" strokeWidth={1.8} />,
-  },
-  {
-    label: "Novo livro",
-    href: "/books/new",
-    icon: <Plus className="w-5 h-5 shrink-0" strokeWidth={1.8} />,
-  },
-  {
-    label: "Configurações",
-    href: "/settings",
-    icon: <Settings className="w-5 h-5 shrink-0" strokeWidth={1.8} />,
-  },
-];
-
-interface Props {
-  isCollapsed?: boolean;
-}
-
-export function SidebarNav({ isCollapsed = false }: Props) {
-  const pathname = usePathname();
+export function SidebarNav({ onNavigate }: { onNavigate: () => void }) {
+  const menu = useSidebarNavigation();
 
   return (
-    <nav className="flex flex-col gap-1.5">
-      {NAV_ITEMS.map((item) => {
-        const isActive = pathname === item.href;
-        return (
-          <Link
-            key={item.href}
-            href={item.href}
-            title={isCollapsed ? item.label : undefined}
-            className={`flex items-center rounded-lg transition-colors ${
-              isCollapsed ? "justify-center p-2.5" : "gap-3 px-3 py-2.5 text-[13px]"
-            } ${
-              isActive
-                ? "bg-primary-soft text-primary font-bold"
-                : "text-muted hover:text-foreground hover:bg-surface-elevated font-medium"
-            }`}
-          >
-            {item.icon}
-            {!isCollapsed && <span className="truncate">{item.label}</span>}
-          </Link>
-        );
-      })}
+    <nav aria-label="Navegação principal" className="flex min-h-0 flex-1 flex-col pb-5">
+      <div className="min-h-0 flex-1 overflow-y-auto">
+        <p className="sidebar-section-label">
+          <span data-sidebar-expanded>PRINCIPAL</span>
+          <span data-sidebar-compact aria-hidden="true">MENU</span>
+        </p>
+        <div className="flex flex-col gap-1">
+          <SidebarNavLink label="Início" href="/home" icon={Home} onNavigate={onNavigate} />
+          <div className="workspace-nav-row flex items-center">
+            <SidebarNavLink label="Biblioteca" href="/library" icon={Library} onNavigate={onNavigate} />
+            <button data-sidebar-expanded type="button" aria-controls={menu.collectionId}
+              aria-expanded={menu.isCollectionOpen} onClick={menu.toggleCollection}
+              aria-label={menu.isCollectionOpen ? "Ocultar livros recentes" : "Mostrar livros recentes"}
+              className="mr-1 rounded-md p-2 text-muted hover:bg-surface-hover hover:text-foreground"
+            >
+              <ChevronDown className={`h-3.5 w-3.5 ${menu.isCollectionOpen ? "" : "-rotate-90"}`} />
+            </button>
+          </div>
+          <div id={menu.collectionId} data-sidebar-expanded hidden={!menu.isCollectionOpen}>
+            <SidebarRecentBooks onNavigate={onNavigate} />
+          </div>
+          <SidebarNavLink label="Novo livro" href="/books/new" icon={Plus} onNavigate={onNavigate} />
+        </div>
+      </div>
+      <div className="mt-5 shrink-0 border-t border-border pt-4">
+        <p className="sidebar-section-label">
+          <span data-sidebar-expanded>PREFERÊNCIAS</span>
+          <span data-sidebar-compact aria-hidden="true">AJUSTES</span>
+        </p>
+        <SidebarNavLink label="Configurações" href="/settings" icon={Settings} onNavigate={onNavigate} />
+      </div>
     </nav>
   );
 }

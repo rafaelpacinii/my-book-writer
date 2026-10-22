@@ -1,5 +1,10 @@
-@import "tailwindcss";
+@import "tailwindcss" source("../");
+@source not "../prototype";
+@source not "../tests";
 @import "../lib/editor/bookTypography.css";
+@import "../components/shared/workspace.css";
+@import "../components/shared/sidebar.css";
+@import "../components/shared/book-object.css";
 
 @font-face {
   font-family: 'Inter';
@@ -204,6 +209,7 @@
   --warning: #805B1E;
   --warning-soft: #F4ECDC;
   --danger: #9B3D3D;
+  --danger-foreground: #FFFFFF;
   --danger-soft: #F7E5E2;
   --paper: #FAF9F6;
   --ink: #222621;
@@ -229,6 +235,7 @@
   --warning: #DEC288;
   --warning-soft: #3D3524;
   --danger: #E4A6A3;
+  --danger-foreground: #261715;
   --danger-soft: #3F2928;
   --paper: #FAF9F6;
   --ink: #222621;
@@ -252,12 +259,14 @@
   --color-warning: var(--warning);
   --color-warning-soft: var(--warning-soft);
   --color-danger: var(--danger);
+  --color-danger-foreground: var(--danger-foreground);
   --color-danger-soft: var(--danger-soft);
   --color-paper: var(--paper);
   --color-ink: var(--ink);
 
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-serif: 'Merriweather', Georgia, serif;
+  --font-display: 'EB Garamond', Georgia, serif;
 }
 
 * {
@@ -275,7 +284,6 @@ body {
   background-color: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans);
-  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 .font-serif {
@@ -346,51 +354,41 @@ select option {
   height: auto;
 }
 
-@keyframes skeleton-diagonal {
-  0% {
-    transform: translateX(-100%);
-  }
-  100% {
-    transform: translateX(100%);
-  }
+/* Slow pulse on the surface color, never on the region's content. */
+@keyframes skeleton-pulse {
+  0%, 100% { background-color: var(--surface-hover); }
+  50% { background-color: var(--surface-elevated); }
 }
 
-.skeleton-diagonal {
-  position: relative;
-  overflow: hidden;
+.skeleton-pulse {
   background-color: var(--surface-hover);
+  animation: skeleton-pulse 1.8s ease-in-out infinite;
 }
 
-.skeleton-diagonal::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  transform: translateX(-100%);
-  background: linear-gradient(
-    115deg,
-    transparent 0%,
-    transparent 30%,
-    rgba(255, 255, 255, 0.45) 50%,
-    transparent 70%,
-    transparent 100%
-  );
-  animation: skeleton-diagonal 1.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 3px;
 }
 
-.dark .skeleton-diagonal::after,
-[data-theme="dark"] .skeleton-diagonal::after {
-  background: linear-gradient(
-    115deg,
-    transparent 0%,
-    transparent 30%,
-    rgba(255, 255, 255, 0.08) 50%,
-    transparent 70%,
-    transparent 100%
-  );
+/* The head script sets this before the static sidebar is painted. */
+[data-sidebar-collapsed="true"] [data-app-sidebar] {
+  width: 4.5rem;
+  padding: 0.625rem;
+}
+
+[data-sidebar-collapsed="true"] [data-sidebar-expanded] { display: none; }
+[data-sidebar-collapsed="true"] [data-sidebar-item] { justify-content: center; padding-inline: 0.625rem; }
+
+@media (max-width: 699px) {
+  [data-sidebar-collapsed="true"] [data-app-sidebar] { width: 248px; padding: 26px 20px 20px; }
+  [data-sidebar-collapsed="true"] [data-sidebar-expanded] { display: revert; }
+  [data-sidebar-collapsed="true"] [data-sidebar-item] { justify-content: flex-start; padding-inline: 13px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .skeleton-diagonal::after {
-    animation: none;
+  *, *::before, *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
   }
 }

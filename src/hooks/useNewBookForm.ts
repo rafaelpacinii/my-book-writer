@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useProfile } from "@/hooks/useProfile";
 import { useCatalog } from "@/hooks/useCatalog";
@@ -10,10 +10,12 @@ import { validateBookLayout } from "@/utils/bookMeasurements";
 
 export function useNewBookForm() {
   const router = useRouter();
-  const { profile } = useProfile();
-  const { formats, fonts, isLoading: isCatalogLoading } = useCatalog();
-  const { addBook } = useBooks(profile?.id);
+  const { profile, isLoading: isProfileLoading, error: profileError, refreshProfile } = useProfile();
+  const { formats, fonts, isLoading: isCatalogLoading, error: catalogError, refreshCatalog } = useCatalog();
+  const { addBook, editBook } = useBooks(profile?.id);
 
+  const pendingBook = useRef<string | null>(null);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [title, setTitle] = useState("");
   const [titleError, setTitleError] = useState<string | null>(null);
   const [layoutError, setLayoutError] = useState<string | null>(null);
@@ -51,10 +53,11 @@ export function useNewBookForm() {
     );
     setLayoutError(error);
     if (error) return;
+    setSubmitError(null);
     setIsSubmitting(true);
     try {
       const marginUm = Math.round(marginMm * 1000);
-      const newBook = await addBook({
+      const input = {
         profile_id: profile?.id || "local-default-id",
         title: trimmedTitle,
         author_name: author.trim() || profile?.display_name || "Autor",
@@ -66,21 +69,30 @@ export function useNewBookForm() {
         margin_bottom_um: marginUm,
         margin_left_um: marginUm,
         margin_right_um: marginUm,
-      });
+      };
+      const newBook = pendingBook.current
+        ? await editBook(pendingBook.current, input) : await addBook(input);
+      pendingBook.current = newBook.id;
 
       if (coverUrl && newBook?.id) {
         await saveBookCoverImage(newBook.id, coverUrl);
       }
 
       router.push("/home");
-    } catch {
-      // error is handled by hook
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Não foi possível criar o livro.";
+      setSubmitError(pendingBook.current ? `O livro foi criado, mas a capa não foi salva. Tente novamente. ${message}` : message);
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return {
+    loadError: profileError || catalogError,
+    hasData: Boolean(profile && formats.length && fonts.length),
+    isLoading: isProfileLoading || isCatalogLoading,
+    retry: () => { void refreshProfile(); void refreshCatalog(); },
+    submitError,
     title, setTitle, titleError, layoutError,
     author, setAuthor,
     formatId, setFormatId, formats,

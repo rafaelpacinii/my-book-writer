@@ -1,25 +1,28 @@
 "use client";
 
-import React from "react";
-import { AppShell } from "@/components/shared/AppShell";
-import { SettingsHeader } from "./SettingsHeader";
-import { SettingsTabs } from "./SettingsTabs";
-import { BackupSettingsSection } from "./BackupSettingsSection";
-import { EditorPreferencesSection } from "./EditorPreferencesSection";
-import { KeyboardShortcutsSection } from "./KeyboardShortcutsSection";
-import { RestoreConfirmModal } from "./RestoreConfirmModal";
-import { useSettingsPage } from "./useSettingsPage";
+import { PageContent } from "@/components/shared/PageContent";
+import { ErrorState } from "@/components/shared/ErrorState";
+import { SettingsHeader } from "@/components/settings/SettingsHeader";
+import { SettingsTabs } from "@/components/settings/SettingsTabs";
+import { BackupSettingsSection } from "@/components/settings/BackupSettingsSection";
+import { EditorPreferencesSection } from "@/components/settings/EditorPreferencesSection";
+import { KeyboardShortcutsSection } from "@/components/settings/KeyboardShortcutsSection";
+import { RestoreConfirmModal } from "@/components/settings/RestoreConfirmModal";
+import { useSettingsPage } from "@/hooks/useSettingsPage";
 
 export function Main() {
   const s = useSettingsPage();
 
   return (
-    <AppShell>
-      <div className="max-w-6xl mx-auto pb-16 flex flex-col gap-6">
+    <>
+      <PageContent>
         <SettingsHeader />
         <SettingsTabs activeTab={s.activeTab} onSelectTab={s.setActiveTab} />
 
-        {s.activeTab === "backup" && (
+        {s.statsError && s.activeTab === "backup" && (
+          <ErrorState message={s.statsError} onRetry={() => { void s.retryStats(); }} />
+        )}
+        {s.activeTab === "backup" && (!s.statsError || s.stats) && (
           <BackupSettingsSection
             stats={s.stats}
             isLoading={s.isLoadingStats}
@@ -44,7 +47,7 @@ export function Main() {
             onReset={s.resetShortcuts}
           />
         )}
-      </div>
+      </PageContent>
 
       <RestoreConfirmModal
         isOpen={s.isRestoreModalOpen}
@@ -52,6 +55,6 @@ export function Main() {
         onConfirm={s.handleConfirmRestore}
         isRestoring={s.isRestoring}
       />
-    </AppShell>
+    </>
   );
 }
