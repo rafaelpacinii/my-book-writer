@@ -11,6 +11,7 @@ export function usePdfExport(bookId: string) {
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<PdfExportResult | null>(null);
   const running = useRef(false);
+  const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
     let active = true;
@@ -26,7 +27,7 @@ export function usePdfExport(bookId: string) {
       if (active) setIsLoading(false);
     });
     return () => { active = false; };
-  }, [bookId]);
+  }, [bookId, attempt]);
 
   async function exportPdf() {
     if (running.current || !info?.available || !info.chapter_count) return;
@@ -44,5 +45,5 @@ export function usePdfExport(bookId: string) {
     }
   }
 
-  return { info, isLoading, isExporting, error, result, exportPdf };
+  return { info, isLoading, isExporting, error, result, exportPdf, reload: () => setAttempt((value) => value + 1) };
 }

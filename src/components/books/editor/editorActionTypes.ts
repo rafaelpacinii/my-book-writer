@@ -1,4 +1,6 @@
 export interface EditorActionProps {
+  bookId: string;
+  chapterId: string;
   onOpenSettings: () => void;
   onToggleFocus: () => void;
   isReviewOpen: boolean;

@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { PageContent } from "@/components/shared/PageContent";
+import { BookSectionPage } from "@/components/books/shared/BookSectionPage";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { SettingsHeader } from "./SettingsHeader";
 import { SettingsForm } from "./SettingsForm";
@@ -19,48 +19,46 @@ export function Main({ bookId }: Props) {
 
   if (s.isLoading && !s.book) {
     return (
-      <PageContent>
+      <BookSectionPage>
         <div className="pb-16 flex flex-col gap-6">
           <Skeleton className="h-6 w-24 rounded-md" />
           <Skeleton className="h-10 w-80 rounded-md" />
           <Skeleton className="h-96 w-full rounded-xl" />
         </div>
-      </PageContent>
+      </BookSectionPage>
     );
   }
 
   if (!s.book) {
     return (
-      <PageContent>
+      <BookSectionPage>
         <div className="pb-16 p-8 text-center bg-surface border border-border rounded-xl">
           <h2 className="font-serif text-2xl font-normal text-foreground">Livro não encontrado</h2>
           <Link href="/library" className="text-sm font-bold text-primary mt-4 inline-block hover:underline">
             Voltar para a biblioteca
           </Link>
         </div>
-      </PageContent>
+      </BookSectionPage>
     );
   }
 
   return (
-    <PageContent>
-      <div className="pb-16">
-        <SettingsHeader bookId={bookId} bookTitle={s.book.title} />
-        <SettingsForm settings={s} />
+    <BookSectionPage>
+      <SettingsHeader bookId={bookId} bookTitle={s.book.title} />
+      <SettingsForm settings={s} />
 
-        <DeleteBookModal
-          isOpen={s.isDeleteModalOpen}
-          onClose={() => s.setIsDeleteModalOpen(false)}
-          onConfirm={s.handleConfirmDelete}
-          bookTitle={s.book.title}
-          isDeleting={s.isDeleting}
-        />
-        <DiscardChangesModal
-          isOpen={s.isDiscardModalOpen}
-          onClose={s.closeDiscardModal}
-          onDiscard={s.handleConfirmDiscard}
-        />
-      </div>
-    </PageContent>
+      <DeleteBookModal
+        isOpen={s.isDeleteModalOpen}
+        onClose={() => s.setIsDeleteModalOpen(false)}
+        onConfirm={s.handleConfirmDelete}
+        bookTitle={s.book.title}
+        isDeleting={s.isDeleting}
+      />
+      <DiscardChangesModal
+        isOpen={s.isDiscardModalOpen}
+        onClose={s.closeDiscardModal}
+        onDiscard={s.handleConfirmDiscard}
+      />
+    </BookSectionPage>
   );
 }

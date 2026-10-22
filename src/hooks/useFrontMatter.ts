@@ -11,14 +11,14 @@ export function useFrontMatter(bookId: string) {
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
-    if (!bookId) return;
+    if (!bookId) { setData(null); setIsLoading(false); return; }
     setIsLoading(true);
     setError(null);
     try {
       const res = await getBookFrontMatter(bookId);
       setData(res);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
+    } catch {
+      setError("Não foi possível carregar as páginas iniciais. Tente novamente.");
     } finally {
       setIsLoading(false);
     }
@@ -36,8 +36,8 @@ export function useFrontMatter(bookId: string) {
         const updated = await saveBookFrontMatter(input);
         setData(updated);
         return true;
-      } catch (err) {
-        setError(err instanceof Error ? err.message : String(err));
+      } catch {
+        setError("Não foi possível salvar as páginas iniciais. Suas alterações foram mantidas; tente novamente.");
         return false;
       } finally {
         setIsSaving(false);

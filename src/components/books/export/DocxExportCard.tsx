@@ -10,8 +10,8 @@ interface Props {
 
 export function DocxExportCard({ info, isExporting, onExport }: Props) {
   return (
-    <section className="rounded-xl border border-border bg-surface p-6">
-      <h2 className="text-xl font-semibold text-foreground">Documento Word (.docx)</h2>
+    <section>
+      <h2 className="text-lg font-bold text-foreground">Documento Word (.docx)</h2>
       <p className="text-muted mt-2">{info.title} · {info.author || "Autor"}</p>
       <dl className="grid grid-cols-1 sm:grid-cols-2 gap-4 my-6 text-sm">
         <div><dt className="text-muted">Dimensões da página</dt><dd className="font-semibold mt-1">{info.format_name}</dd></div>

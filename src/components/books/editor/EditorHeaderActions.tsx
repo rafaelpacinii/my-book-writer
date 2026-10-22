@@ -24,7 +24,7 @@ export function EditorHeaderActions(props: EditorActionProps) {
         </summary>
         <div className={`${styles.popup} rounded-lg border border-border bg-surface shadow-lg`}
           onClick={(event) => {
-            if (event.target instanceof Element && event.target.closest("button") && menuRef.current) menuRef.current.open = false;
+            if (event.target instanceof Element && event.target.closest("button, a") && menuRef.current) menuRef.current.open = false;
           }}
         >
           <EditorSecondaryActions {...props} />

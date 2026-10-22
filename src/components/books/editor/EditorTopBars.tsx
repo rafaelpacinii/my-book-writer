@@ -16,6 +16,7 @@ export function EditorTopBars({ state, bookId }: { state: MainEditorState; bookI
         isBold={ed.isBold} isItalic={ed.isItalic} isUnderline={ed.isUnderline}
       />
       <EditorHeaderActions
+        bookId={bookId} chapterId={ed.chapter?.id || ""}
         onOpenSettings={() => ed.setIsSettingsModalOpen(true)} onToggleFocus={() => ed.setIsFocusMode(true)}
         isReviewOpen={isReviewOpen} onToggleReview={() => setIsReviewOpen(!isReviewOpen)}
         openCommentsCount={rev.openCommentsCount} needsRecheck={rev.needsRecheck}

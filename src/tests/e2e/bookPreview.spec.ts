@@ -27,7 +27,7 @@ test("preview shows the whole book page by page, read-only", async ({ page }) =>
 
 test("preview links lead back to the book and to PDF export", async ({ page }) => {
   await page.goto(previewURL);
-  await expect(page.getByRole("link", { name: "Exportar PDF" }))
+  await expect(page.getByRole("link", { name: "Exportar", exact: true }))
     .toHaveAttribute("href", `/books/export?bookId=${book.id}`);
   await expect(page.getByRole("navigation", { name: "Caminho de navegação" }).getByRole("link", { name: book.title, exact: true }))
     .toHaveAttribute("href", `/books/view?bookId=${book.id}`);
