@@ -26,26 +26,22 @@ impl<'a> BackupService<'a> {
         let db_path = self.get_db_path();
         let file_size_bytes = fs::metadata(&db_path).map(|m| m.len()).unwrap_or(0);
 
-        let books_count: i64 = sqlx::query_scalar(
-            "SELECT COUNT(*) FROM books WHERE deleted_at IS NULL",
-        )
-        .fetch_one(self.pool)
-        .await
-        .unwrap_or(0);
+        let books_count: i64 =
+            sqlx::query_scalar("SELECT COUNT(*) FROM books WHERE deleted_at IS NULL")
+                .fetch_one(self.pool)
+                .await
+                .unwrap_or(0);
 
-        let chapters_count: i64 = sqlx::query_scalar(
-            "SELECT COUNT(*) FROM chapters WHERE deleted_at IS NULL",
-        )
-        .fetch_one(self.pool)
-        .await
-        .unwrap_or(0);
+        let chapters_count: i64 =
+            sqlx::query_scalar("SELECT COUNT(*) FROM chapters WHERE deleted_at IS NULL")
+                .fetch_one(self.pool)
+                .await
+                .unwrap_or(0);
 
-        let versions_count: i64 = sqlx::query_scalar(
-            "SELECT COUNT(*) FROM chapter_versions",
-        )
-        .fetch_one(self.pool)
-        .await
-        .unwrap_or(0);
+        let versions_count: i64 = sqlx::query_scalar("SELECT COUNT(*) FROM chapter_versions")
+            .fetch_one(self.pool)
+            .await
+            .unwrap_or(0);
 
         Ok(DatabaseStats {
             db_path: db_path.to_string_lossy().to_string(),
@@ -64,7 +60,9 @@ impl<'a> BackupService<'a> {
     ) -> Result<Option<BackupExportResult>, AppError> {
         let db_path = self.get_db_path();
         if !db_path.exists() {
-            return Err(AppError::Validation("Arquivo de banco de dados não encontrado.".into()));
+            return Err(AppError::Validation(
+                "Arquivo de banco de dados não encontrado.".into(),
+            ));
         }
 
         // 1. Descarrega e sincroniza o WAL para garantir consistência
@@ -176,23 +174,24 @@ impl<'a> BackupService<'a> {
             .run(self.pool)
             .await
             .map_err(|e| {
-                AppError::Validation(format!("Falha ao aplicar migrações após restauração: {}", e))
+                AppError::Validation(format!(
+                    "Falha ao aplicar migrações após restauração: {}",
+                    e
+                ))
             })?;
 
         // 7. Lê estatísticas restauradas
-        let books_count: i64 = sqlx::query_scalar(
-            "SELECT COUNT(*) FROM books WHERE deleted_at IS NULL",
-        )
-        .fetch_one(self.pool)
-        .await
-        .unwrap_or(0);
+        let books_count: i64 =
+            sqlx::query_scalar("SELECT COUNT(*) FROM books WHERE deleted_at IS NULL")
+                .fetch_one(self.pool)
+                .await
+                .unwrap_or(0);
 
-        let chapters_count: i64 = sqlx::query_scalar(
-            "SELECT COUNT(*) FROM chapters WHERE deleted_at IS NULL",
-        )
-        .fetch_one(self.pool)
-        .await
-        .unwrap_or(0);
+        let chapters_count: i64 =
+            sqlx::query_scalar("SELECT COUNT(*) FROM chapters WHERE deleted_at IS NULL")
+                .fetch_one(self.pool)
+                .await
+                .unwrap_or(0);
 
         Ok(Some(BackupImportResult {
             books_count,
@@ -204,7 +203,9 @@ impl<'a> BackupService<'a> {
 /// Valida magic bytes e integridade básica do arquivo SQLite
 async fn validate_sqlite_file(path: &Path) -> Result<(), AppError> {
     if !path.exists() {
-        return Err(AppError::Validation("O arquivo selecionado não existe.".into()));
+        return Err(AppError::Validation(
+            "O arquivo selecionado não existe.".into(),
+        ));
     }
 
     let metadata = fs::metadata(path)
@@ -227,15 +228,15 @@ async fn validate_sqlite_file(path: &Path) -> Result<(), AppError> {
     }
 
     // Tenta abrir temporariamente para verificar integridade
-    let options = SqliteConnectOptions::new()
-        .filename(path)
-        .read_only(true);
+    let options = SqliteConnectOptions::new().filename(path).read_only(true);
 
     let temp_pool = SqlitePoolOptions::new()
         .max_connections(1)
         .connect_with(options)
         .await
-        .map_err(|e| AppError::Validation(format!("Falha ao conectar ao banco de backup: {}", e)))?;
+        .map_err(|e| {
+            AppError::Validation(format!("Falha ao conectar ao banco de backup: {}", e))
+        })?;
 
     let integrity: Result<String, _> = sqlx::query_scalar("PRAGMA quick_check(1);")
         .fetch_one(&temp_pool)
