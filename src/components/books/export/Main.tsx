@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { AppShell } from "@/components/shared/AppShell";
+import { PageContent } from "@/components/shared/PageContent";
 import { usePdfExport } from "@/hooks/usePdfExport";
 import { useEpubExport } from "@/hooks/useEpubExport";
 import { useDocxExport } from "@/hooks/useDocxExport";
@@ -22,9 +22,9 @@ export function Main({ bookId }: { bookId: string }) {
   const result = format === "pdf" ? pdf.result : format === "epub" ? epub.result : docx.result;
 
   return (
-    <AppShell>
+    <PageContent>
       <div className="max-w-4xl mx-auto pb-16">
-        <ExportHeader bookId={bookId} />
+        <ExportHeader bookId={bookId} bookTitle={pdf.info?.title} />
         {pdf.isLoading && <p role="status" className="text-muted">Carregando o livro…</p>}
         {pdf.info && (
           <>
@@ -47,6 +47,6 @@ export function Main({ bookId }: { bookId: string }) {
           </p>
         )}
       </div>
-    </AppShell>
+    </PageContent>
   );
 }

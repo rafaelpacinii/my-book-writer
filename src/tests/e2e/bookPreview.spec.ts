@@ -29,14 +29,14 @@ test("preview links lead back to the book and to PDF export", async ({ page }) =
   await page.goto(previewURL);
   await expect(page.getByRole("link", { name: "Exportar PDF" }))
     .toHaveAttribute("href", `/books/export?bookId=${book.id}`);
-  await expect(page.getByRole("link", { name: "Voltar ao livro" }))
+  await expect(page.getByRole("navigation", { name: "Caminho de navegação" }).getByRole("link", { name: book.title, exact: true }))
     .toHaveAttribute("href", `/books/view?bookId=${book.id}`);
 });
 
 test("preview of a missing book offers a way back", async ({ page }) => {
   await page.goto("/books/preview?bookId=does-not-exist");
   await expect(page.getByText("Livro não encontrado.")).toBeVisible();
-  await expect(page.getByRole("link", { name: "Voltar à biblioteca" })).toBeVisible();
+  await expect(page.getByRole("navigation", { name: "Caminho de navegação" }).getByRole("link", { name: "Biblioteca" })).toBeVisible();
 });
 
 test("preview scrubber allows page navigation with Kindle-style slider", async ({ page }) => {

@@ -37,7 +37,7 @@ test("cm/in settings update physical format, margins, font and font size", async
   expect(fontSize.declared).toBeCloseTo(16 * 96 / 72, 3);
   // Engines round computed styles to their own subpixel grid.
   expect(Math.abs(fontSize.rendered - fontSize.declared)).toBeLessThan(0.02);
-  await expect(page.locator("main > p")).toContainText("6 × 9 in");
+  await expect(page.getByRole("region", { name: "Área de escrita" }).locator(":scope > p")).toContainText("6 × 9 in");
 });
 
 test("decimal input, selected units and precise margins survive unrelated saves", async ({ page }) => {

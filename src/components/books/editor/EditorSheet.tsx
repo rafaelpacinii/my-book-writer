@@ -29,7 +29,7 @@ export function EditorSheet(props: Props) {
       {props.isFocusMode && (
         <EditorFocusHeader title={props.title} onExitFocus={props.onExitFocus} />
       )}
-      <main className="flex-1 overflow-y-auto px-6 py-8 flex flex-col items-center">
+      <section aria-label="Área de escrita" className="flex-1 overflow-y-auto px-6 py-8 flex flex-col items-center">
         <div
           style={{
             transform: zoomScale !== 1 ? `scale(${zoomScale})` : undefined,
@@ -54,7 +54,7 @@ export function EditorSheet(props: Props) {
             nextChapter={props.nextChapter}
           />
         </div>
-      </main>
+      </section>
     </div>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { AppShell } from "@/components/shared/AppShell";
+import { PageContent } from "@/components/shared/PageContent";
 import { BookDetailHeader } from "./BookDetailHeader";
 import { ChaptersSectionHeader } from "./ChaptersSectionHeader";
 import { ChaptersGrid } from "./ChaptersGrid";
@@ -25,8 +25,8 @@ export function Main({ bookId }: Props) {
   if (!d.book) return <DetailNotFound />;
 
   return (
-    <AppShell>
-      <div className="max-w-6xl mx-auto pb-16">
+    <PageContent>
+      <div className="pb-16">
         <BookDetailHeader book={d.book} formatName={d.formatName} fontName={d.fontName} onOpenFrontMatter={() => setIsFrontMatterOpen(true)} />
         <ChaptersSectionHeader chaptersCount={d.chapters.length} />
         <ChaptersGrid
@@ -45,6 +45,6 @@ export function Main({ bookId }: Props) {
           onSave={fm.save} isSaving={fm.isSaving}
         />
       </div>
-    </AppShell>
+    </PageContent>
   );
 }

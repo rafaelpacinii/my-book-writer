@@ -1,5 +1,8 @@
 /* Editorial workspace from the supplied design. Manuscript typography stays separate. */
 .workspace-main { padding: 37px 42px 24px; }
+.workspace-studio > .workspace-menu-trigger { margin: 8px 16px; }
+.workspace-shell:has([data-editor-focus="true"]) > .workspace-navigation,
+.workspace-shell:has([data-editor-focus="true"]) .workspace-menu-trigger { display: none; }
 .editorial-eyebrow { font: 10px var(--font-mono); letter-spacing: .13em; text-transform: uppercase; color: var(--muted); }
 .editorial-heading { font-family: var(--font-display); font-size: clamp(40px, 3.6vw, 58px); font-weight: 400; line-height: 1.05; letter-spacing: -.025em; overflow-wrap: anywhere; }
 .resume-card { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(180px, .8fr); gap: 24px; min-height: 235px; padding: 28px 32px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }

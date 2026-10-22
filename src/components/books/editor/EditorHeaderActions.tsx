@@ -29,7 +29,7 @@ export function EditorHeaderActions(props: Props) {
   } = props;
 
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex min-w-0 flex-wrap items-center gap-2">
       <EditorSaveIndicator status={saveStatus} />
 
       {onToggleVersion && (

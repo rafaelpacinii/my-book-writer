@@ -16,7 +16,7 @@ export function Main({ bookId, chapterId, initialVersionId }: MainProps) {
 
   if (state.isLoading && !state.selectedVersion && state.versions.length === 0) {
     return (
-      <div className="flex flex-col h-screen overflow-hidden bg-background text-foreground">
+      <div className="flex h-full min-h-0 flex-col overflow-hidden bg-background text-foreground">
         <div className="h-[72px] px-6 border-b border-border bg-surface animate-pulse" />
         <div className="flex-1 flex items-center justify-center text-sm text-muted">
           Carregando histórico de versões...
@@ -26,7 +26,7 @@ export function Main({ bookId, chapterId, initialVersionId }: MainProps) {
   }
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden bg-background text-foreground">
+    <div className="flex h-full min-h-0 flex-col overflow-hidden bg-background text-foreground">
       <VersionsHeader
         bookId={bookId}
         chapterId={chapterId}

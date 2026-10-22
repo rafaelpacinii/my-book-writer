@@ -7,10 +7,10 @@ test("@ui empty library is distinct from a filtered library", async ({ page }) =
   await page.goto("/library");
   await expect(page.getByRole("heading", { name: "Sua biblioteca começa aqui." })).toBeVisible();
   await expect(page.locator("[data-loading-placeholder]")).toHaveCount(0);
-  await page.getByRole("navigation").getByRole("link", { name: "Novo livro" }).click();
+  await page.locator("main").getByRole("link", { name: "Criar meu primeiro livro", exact: true }).click();
   await page.getByLabel("Título do livro").fill("Uma história");
   await page.getByRole("button", { name: "Criar livro", exact: true }).click();
-  await page.getByRole("navigation").getByRole("link", { name: "Biblioteca" }).click();
+  await page.getByRole("navigation", { name: "Navegação principal" }).getByRole("link", { name: "Biblioteca" }).click();
   await page.getByLabel("Buscar por título ou autor").fill("Inexistente");
   await expect(page.getByRole("heading", { name: "Nenhum livro encontrado." })).toBeVisible();
   await page.getByRole("button", { name: "Limpar filtros", exact: true }).last().click();
@@ -65,8 +65,8 @@ test("@ui editor preferences persist across routes and stay synchronized with th
   await page.getByLabel("Salvamento automático").uncheck();
   await page.getByRole("button", { name: "Escuro", exact: true }).click();
   await expect(page.getByRole("button", { name: "Escuro", exact: true })).toHaveAttribute("aria-pressed", "true");
-  await page.getByRole("navigation").getByRole("link", { name: "Biblioteca" }).click();
-  await page.getByRole("navigation").getByRole("link", { name: "Configurações" }).click();
+  await page.getByRole("navigation", { name: "Navegação principal" }).getByRole("link", { name: "Biblioteca" }).click();
+  await page.getByRole("navigation", { name: "Navegação principal" }).getByRole("link", { name: "Configurações" }).click();
   await page.getByRole("button", { name: "Preferências", exact: true }).click();
   await expect(page.getByLabel("Salvamento automático")).not.toBeChecked();
   await page.getByRole("button", { name: "Alternar tema" }).click();

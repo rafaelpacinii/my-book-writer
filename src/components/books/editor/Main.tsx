@@ -9,16 +9,18 @@ import { EditorNotFound } from "./EditorNotFound";
 import { EditorModals } from "./EditorModals";
 import { useMainEditorState } from "./useMainEditorState";
 import type { MainProps } from "./mainTypes";
+import { useSaveBeforeNavigation } from "@/hooks/useSaveBeforeNavigation";
 
 export function Main({ bookId, chapterId }: MainProps) {
   const state = useMainEditorState(bookId, chapterId);
   const { ed, rev, ver } = state;
+  useSaveBeforeNavigation(Boolean(ed.chapter), ed.saveNow);
 
   if (ed.isLoading && !ed.chapter) return <EditorSkeleton />;
   if (!ed.chapter) return <EditorNotFound bookId={bookId} />;
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden bg-background text-foreground">
+    <div data-editor-focus={ed.isFocusMode} className="flex h-full min-h-0 flex-col overflow-hidden bg-background text-foreground">
       <EditorTopBars state={state} bookId={bookId} />
       <EditorWorkspace
         ed={ed} rev={rev} ver={ver} chapterId={chapterId} bookId={bookId}

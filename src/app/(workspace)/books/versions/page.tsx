@@ -1,11 +1,12 @@
 import { Suspense } from "react";
 import { RouteLoading } from "@/components/shared/RouteLoading";
-import { SettingsContent } from "@/app/books/settings/SettingsContent";
+import { VersionsContent } from "@/app/(workspace)/books/versions/VersionsContent";
 
-export default function BookSettingsPage() {
+export default function BookVersionsPage() {
   return (
     <Suspense fallback={<RouteLoading />}>
-      <SettingsContent />
+      <VersionsContent />
     </Suspense>
   );
 }
+

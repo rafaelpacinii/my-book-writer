@@ -8,6 +8,7 @@ import { useBooks } from "@/hooks/useBooks";
 import { useCatalog } from "@/hooks/useCatalog";
 import type { Book } from "@/types/book";
 import { validateBookLayout } from "@/utils/bookMeasurements";
+import { useUnsavedNavigation } from "@/hooks/useUnsavedNavigation";
 
 export function useBookSettings(bookId: string) {
   const router = useRouter();
@@ -35,7 +36,6 @@ export function useBookSettings(bookId: string) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [isDiscardModalOpen, setIsDiscardModalOpen] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -89,6 +89,7 @@ export function useBookSettings(bookId: string) {
     book, coverUrl, originalCoverUrl, title, author, formatId, fontId, fontSize, lineHeight,
     marginTopMm, marginBottomMm, marginLeftMm, marginRightMm,
   ]);
+  const navigation = useUnsavedNavigation(isDirty, `/books/view?bookId=${encodeURIComponent(bookId)}`);
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -153,19 +154,6 @@ export function useBookSettings(bookId: string) {
     }
   };
 
-  const handleCancel = () => {
-    if (isDirty) {
-      setIsDiscardModalOpen(true);
-    } else {
-      router.push(`/books/view?bookId=${encodeURIComponent(bookId)}`);
-    }
-  };
-
-  const handleConfirmDiscard = () => {
-    setIsDiscardModalOpen(false);
-    router.push(`/books/view?bookId=${encodeURIComponent(bookId)}`);
-  };
-
   return {
     book,
     isLoading: isLoadingBook || isCatalogLoading,
@@ -184,10 +172,11 @@ export function useBookSettings(bookId: string) {
     isSubmitting,
     isDeleting,
     isDeleteModalOpen, setIsDeleteModalOpen,
-    isDiscardModalOpen, setIsDiscardModalOpen,
+    isDiscardModalOpen: navigation.isOpen,
+    closeDiscardModal: navigation.close,
     handleSave,
     handleConfirmDelete,
-    handleCancel,
-    handleConfirmDiscard,
+    handleCancel: navigation.cancel,
+    handleConfirmDiscard: navigation.confirm,
   };
 }
