@@ -50,7 +50,9 @@ try {
       .then(done, error => done({ error: String(error) }));`);
   assert.ok(stats.db_path?.includes(config.identifier), "refusing to write outside the isolated UI-test database");
   const title = `Teste de escrita ${Date.now()}`;
-  await session.click('nav a[href="/books/new"]');
+  await session.click('nav a[href="/library"]');
+  await waitUntil(() => session.execute('return Boolean(document.querySelector(\'main a[href="/books/new"]\'));'), "library creation action ready");
+  await session.click('main a[href="/books/new"]');
   await waitUntil(() => session.execute('return Boolean(document.querySelector("input[placeholder*=lugar]"));'), "new book form ready");
   await session.type('input[placeholder*="lugar"]', title);
   await session.click('button[type="submit"]');
@@ -62,7 +64,8 @@ try {
       const current = await session.execute("return document.documentElement.dataset.theme;");
       if (current !== theme) await session.click('button[aria-label="Alternar tema"]');
       for (const [route, heading] of [["/library", "Biblioteca"], ["/books/new", "Novo livro"], ["/settings", "Configurações"], ["/home", "Início"]]) {
-        await session.click(`nav a[href="${route}"]`);
+        const selector = route === "/books/new" ? 'main a[href="/books/new"]' : `nav a[href="${route}"]`;
+        await session.click(selector);
         await waitUntil(() => session.execute('return (arguments[0] === "Início" ? location.pathname === "/home" && Boolean(document.querySelector("h1")) : document.querySelector("h1")?.textContent === arguments[0]) && !document.querySelector("[aria-busy=true]");', [heading]), heading);
         assert.equal(await session.execute('return document.querySelector("[data-app-sidebar]").dataset.persisted;'), "yes");
         assert.equal(await session.execute('const main = document.querySelector("main"); return main.scrollWidth <= main.clientWidth;'), true);

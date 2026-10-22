@@ -1,11 +1,11 @@
 import { Suspense } from "react";
 import { RouteLoading } from "@/components/shared/RouteLoading";
-import { VersionsContent } from "@/app/books/versions/VersionsContent";
+import { PreviewContent } from "@/app/(workspace)/books/preview/PreviewContent";
 
-export default function BookVersionsPage() {
+export default function BookPreviewPage() {
   return (
     <Suspense fallback={<RouteLoading />}>
-      <VersionsContent />
+      <PreviewContent />
     </Suspense>
   );
 }

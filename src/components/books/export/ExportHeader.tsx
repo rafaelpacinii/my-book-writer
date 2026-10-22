@@ -1,17 +1,12 @@
 import React from "react";
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { BookBreadcrumbs } from "@/components/shared/BookBreadcrumbs";
 
-export function ExportHeader({ bookId }: { bookId: string }) {
+export function ExportHeader({ bookId, bookTitle }: { bookId: string; bookTitle?: string }) {
   return (
     <div className="mb-6 select-none">
-      <Link
-        href={`/books/view?bookId=${encodeURIComponent(bookId)}`}
-        className="inline-flex items-center gap-1.5 text-[13px] font-bold text-muted hover:text-foreground transition-colors cursor-pointer mb-4"
-      >
-        <ArrowLeft className="w-4 h-4" />
-        <span>Voltar</span>
-      </Link>
+      <div className="mb-4">
+        <BookBreadcrumbs bookId={bookId} bookTitle={bookTitle} current="Exportar" />
+      </div>
       <h1 className="font-serif text-3xl lg:text-[32px] font-normal text-foreground tracking-tight">
         Exportar livro
       </h1>

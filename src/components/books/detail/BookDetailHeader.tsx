@@ -1,8 +1,7 @@
 "use client";
 
 import React from "react";
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { BookBreadcrumbs } from "@/components/shared/BookBreadcrumbs";
 import { Badge } from "@/components/ui/Badge";
 import type { Book } from "@/types/book";
 import { BookDetailActions } from "./BookDetailActions";
@@ -17,13 +16,7 @@ interface Props {
 export function BookDetailHeader({ book, formatName, fontName, onOpenFrontMatter }: Props) {
   return (
     <div className="flex flex-col gap-4 mb-8 select-none">
-      <Link
-        href="/library"
-        className="inline-flex items-center gap-1.5 text-[13px] font-bold text-muted hover:text-foreground transition-colors cursor-pointer w-fit"
-      >
-        <ArrowLeft className="w-4 h-4" />
-        <span>Biblioteca</span>
-      </Link>
+      <BookBreadcrumbs bookId={book.id} bookTitle={book.title} />
 
       <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
         <div>

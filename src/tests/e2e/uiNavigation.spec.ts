@@ -21,7 +21,8 @@ test("@ui repeated navigation preserves shell, decoded covers and loaded data", 
       });
     }
     for (const name of ["Biblioteca", "Novo livro", "Configurações", "Início"]) {
-      await page.getByRole("navigation").getByRole("link", { name, exact: true }).click();
+      const region = name === "Novo livro" ? page.locator("main") : page.getByRole("navigation", { name: "Navegação principal" });
+      await region.getByRole("link", { name, exact: true }).click();
       await expect(page.getByRole("heading", { level: 1, name: name === "Início" ? "Bom te ver, Helena." : name, exact: true })).toBeVisible();
       await expect(page.locator('[data-persisted="yes"]')).toHaveCount(1);
       if (name === "Início" || name === "Biblioteca") {
@@ -66,15 +67,15 @@ test("@ui creating a book and restoring a backup invalidate previously loaded da
   await mockUI(page);
   await page.goto("/library");
   await expect(page.getByRole("heading", { name: "Livro de teste" })).toBeVisible();
-  await page.getByRole("navigation").getByRole("link", { name: "Novo livro" }).click();
+  await page.locator("main").getByRole("link", { name: "Novo livro", exact: true }).click();
   await page.getByLabel("Título do livro").fill("Minha nova história");
   await page.getByRole("button", { name: "Criar livro", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Minha nova história" })).toBeVisible();
-  await page.getByRole("navigation").getByRole("link", { name: "Configurações" }).click();
+  await page.getByRole("navigation", { name: "Navegação principal" }).getByRole("link", { name: "Configurações" }).click();
   await page.getByRole("button", { name: "Restaurar backup", exact: true }).click();
   await page.getByRole("button", { name: "Selecionar arquivo e restaurar" }).click();
   await expect(page.getByRole("dialog")).toHaveCount(0);
-  await page.getByRole("navigation").getByRole("link", { name: "Biblioteca" }).click();
+  await page.getByRole("navigation", { name: "Navegação principal" }).getByRole("link", { name: "Biblioteca" }).click();
   await expect(page.getByRole("heading", { name: "Livro restaurado" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Minha nova história" })).toHaveCount(0);
 });

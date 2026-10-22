@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { AppShell } from "@/components/shared/AppShell";
+import { PageContent } from "@/components/shared/PageContent";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { SettingsHeader } from "./SettingsHeader";
 import { SettingsForm } from "./SettingsForm";
@@ -19,33 +19,33 @@ export function Main({ bookId }: Props) {
 
   if (s.isLoading && !s.book) {
     return (
-      <AppShell>
-        <div className="max-w-6xl mx-auto pb-16 flex flex-col gap-6">
+      <PageContent>
+        <div className="pb-16 flex flex-col gap-6">
           <Skeleton className="h-6 w-24 rounded-md" />
           <Skeleton className="h-10 w-80 rounded-md" />
           <Skeleton className="h-96 w-full rounded-xl" />
         </div>
-      </AppShell>
+      </PageContent>
     );
   }
 
   if (!s.book) {
     return (
-      <AppShell>
-        <div className="max-w-6xl mx-auto pb-16 p-8 text-center bg-surface border border-border rounded-xl">
+      <PageContent>
+        <div className="pb-16 p-8 text-center bg-surface border border-border rounded-xl">
           <h2 className="font-serif text-2xl font-normal text-foreground">Livro não encontrado</h2>
           <Link href="/library" className="text-sm font-bold text-primary mt-4 inline-block hover:underline">
             Voltar para a biblioteca
           </Link>
         </div>
-      </AppShell>
+      </PageContent>
     );
   }
 
   return (
-    <AppShell>
-      <div className="max-w-6xl mx-auto pb-16">
-        <SettingsHeader bookId={bookId} onBack={s.handleCancel} />
+    <PageContent>
+      <div className="pb-16">
+        <SettingsHeader bookId={bookId} bookTitle={s.book.title} />
         <SettingsForm settings={s} />
 
         <DeleteBookModal
@@ -57,10 +57,10 @@ export function Main({ bookId }: Props) {
         />
         <DiscardChangesModal
           isOpen={s.isDiscardModalOpen}
-          onClose={() => s.setIsDiscardModalOpen(false)}
+          onClose={s.closeDiscardModal}
           onDiscard={s.handleConfirmDiscard}
         />
       </div>
-    </AppShell>
+    </PageContent>
   );
 }

@@ -16,6 +16,7 @@
     "pdf:install": "playwright install chromium",
     "pdf:prepare": "node --experimental-strip-types src-tauri/prepareChromium.ts",
     "tauri": "tauri",
+    "tauri:dev:wsl": "GDK_BACKEND=x11 WEBKIT_DISABLE_DMABUF_RENDERER=1 tauri dev",
     "typecheck": "tsc --noEmit --incremental false",
     "test:ui": "playwright test ui --project=chromium",
     "test:native": "node src/tests/native/ui.windows.mjs",

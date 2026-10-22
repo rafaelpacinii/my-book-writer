@@ -1,11 +1,11 @@
 import React from "react";
 import Link from "next/link";
-import { AppShell } from "@/components/shared/AppShell";
+import { PageContent } from "@/components/shared/PageContent";
 
 export function DetailNotFound() {
   return (
-    <AppShell>
-      <div className="max-w-6xl mx-auto pb-16 p-8 text-center bg-surface border border-border rounded-xl">
+    <PageContent>
+      <div className="pb-16 p-8 text-center bg-surface border border-border rounded-xl">
         <h2 className="font-serif text-2xl font-normal text-foreground">
           Livro não encontrado
         </h2>
@@ -16,6 +16,6 @@ export function DetailNotFound() {
           Voltar para a biblioteca
         </Link>
       </div>
-    </AppShell>
+    </PageContent>
   );
 }

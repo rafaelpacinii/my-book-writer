@@ -10,7 +10,7 @@ export function EditorPagedSheet(props: PagedEditorProps) {
   const editor = usePagedEditor(props);
 
   return (
-    <main ref={editor.containerRef} className="flex-1 min-h-0 min-w-0 overflow-auto p-4 flex flex-col items-center">
+    <section aria-label="Área de escrita" ref={editor.containerRef} className="flex-1 min-h-0 min-w-0 overflow-auto p-4 flex flex-col items-center">
       <EditorPagedControls
         currentPage={editor.currentPage}
         totalPages={editor.totalPages}
@@ -26,6 +26,6 @@ export function EditorPagedSheet(props: PagedEditorProps) {
       />
       <EditorPagedPaper props={props} editor={editor} />
       <EditorPageLayoutInfo book={props.book} dimensions={editor.dim} />
-    </main>
+    </section>
   );
 }

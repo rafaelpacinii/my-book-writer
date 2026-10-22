@@ -19,8 +19,10 @@ for (const theme of ["light", "dark"]) {
     expect(themeToggle!.y + themeToggle!.height).toBeLessThanOrEqual(profile!.y);
     const recent = page.getByRole("region", { name: "Livros recentes", exact: true });
     await expect(recent.getByRole("link")).toHaveCount(3);
-    for (const name of ["Início", "Biblioteca", "Novo livro", "Configurações"]) {
-      await expect(page.getByRole("navigation").getByRole("link", { name, exact: true })).toBeInViewport({ ratio: 1 });
+    await expect(sidebar.getByRole("link", { name: "Novo livro", exact: true })).toHaveCount(0);
+    await expect(page.locator("main").getByRole("link", { name: "Novo livro", exact: true })).toBeVisible();
+    for (const name of ["Início", "Biblioteca", "Configurações"]) {
+      await expect(page.getByRole("navigation", { name: "Navegação principal" }).getByRole("link", { name, exact: true })).toBeInViewport({ ratio: 1 });
     }
     await page.getByRole("button", { name: "Ocultar livros recentes" }).click();
     await expect(recent).toBeHidden();
@@ -30,7 +32,7 @@ for (const theme of ["light", "dark"]) {
     await expect(page.locator("[data-app-sidebar]")).toHaveCSS("width", "68px");
     await expect(sidebar.getByRole("button", { name: "Alternar tema" })).toBeInViewport({ ratio: 1 });
     await expect(sidebar.getByRole("button", { name: "Abrir configurações do perfil" })).toBeInViewport({ ratio: 1 });
-    const library = page.getByRole("navigation").getByRole("link", { name: "Biblioteca", exact: true });
+    const library = page.getByRole("navigation", { name: "Navegação principal" }).getByRole("link", { name: "Biblioteca", exact: true });
     await library.hover();
     await expect(page.getByRole("tooltip", { name: "Biblioteca", exact: true })).toBeVisible();
     await page.mouse.move(500, 30);

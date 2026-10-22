@@ -20,7 +20,7 @@ for (const theme of ["light", "dark"]) {
     await expect(page.locator('[aria-busy="true"]')).toHaveCount(0);
     await page.evaluate(() => document.fonts.ready);
     const targets = [
-      page.getByRole("navigation").getByRole("link", { name: "Novo livro", exact: true }),
+      page.getByRole("navigation", { name: "Navegação principal" }).getByRole("link", { name: "Configurações", exact: true }),
       page.getByRole("button", { name: "Alternar tema" }),
       page.getByRole("button", { name: "Abrir configurações do perfil" }),
       page.locator(".book-card").first(),
@@ -39,7 +39,7 @@ for (const theme of ["light", "dark"]) {
       }
     }
     await page.getByRole("button", { name: "Recolher menu", exact: true }).click();
-    const library = page.getByRole("navigation").getByRole("link", { name: "Biblioteca", exact: true });
+    const library = page.getByRole("navigation", { name: "Navegação principal" }).getByRole("link", { name: "Biblioteca", exact: true });
     for (let index = 0; index < 5; index++) {
       await library.hover();
       await expect(page.getByRole("tooltip")).toHaveCount(1);

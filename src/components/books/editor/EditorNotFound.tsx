@@ -1,6 +1,6 @@
 import React from "react";
 import Link from "next/link";
-import { AppShell } from "@/components/shared/AppShell";
+import { PageContent } from "@/components/shared/PageContent";
 
 interface Props {
   bookId: string;
@@ -8,7 +8,7 @@ interface Props {
 
 export function EditorNotFound({ bookId }: Props) {
   return (
-    <AppShell>
+    <PageContent>
       <div className="max-w-4xl mx-auto py-16 p-8 text-center bg-surface border border-border rounded-xl">
         <h2 className="font-serif text-2xl font-normal text-foreground">
           Capítulo não encontrado
@@ -20,6 +20,6 @@ export function EditorNotFound({ bookId }: Props) {
           Voltar para o livro
         </Link>
       </div>
-    </AppShell>
+    </PageContent>
   );
 }

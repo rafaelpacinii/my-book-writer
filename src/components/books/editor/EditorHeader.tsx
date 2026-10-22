@@ -1,6 +1,5 @@
 import React from "react";
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { BookBreadcrumbs } from "@/components/shared/BookBreadcrumbs";
 import { EditorHeaderActions } from "./EditorHeaderActions";
 import type { EditorHeaderProps } from "./editorHeaderTypes";
 
@@ -13,19 +12,10 @@ export function EditorHeader(props: EditorHeaderProps) {
   } = props;
 
   return (
-    <header className="h-[72px] px-6 border-b border-border bg-surface flex items-center justify-between select-none shrink-0">
+    <header className="min-h-[72px] flex shrink-0 flex-wrap items-center justify-between gap-3 border-b border-border bg-surface px-4 py-3 select-none">
       <div className="flex items-center gap-4 min-w-0">
-        <Link
-          href={`/books/view?bookId=${encodeURIComponent(bookId)}`}
-          className="text-foreground hover:text-primary transition-colors cursor-pointer"
-          title="Voltar ao menu do livro"
-        >
-          <ArrowLeft className="w-5 h-5" />
-        </Link>
         <div className="flex flex-col min-w-0">
-          <span className="text-[13px] font-bold text-foreground truncate">
-            {bookTitle || "Sem título"}
-          </span>
+          <BookBreadcrumbs bookId={bookId} bookTitle={bookTitle} current="Editor" />
           <span className="text-xs text-muted truncate">
             {chapterNumber ? `${chapterNumber} · ` : ""}{chapterTitle || "Sem título"}
           </span>

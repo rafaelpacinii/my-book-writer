@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import Link from "next/link";
-import { ArrowLeft, RotateCcw } from "lucide-react";
+import { RotateCcw } from "lucide-react";
+import { BookBreadcrumbs } from "@/components/shared/BookBreadcrumbs";
 
 interface Props {
   bookId: string;
@@ -32,19 +32,11 @@ export function VersionsHeader(props: Props) {
   const editorUrl = `/books/editor?bookId=${encodeURIComponent(bookId)}&chapterId=${encodeURIComponent(chapterId)}`;
 
   return (
-    <header className="h-[72px] px-6 border-b border-border bg-surface flex items-center justify-between select-none shrink-0 z-20">
+    <header className="z-20 flex min-h-[72px] shrink-0 flex-wrap items-center justify-between gap-3 border-b border-border bg-surface px-4 py-3 select-none">
       <div className="flex items-center gap-4 min-w-0">
-        <Link
-          href={editorUrl}
-          className="text-foreground hover:text-primary transition-colors cursor-pointer"
-          title="Voltar ao editor"
-        >
-          <ArrowLeft className="w-5 h-5" />
-        </Link>
         <div className="flex flex-col min-w-0">
-          <span className="text-[13px] font-bold text-foreground truncate">
-            {bookTitle || "Sem título"}
-          </span>
+          <BookBreadcrumbs bookId={bookId} bookTitle={bookTitle} current="Histórico"
+            ancestors={[{ label: "Editor", href: editorUrl }]} />
           <span className="text-xs text-muted truncate">
             {chapterTitle || "Sem título"} · Histórico de Versões
           </span>
