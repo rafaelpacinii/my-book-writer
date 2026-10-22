@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { PageContent } from "@/components/shared/PageContent";
 import { BookDetailHeader } from "./BookDetailHeader";
 import { ChaptersSectionHeader } from "./ChaptersSectionHeader";
@@ -9,8 +9,6 @@ import { ChapterModals } from "./ChapterModals";
 import { DetailSkeleton } from "./DetailSkeleton";
 import { DetailNotFound } from "./DetailNotFound";
 import { useBookDetail } from "./useBookDetail";
-import { useFrontMatter } from "@/hooks/useFrontMatter";
-import { FrontMatterModal } from "@/components/books/frontMatter/FrontMatterModal";
 
 interface Props {
   bookId: string;
@@ -18,8 +16,6 @@ interface Props {
 
 export function Main({ bookId }: Props) {
   const d = useBookDetail(bookId);
-  const fm = useFrontMatter(bookId);
-  const [isFrontMatterOpen, setIsFrontMatterOpen] = useState(false);
 
   if (d.isLoading && !d.book) return <DetailSkeleton />;
   if (!d.book) return <DetailNotFound />;
@@ -27,7 +23,7 @@ export function Main({ bookId }: Props) {
   return (
     <PageContent>
       <div className="pb-16">
-        <BookDetailHeader book={d.book} formatName={d.formatName} fontName={d.fontName} onOpenFrontMatter={() => setIsFrontMatterOpen(true)} />
+        <BookDetailHeader book={d.book} formatName={d.formatName} fontName={d.fontName} />
         <ChaptersSectionHeader chaptersCount={d.chapters.length} />
         <ChaptersGrid
           chapters={d.chapters} bookId={bookId} onNewChapter={() => d.setIsModalOpen(true)}
@@ -38,11 +34,6 @@ export function Main({ bookId }: Props) {
           isNewOpen={d.isModalOpen} onNewClose={() => d.setIsModalOpen(false)} onNewCreate={d.handleCreateChapter}
           chapterToRename={d.chapterToRename} onRenameClose={() => d.setChapterToRename(null)} onRenameConfirm={d.handleConfirmRename}
           chapterToDelete={d.chapterToDelete} onDeleteClose={() => d.setChapterToDelete(null)} onDeleteConfirm={d.handleConfirmDelete}
-        />
-        <FrontMatterModal
-          isOpen={isFrontMatterOpen} onClose={() => setIsFrontMatterOpen(false)} data={fm.data}
-          bookTitle={d.book.title} authorName={d.book.author_name} chapterCount={d.chapters.length}
-          onSave={fm.save} isSaving={fm.isSaving}
         />
       </div>
     </PageContent>

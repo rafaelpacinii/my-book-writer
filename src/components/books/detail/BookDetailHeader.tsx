@@ -10,10 +10,9 @@ interface Props {
   book: Book;
   formatName?: string;
   fontName?: string;
-  onOpenFrontMatter: () => void;
 }
 
-export function BookDetailHeader({ book, formatName, fontName, onOpenFrontMatter }: Props) {
+export function BookDetailHeader({ book, formatName, fontName }: Props) {
   return (
     <div className="flex flex-col gap-4 mb-8 select-none">
       <BookBreadcrumbs bookId={book.id} bookTitle={book.title} />
@@ -34,7 +33,7 @@ export function BookDetailHeader({ book, formatName, fontName, onOpenFrontMatter
           </div>
         </div>
 
-        <BookDetailActions bookId={book.id} onOpenFrontMatter={onOpenFrontMatter} />
+        <BookDetailActions bookId={book.id} />
       </div>
     </div>
   );

@@ -3,24 +3,25 @@ import { EditorPagedNavigation } from "@/components/books/editor/EditorPagedNavi
 
 interface Props {
   bookId: string;
+  chapterId: string;
   page: number;
   totalPages: number;
   onPageChange: (page: number) => void;
 }
 
-export function PreviewToolbar({ bookId, page, totalPages, onPageChange }: Props) {
+export function PreviewToolbar({ bookId, chapterId, page, totalPages, onPageChange }: Props) {
   return (
-    <div className="h-[59px] px-6 border-b border-border bg-surface flex items-center justify-between gap-4 select-none shrink-0 overflow-x-auto">
-      <span className="text-[13px] font-bold text-foreground whitespace-nowrap">Visualização de impressão</span>
-      <div className="flex items-center gap-3 text-xs text-muted">
-        <EditorPagedNavigation currentPage={page} totalPages={totalPages} onPageChange={onPageChange} />
-        <Link
-          href={`/books/export?bookId=${encodeURIComponent(bookId)}`}
-          className="inline-flex items-center h-10 px-4 rounded-lg bg-primary text-primary-foreground text-[13px] font-bold hover:bg-primary-hover transition-colors whitespace-nowrap"
-        >
-          Exportar PDF
-        </Link>
-      </div>
+    <div className="flex min-w-0 flex-wrap items-center gap-3 text-xs text-muted">
+      <EditorPagedNavigation currentPage={page} totalPages={totalPages} onPageChange={onPageChange} />
+      <Link href={`/books/editor?bookId=${encodeURIComponent(bookId)}&chapterId=${encodeURIComponent(chapterId)}`}
+        className="inline-flex min-h-10 items-center rounded-lg border border-control-border px-3 font-semibold text-foreground hover:bg-surface-hover"
+      >Voltar ao editor</Link>
+      <Link
+        href={`/books/export?bookId=${encodeURIComponent(bookId)}`}
+        className="inline-flex items-center h-10 px-4 rounded-lg bg-primary text-primary-foreground text-[13px] font-bold hover:bg-primary-hover transition-colors whitespace-nowrap"
+      >
+        Exportar
+      </Link>
     </div>
   );
 }

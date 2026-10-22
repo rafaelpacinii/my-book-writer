@@ -1,10 +1,15 @@
 import { invoke, isTauri } from "@tauri-apps/api/core";
 import type { BookFrontMatter, SaveFrontMatterInput } from "@/types/frontMatter";
 
+const storageKey = (bookId: string) => `my_book_writer_front_matter_${bookId}`;
+
 export async function getBookFrontMatter(bookId: string): Promise<BookFrontMatter> {
   if (isTauri()) {
     return invoke<BookFrontMatter>("get_book_front_matter", { bookId });
   }
+
+  const stored = localStorage.getItem(storageKey(bookId));
+  if (stored) return JSON.parse(stored) as BookFrontMatter;
 
   return {
     book_id: bookId,
@@ -41,10 +46,12 @@ export async function saveBookFrontMatter(
     return invoke<BookFrontMatter>("save_book_front_matter", { input });
   }
 
-  return {
+  const updated: BookFrontMatter = {
     ...input,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   };
+  localStorage.setItem(storageKey(input.book_id), JSON.stringify(updated));
+  return updated;
 }
 

@@ -4,7 +4,7 @@ import { PreviewStatus } from "./PreviewStatus";
 import { PreviewWorkspace } from "./PreviewWorkspace";
 import { usePreviewData } from "./usePreviewData";
 
-export function Main({ bookId }: { bookId: string }) {
+export function Main({ bookId, chapterId = "" }: { bookId: string; chapterId?: string }) {
   const data = usePreviewData(bookId);
 
   if (data.isLoading) return <PreviewStatus bookId={bookId} message="Carregando o livro…" />;
@@ -14,6 +14,7 @@ export function Main({ bookId }: { bookId: string }) {
     return <PreviewStatus bookId={bookId} message="Este livro ainda não tem capítulos para visualizar." />;
   }
 
-  return <PreviewWorkspace bookId={bookId} data={data} />;
+  const editorChapterId = data.chapters.find((chapter) => chapter.id === chapterId)?.id || data.chapters[0].id;
+  return <PreviewWorkspace bookId={bookId} data={data} editorChapterId={editorChapterId} />;
 }
 

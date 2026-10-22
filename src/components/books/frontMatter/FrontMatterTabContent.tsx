@@ -2,7 +2,7 @@
 
 import React from "react";
 import type { SaveFrontMatterInput } from "@/types/frontMatter";
-import type { FrontMatterTab } from "./FrontMatterModalTabs";
+import type { FrontMatterTab } from "@/components/books/frontMatter/frontMatterSections";
 import { HalfTitleSection } from "./HalfTitleSection";
 import { TitlePageSection } from "./TitlePageSection";
 import { CopyrightSection } from "./CopyrightSection";

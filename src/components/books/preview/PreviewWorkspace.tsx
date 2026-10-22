@@ -14,7 +14,7 @@ import { PreviewScrubber } from "./PreviewScrubber";
 import { PreviewMeasurer } from "./PreviewMeasurer";
 import { PreviewFooter } from "./PreviewFooter";
 
-export function PreviewWorkspace({ bookId, data }: { bookId: string; data: ReturnType<typeof usePreviewData> }) {
+export function PreviewWorkspace({ bookId, data, editorChapterId }: { bookId: string; data: ReturnType<typeof usePreviewData>; editorChapterId: string }) {
   const { book, chapters, dim, frontMatter, frontMatterPages } = data;
   const stageRef = useRef<HTMLElement>(null);
   const zoom = usePreviewZoom(stageRef, dim);
@@ -32,8 +32,9 @@ export function PreviewWorkspace({ bookId, data }: { bookId: string; data: Retur
 
   return (
     <div className="flex h-full min-h-0 flex-col overflow-hidden bg-background text-foreground">
-      <PreviewHeader bookId={bookId} title={book?.title ?? ""} />
-      <PreviewToolbar bookId={bookId} page={pages.page} totalPages={pages.total} onPageChange={pages.goToPage} />
+      <PreviewHeader bookId={bookId} title={book?.title ?? ""}>
+        <PreviewToolbar bookId={bookId} chapterId={editorChapterId} page={pages.page} totalPages={pages.total} onPageChange={pages.goToPage} />
+      </PreviewHeader>
       <div className="flex flex-1 min-h-0 overflow-hidden">
         <PreviewToc
           frontMatterPages={frontMatterPages} activeFrontMatterIndex={pages.frontMatterIndex}
