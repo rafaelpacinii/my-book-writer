@@ -12,8 +12,11 @@ export function useMainEditorState(bookId: string, chapterId: string): MainEdito
   const ed = useChapterEditor(bookId, chapterId);
   const rev = useReview(chapterId, ed.chapter?.content_revision ?? 1);
   const ver = useChapterVersions(chapterId, ed.chapter?.track_changes_enabled ?? false);
-  const [isReviewOpen, setIsReviewOpen] = useState(false);
-  const [isVersionOpen, setIsVersionOpen] = useState(false);
+  const [panel, setPanel] = useState<"review" | "versions" | null>(null);
+  const isReviewOpen = panel === "review";
+  const isVersionOpen = panel === "versions";
+  const setIsReviewOpen = (open: boolean) => setPanel((current) => open ? "review" : current === "review" ? null : current);
+  const setIsVersionOpen = (open: boolean) => setPanel((current) => open ? "versions" : current === "versions" ? null : current);
 
   React.useEffect(() => {
     if (ed.lastSavedAt && ver.trackChanges) {
@@ -28,10 +31,10 @@ export function useMainEditorState(bookId: string, chapterId: string): MainEdito
         ed.setIsFocusMode((prev) => !prev);
       } else if (matchesShortcut(e, ed.preferences.shortcuts.versionsDrawer)) {
         e.preventDefault();
-        setIsVersionOpen((prev) => !prev);
+        setPanel((current) => current === "versions" ? null : "versions");
       } else if (matchesShortcut(e, ed.preferences.shortcuts.reviewDrawer)) {
         e.preventDefault();
-        setIsReviewOpen((prev) => !prev);
+        setPanel((current) => current === "review" ? null : "review");
       } else if (matchesShortcut(e, ed.preferences.shortcuts.newChapter)) {
         e.preventDefault();
         ed.setIsNewChapterModalOpen(true);

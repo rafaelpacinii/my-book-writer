@@ -1,32 +1,34 @@
-import React from "react";
+import { EditorSaveIndicator } from "./EditorSaveIndicator";
+import { EditorViewMode } from "./EditorViewMode";
+import type { SaveStatus } from "./useChapterEditor";
+import styles from "./editorChrome.module.css";
 
 interface Props {
   wordCount: number;
   readingTime: string;
-  viewMode?: "continuous" | "paged";
+  viewMode: "continuous" | "paged";
+  onViewModeChange: (mode: "continuous" | "paged") => void;
+  saveStatus: SaveStatus;
+  autosaveEnabled: boolean;
+  onSave: () => void;
+  isFocusMode: boolean;
 }
 
-export function EditorFooter({
-  wordCount, readingTime, viewMode = "continuous",
-}: Props) {
-  const isPaged = viewMode === "paged";
-
+export function EditorFooter(props: Props) {
+  if (props.isFocusMode && props.saveStatus !== "error") return null;
   return (
-    <footer className="h-11 px-6 border-t border-border bg-surface flex items-center justify-between text-xs text-muted select-none shrink-0">
-      <div>
-        <span>
-          <strong className="text-foreground font-semibold">{wordCount.toLocaleString()}</strong>{" "}
-          {wordCount === 1 ? "palavra" : "palavras"}
+    <footer role="region" aria-label="Status do editor" className={`${styles.footer} border-t border-border bg-surface text-xs text-muted select-none`}>
+      {!props.isFocusMode && (
+        <span className="whitespace-nowrap">
+          <strong className="font-medium text-foreground">{props.wordCount.toLocaleString("pt-BR")}</strong>{" "}
+          {props.wordCount === 1 ? "palavra" : "palavras"}
+          <span className={styles.readingTime}> · {props.readingTime}</span>
         </span>
-        <span className="mx-2 text-border">·</span>
-        <span>português</span>
+      )}
+      <div className={styles.saveStatus}>
+        <EditorSaveIndicator status={props.saveStatus} autosaveEnabled={props.autosaveEnabled} onSave={props.onSave} />
       </div>
-
-      <div className="hidden sm:block">
-        <span>{isPaged ? "Diagramação em tempo real" : "Salvamento automático local"}</span>
-      </div>
-
-      <span>{readingTime}</span>
+      {!props.isFocusMode && <EditorViewMode value={props.viewMode} onChange={props.onViewModeChange} />}
     </footer>
   );
 }

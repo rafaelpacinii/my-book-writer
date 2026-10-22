@@ -37,7 +37,9 @@ export function QuickNewChapterModal({ isOpen, onClose, onCreate }: Props) {
     try {
       await onCreate(finalTitle, type, type === "custom" ? customName.trim() : undefined);
       setTitle(""); setType("standard"); setCustomName(""); onClose();
-    } catch { /* erro tratado pelo chamador */ } finally { setIsSubmitting(false); }
+    } catch { /* erro tratado pelo chamador */
+      setError("Não foi possível criar o capítulo. Verifique o salvamento e tente novamente.");
+    } finally { setIsSubmitting(false); }
   };
 
   return (
@@ -55,6 +57,7 @@ export function QuickNewChapterModal({ isOpen, onClose, onCreate }: Props) {
             O capítulo será criado como <strong className="text-foreground">{getDefaultTitleForType(type)}</strong>.
           </p>
         )}
+        {error && type !== "standard" && type !== "custom" && <p role="alert" className="text-sm text-danger">{error}</p>}
         <div className="flex items-center justify-end gap-3 pt-3 border-t border-border mt-1">
           <Button type="button" variant="outline" onClick={onClose} disabled={isSubmitting}>Cancelar</Button>
           <Button type="submit" variant="primary" isLoading={isSubmitting}>Criar capítulo</Button>
