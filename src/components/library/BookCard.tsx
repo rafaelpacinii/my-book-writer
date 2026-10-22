@@ -25,7 +25,7 @@ export function BookCard({ book, index, formatName, fontName }: Props) {
           </Link>
         </h2>
         <p className="mt-1.5 truncate text-[10px] text-muted">{book.author_name || "Autor"}</p>
-        <div className="mt-3 flex flex-wrap justify-between gap-x-3 gap-y-1 border-t border-border pt-2.5 text-[9px] text-muted">
+        <div className="book-metadata mt-3 flex flex-wrap justify-between gap-x-3 gap-y-1 border-t border-border pt-2.5 text-[9px] text-muted">
           <span>{[formatName, fontName].filter(Boolean).join(" · ")}</span>
           <span>Atualizado {formatLastEdited(book.updated_at)}</span>
         </div>

@@ -19,6 +19,12 @@ for (const theme of ["light", "dark"]) {
         expect(await page.locator("main").evaluate((main) => main.scrollWidth <= main.clientWidth)).toBe(true);
         if (route === "/library") {
           await expect(page.locator(".book-grid article")).toHaveCount(6);
+          const proportions = await page.locator(".book-grid article").evaluateAll((cards) =>
+            cards.map((card) => {
+              const { width, height } = card.getBoundingClientRect();
+              return height / width;
+            }));
+          expect(proportions.every((ratio) => ratio > 1.4)).toBe(true);
           await expect(page.getByRole("region", { name: "Retomar seu livro" })).toHaveCount(0);
         } else {
           await expect(page.getByRole("region", { name: "Retomar seu livro" })).toBeVisible();
