@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
+import { openSync, closeSync } from "node:fs";
 import { mkdir, readFile, writeFile, access } from "node:fs/promises";
 import { resolve } from "node:path";
 import { request, waitUntil, client } from "./webdriver.mjs";
@@ -12,11 +13,19 @@ const binary = resolve("src-tauri/target/ui-tests/release/my-book-writer.exe");
 await access(binary);
 const output = resolve("src/tests/test-results/native");
 await mkdir(output, { recursive: true });
-const driver = spawn("tauri-driver", process.env.MBW_EDGE_DRIVER ? ["--native-driver", process.env.MBW_EDGE_DRIVER] : [], { stdio: "inherit" });
+const driverLog = openSync(resolve(output, "driver.log"), "w");
+const driver = spawn("tauri-driver", process.env.MBW_EDGE_DRIVER ? ["--native-driver", process.env.MBW_EDGE_DRIVER] : [], {
+  stdio: ["ignore", driverLog, driverLog],
+});
+closeSync(driverLog);
 let driverError;
 driver.on("error", (error) => { driverError = error; });
+driver.on("exit", (code, signal) => {
+  driverError = new Error(`tauri-driver exited (code: ${code}, signal: ${signal}); see driver.log.`);
+});
 let session;
 async function start(resetSidebar = false) {
+  console.log("Creating native WebDriver session (up to 120 seconds for cold WebView2 startup).");
   const created = await request("/session", { capabilities: {
     alwaysMatch: { "tauri:options": { application: binary } },
   } });
@@ -72,6 +81,12 @@ try {
   await waitUntil(() => session.execute("return document.body.textContent.includes(arguments[0]);", [title]), "book survives application restart");
   console.log("Native Windows UI checks passed. Actual DPI/runtime:", runtime);
 } catch (error) {
+  await writeFile(output + "/failure.json", JSON.stringify({
+    message: error instanceof Error ? error.message : String(error),
+    stack: error instanceof Error ? error.stack : undefined,
+    cause: error instanceof Error && error.cause instanceof Error ? error.cause.stack : undefined,
+    sessionCreated: Boolean(session),
+  }, null, 2));
   if (session) {
     try { await writeFile(output + "/failure.png", Buffer.from(await session.screenshot(), "base64")); }
     catch (captureError) { console.error("Could not capture native failure:", captureError); }

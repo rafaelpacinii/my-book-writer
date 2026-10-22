@@ -2,14 +2,24 @@ import { setTimeout as delay } from "node:timers/promises";
 
 const endpoint = "http://127.0.0.1:4444";
 export async function request(path, body, method = body === undefined ? "GET" : "POST") {
-  const response = await fetch(endpoint + path, {
-    method,
-    headers: { "content-type": "application/json" },
-    body: body === undefined ? undefined : JSON.stringify(body),
-    signal: AbortSignal.timeout(15_000),
-  });
-  const result = await response.json();
-  if (!response.ok || result.value?.error) throw new Error(JSON.stringify(result.value));
+  // Cold WebView2 startup includes launching the app; ordinary commands stay bounded.
+  const timeout = method === "POST" && path === "/session" ? 120_000 : 15_000;
+  let response;
+  let result;
+  try {
+    response = await fetch(endpoint + path, {
+      method,
+      headers: { "content-type": "application/json" },
+      body: body === undefined ? undefined : JSON.stringify(body),
+      signal: AbortSignal.timeout(timeout),
+    });
+    result = await response.json();
+  } catch (cause) {
+    throw new Error(`WebDriver ${method} ${path} failed (timeout: ${timeout}ms).`, { cause });
+  }
+  if (!response.ok || result.value?.error) {
+    throw new Error(`WebDriver ${method} ${path} (HTTP ${response.status}): ${JSON.stringify(result.value)}`);
+  }
   return result.value;
 }
 
