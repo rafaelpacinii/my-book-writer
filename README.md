@@ -264,6 +264,22 @@ Launch the Tauri desktop application with Hot Module Replacement (HMR):
 npm run tauri dev
 ```
 
+When running from a WSL/Linux terminal in VS Code, this launches the Linux app
+through WSLg, rather than a native Windows WebView2 app. If the window loses its
+cursor, stops accepting clicks, or flickers, close that development session and try:
+
+```bash
+npm run tauri:dev:wsl
+```
+
+This opt-in command selects the GTK X11 backend and disables WebKitGTK's DMABUF
+renderer for that session. It is a graphics troubleshooting option; restoring mouse
+input must be checked in the actual WSLg window. See the
+[Tauri Linux graphics guide](https://v2.tauri.app/develop/debug/linux-graphics/).
+It does not change the default launch command or native Windows builds. To test
+Windows WebView2 itself, run the project with Windows Node.js and Rust/MSVC from a
+Windows terminal, using a separate Windows checkout and its own dependencies.
+
 ### Building for Production
 
 Compile optimized native binaries and platform installers (DEB/AppImage on Linux, DMG on macOS, MSI/NSIS on Windows):
