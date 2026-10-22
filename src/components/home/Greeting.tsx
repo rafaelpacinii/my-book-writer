@@ -1,25 +1,21 @@
 "use client";
 
-import React from "react";
 import { useProfile } from "@/hooks/useProfile";
-import { getTimeGreeting } from "@/utils/format";
+import { LoadingRegion } from "@/components/ui/LoadingRegion";
+import { Skeleton } from "@/components/ui/Skeleton";
+import { PageHeader } from "@/components/shared/PageHeader";
 
 export function Greeting() {
-  const { profile } = useProfile();
-  const greeting = getTimeGreeting();
-  const firstName = profile?.display_name?.trim().split(/\s+/)[0] || "Autor";
+  const { profile, isLoading } = useProfile();
+  const name = profile?.display_name.trim().split(/\s+/)[0];
 
   return (
-    <div className="mb-8 select-none">
-      <p className="text-xs font-bold tracking-wider text-primary uppercase">
-        Seu estúdio de escrita
-      </p>
-      <h1 className="font-serif text-3xl lg:text-[32px] font-normal text-foreground tracking-tight mt-2.5">
-        {greeting}, {firstName}.
-      </h1>
-      <p className="text-base text-muted font-normal mt-1.5">
-        Há uma história esperando por você.
-      </p>
-    </div>
+    <LoadingRegion isLoading={isLoading} label="Carregando seu espaço"
+      skeleton={<Skeleton className="h-[98px] w-full max-w-md" />}
+    >
+      <PageHeader title={name ? `Bom te ver, ${name}.` : "Seu estúdio de escrita."}
+        description="A próxima página começa no seu tempo."
+      />
+    </LoadingRegion>
   );
 }

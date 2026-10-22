@@ -1,3 +1,4 @@
+import { publishDataChange } from "@/lib/data/changes";
 import { convertFileSrc, invoke } from "@tauri-apps/api/core";
 import type { ImageAsset, ImportImageInput } from "@/types/image";
 import type { Book } from "@/types/book";
@@ -18,8 +19,9 @@ function getStoredCovers(): Record<string, string> {
   if (!stored) return {};
   try {
     return JSON.parse(stored);
-  } catch {
-    return {};
+  } catch (error) {
+    console.error("Dados locais de capas inválidos.", error);
+    throw new Error("Não foi possível ler as capas salvas neste navegador.");
   }
 }
 
@@ -41,8 +43,9 @@ function updateBrowserBookCoverAssetId(bookId: string, assetId: string | null): 
       books[idx].updated_at = new Date().toISOString();
       localStorage.setItem(BOOKS_STORAGE_KEY, JSON.stringify(books));
     }
-  } catch {
-    // ignore
+  } catch (error) {
+    console.error("Falha ao atualizar a capa do livro.", error);
+    throw new Error("Não foi possível atualizar a capa deste livro.");
   }
 }
 
@@ -92,7 +95,7 @@ export async function listImageAssets(bookId: string): Promise<ImageAsset[]> {
   return invoke<ImageAsset[]>("list_image_assets", { bookId });
 }
 
-export async function setBookCardImage(
+async function persistBookCardImage(
   bookId: string,
   assetId?: string | null,
 ): Promise<void> {
@@ -136,7 +139,7 @@ export async function loadBookCoverUrl(
   try {
     const assets = await listImageAssets(bookId);
     if (!assets || assets.length === 0) return null;
-    const asset = assetId ? assets.find((a) => a.id === assetId) || assets[0] : assets[0];
+    const asset = assetId ? assets.find((a) => a.id === assetId) : assets[0];
     if (!asset) return null;
 
     try {
@@ -144,18 +147,20 @@ export async function loadBookCoverUrl(
         storageKey: asset.storage_key,
       });
       if (dataUrl) return dataUrl;
-    } catch {
+    } catch (error) {
+      console.warn("Leitura da capa indisponível; tentando o arquivo local.", error);
       // Fallback para conversão de caminho do arquivo caso comando falhe
     }
 
     const path = await getImageFilePath(asset.storage_key);
     return convertImagePathToSrc(path);
-  } catch {
-    return null;
+  } catch (error) {
+    console.error("Falha ao carregar capa", error);
+    throw new Error("Não foi possível carregar a capa deste livro.");
   }
 }
 
-export async function saveBookCoverImage(
+async function persistBookCoverImage(
   bookId: string,
   dataUrl: string | null,
 ): Promise<string | null> {
@@ -175,11 +180,11 @@ export async function saveBookCoverImage(
   }
 
   if (!dataUrl) {
-    await setBookCardImage(bookId, null);
+    await persistBookCardImage(bookId, null);
     return null;
   }
 
-  if (!dataUrl.startsWith("data:")) return null;
+  if (!dataUrl.startsWith("data:")) throw new Error("Escolha um arquivo de imagem válido.");
 
   const mimeMatch = dataUrl.match(/^data:(image\/[a-zA-Z0-9.+_-]+);base64,/);
   const mimeType = mimeMatch ? mimeMatch[1] : "image/png";
@@ -193,6 +198,17 @@ export async function saveBookCoverImage(
     data_base64: dataUrl,
   });
 
-  await setBookCardImage(bookId, asset.id);
+  await persistBookCardImage(bookId, asset.id);
   return asset.id;
+}
+
+export async function setBookCardImage(bookId: string, assetId?: string | null): Promise<void> {
+  await persistBookCardImage(bookId, assetId);
+  publishDataChange("covers");
+}
+
+export async function saveBookCoverImage(bookId: string, dataUrl: string | null): Promise<string | null> {
+  const assetId = await persistBookCoverImage(bookId, dataUrl);
+  publishDataChange("covers");
+  return assetId;
 }

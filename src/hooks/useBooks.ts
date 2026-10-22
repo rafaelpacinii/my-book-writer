@@ -1,113 +1,38 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import {
-  createBook,
-  deleteBook,
-  listBooks,
-  updateBook,
-} from "@/lib/api/books";
-import type { Book, CreateBookInput, UpdateBookInput } from "@/types/book";
+import { useCallback, useState } from "react";
+import type { CreateBookInput, UpdateBookInput } from "@/types/book";
+import { createBook, deleteBook, updateBook } from "@/lib/api/books";
+import { booksResource, emptyBooksResource } from "@/lib/data/appResources";
+import { useResource } from "@/hooks/useResource";
 
-export interface UseBooksReturn {
-  books: Book[];
-  isLoading: boolean;
-  error: string | null;
-  refreshBooks: () => Promise<void>;
-  addBook: (input: CreateBookInput) => Promise<Book>;
-  editBook: (id: string, input: UpdateBookInput) => Promise<Book>;
-  removeBook: (id: string) => Promise<void>;
-}
-
-/**
- * Hook para gerenciar o ciclo de vida e a lista de livros do perfil ativo.
- * Trata carregamento inicial, criação, atualização e exclusão otimista/reativa.
- */
-export function useBooks(profileId?: string | null): UseBooksReturn {
-  const [books, setBooks] = useState<Book[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(Boolean(profileId));
-  const [error, setError] = useState<string | null>(null);
-
-  const refreshBooks = useCallback(async () => {
-    if (!profileId) {
-      setBooks([]);
-      setIsLoading(false);
-      return;
+export function useBooks(profileId?: string | null) {
+  const [mutationError, setMutationError] = useState<string | null>(null);
+  const resource = profileId ? booksResource(profileId) : emptyBooksResource;
+  const books = useResource(resource);
+  async function mutate<T>(action: () => Promise<T>) {
+    setMutationError(null);
+    try { return await action(); }
+    catch (error) {
+      setMutationError(error instanceof Error ? error.message : String(error));
+      throw error;
     }
-
-    setIsLoading(true);
-    setError(null);
-    try {
-      const data = await listBooks(profileId);
-      setBooks(data);
-    } catch (err) {
-      const message = err instanceof Error ? err.message : String(err);
-      setError(message);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [profileId]);
-
-  const addBook = useCallback(
-    async (input: CreateBookInput): Promise<Book> => {
-      setError(null);
-      try {
-        const newBook = await createBook(input);
-        setBooks((prev) => [newBook, ...prev]);
-        return newBook;
-      } catch (err) {
-        const message = err instanceof Error ? err.message : String(err);
-        setError(message);
-        throw err;
-      }
-    },
-    [],
-  );
-
-  const editBook = useCallback(
-    async (id: string, input: UpdateBookInput): Promise<Book> => {
-      setError(null);
-      try {
-        const updated = await updateBook(id, input);
-        setBooks((prev) =>
-          prev.map((book) => (book.id === id ? updated : book)),
-        );
-        return updated;
-      } catch (err) {
-        const message = err instanceof Error ? err.message : String(err);
-        setError(message);
-        throw err;
-      }
-    },
-    [],
-  );
-
-  const removeBook = useCallback(
-    async (id: string): Promise<void> => {
-      setError(null);
-      try {
-        await deleteBook(id);
-        setBooks((prev) => prev.filter((book) => book.id !== id));
-      } catch (err) {
-        const message = err instanceof Error ? err.message : String(err);
-        setError(message);
-        throw err;
-      }
-    },
-    [],
-  );
-
-  useEffect(() => {
-    void refreshBooks();
-  }, [refreshBooks]);
-
+  }
+  const refresh = books.refresh;
+  const refreshBooks = useCallback(() => {
+    setMutationError(null);
+    return refresh();
+  }, [refresh]);
   return {
-    books,
-    isLoading,
-    error,
+    books: books.data ?? [],
+    isLoading: Boolean(profileId) && books.isLoading,
+    isRefreshing: books.isRefreshing,
+    error: mutationError || books.error,
     refreshBooks,
-    addBook,
-    editBook,
-    removeBook,
+    addBook: (input: CreateBookInput) => mutate(() => createBook(input)),
+    editBook: (id: string, input: UpdateBookInput) => mutate(() => updateBook(id, input)),
+    removeBook: (id: string) => mutate(() => deleteBook(id)),
   };
 }
+
+export type UseBooksReturn = ReturnType<typeof useBooks>;

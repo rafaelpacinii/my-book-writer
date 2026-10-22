@@ -1,5 +1,5 @@
 import React from "react";
-import { ThemePreferencesCard } from "./ThemePreferencesCard";
+import { ThemePreferencesCard } from "@/components/settings/ThemePreferencesCard";
 import type { EditorPreferences } from "@/types/settings";
 
 interface Props {
@@ -17,7 +17,7 @@ const INTERVAL_OPTIONS = [
 
 export function EditorPreferencesSection({ preferences, onToggleAutosave, onIntervalChange }: Props) {
   return (
-    <div className="flex flex-col gap-6 max-w-3xl select-none">
+    <div className="flex flex-col gap-6 w-full select-none">
       <ThemePreferencesCard />
 
       <div className="p-5 rounded-xl border border-border bg-surface flex flex-col gap-4">
@@ -27,6 +27,7 @@ export function EditorPreferencesSection({ preferences, onToggleAutosave, onInte
             <p className="text-xs text-muted">Grava edições em segundo plano sem interromper a escrita.</p>
           </div>
           <input
+            aria-label="Salvamento automático"
             type="checkbox"
             checked={preferences.autosaveEnabled}
             onChange={(e) => onToggleAutosave(e.target.checked)}
@@ -42,6 +43,7 @@ export function EditorPreferencesSection({ preferences, onToggleAutosave, onInte
                 <button
                   key={opt.value}
                   type="button"
+                  aria-pressed={preferences.autosaveIntervalMs === opt.value}
                   onClick={() => onIntervalChange(opt.value)}
                   className={`px-3 py-2 rounded-lg text-xs font-medium border text-center transition-all cursor-pointer ${
                     preferences.autosaveIntervalMs === opt.value

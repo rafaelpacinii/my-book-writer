@@ -1,39 +1,24 @@
-import React from "react";
-import { RotateCcw } from "lucide-react";
-
 interface Props {
   isFiltered: boolean;
   totalResults: number;
+  totalBooks: number;
   onClearFilters: () => void;
 }
 
-export function LibraryResultsBar({ isFiltered, totalResults, onClearFilters }: Props) {
-  if (!isFiltered) {
-    return (
-      <div className="mb-4">
-        <p className="text-[11px] font-bold text-muted uppercase tracking-wider">
-          Seus livros
-        </p>
-      </div>
-    );
-  }
-
-  const resultsLabel = `${totalResults} ${totalResults === 1 ? "resultado" : "resultados"}`;
-
+export function LibraryResultsBar({ isFiltered, totalResults, totalBooks, onClearFilters }: Props) {
   return (
-    <div className="flex items-center justify-between gap-4 mb-4">
-      <p className="text-xs text-muted font-medium">
-        {resultsLabel}
-      </p>
-
-      <button
-        type="button"
-        onClick={onClearFilters}
-        className="inline-flex items-center gap-1.5 text-xs font-bold text-primary hover:underline cursor-pointer"
-      >
-        <RotateCcw className="w-3.5 h-3.5" />
-        <span>Limpar filtros</span>
-      </button>
+    <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+      <h2 className="font-display text-[25px]">Seu acervo</h2>
+      <div className="flex items-center gap-3 text-[10px] text-muted">
+        <p role="status" aria-live="polite">
+          {isFiltered ? `${totalResults} ${totalResults === 1 ? "resultado" : "resultados"}` : `${totalBooks} ${totalBooks === 1 ? "livro" : "livros"} na sua biblioteca`}
+        </p>
+        {isFiltered && (
+          <button type="button" onClick={onClearFilters} className="text-primary hover:underline">
+            Limpar filtros
+          </button>
+        )}
+      </div>
     </div>
   );
 }

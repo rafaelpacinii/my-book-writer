@@ -1,0 +1,67 @@
+/* Profile-first navigation, adapted from the supplied Side Menu reference. */
+.workspace-sidebar {
+  position: relative;
+  width: 248px;
+  height: 100dvh;
+  padding: 26px 20px 20px;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  background: var(--surface);
+  color: var(--foreground);
+  border-right: 1px solid var(--border);
+}
+
+.sidebar-collapse-button { right: -36px; z-index: 30; }
+.sidebar-section-label {
+  margin: 0 0 10px;
+  padding-inline: 12px;
+  font-size: 9px;
+  letter-spacing: .06em;
+  color: var(--muted);
+}
+.workspace-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  color: var(--muted);
+  font-size: 13px;
+}
+.workspace-nav-link:hover,
+.workspace-nav-link[aria-current="page"],
+.workspace-nav-row:hover,
+.workspace-nav-row:has([aria-current="page"]) {
+  background: var(--surface-hover);
+  color: var(--foreground);
+}
+.workspace-nav-link[aria-current="page"] { font-weight: 600; }
+.workspace-nav-row { border-radius: 8px; }
+.workspace-nav-row .workspace-nav-link { background: transparent; }
+.sidebar-book-branch::before {
+  content: '';
+  position: absolute;
+  width: 13px;
+  height: 15px;
+  top: 4px;
+  left: -13px;
+  border-left: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  border-bottom-left-radius: 8px;
+}
+[data-sidebar-compact] { display: none; }
+
+@media (max-height: 700px) {
+  .sidebar-recent { max-height: 60px; overflow-y: auto; }
+}
+
+@media (min-width: 700px) {
+  [data-sidebar-collapsed="true"] .sidebar-collapse-button { right: -26px; }
+  [data-sidebar-collapsed="true"] [data-expand-icon] { display: block; }
+  [data-sidebar-collapsed="true"] [data-collapse-icon] { display: none; }
+  [data-sidebar-collapsed="true"] .sidebar-profile-header [data-sidebar-item] { padding-inline: 0; }
+  [data-sidebar-collapsed="true"] .sidebar-section-label { padding-inline: 0; text-align: center; font-size: 8px; }
+  [data-sidebar-collapsed="true"] [data-sidebar-compact] { display: inline; }
+}

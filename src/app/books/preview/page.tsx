@@ -1,9 +1,10 @@
 import { Suspense } from "react";
-import { PreviewContent } from "./PreviewContent";
+import { RouteLoading } from "@/components/shared/RouteLoading";
+import { PreviewContent } from "@/app/books/preview/PreviewContent";
 
 export default function BookPreviewPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-background" />}>
+    <Suspense fallback={<RouteLoading />}>
       <PreviewContent />
     </Suspense>
   );

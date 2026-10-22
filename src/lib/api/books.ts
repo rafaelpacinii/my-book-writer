@@ -1,3 +1,4 @@
+import { publishDataChange } from "@/lib/data/changes";
 import { invoke } from "@tauri-apps/api/core";
 import type { Book, CreateBookInput, UpdateBookInput } from "@/types/book";
 
@@ -24,7 +25,7 @@ function saveStoredBooks(books: Book[]): void {
   }
 }
 
-export async function createBook(input: CreateBookInput): Promise<Book> {
+async function persistCreateBook(input: CreateBookInput): Promise<Book> {
   if (!isTauriEnvironment()) {
     const newBook: Book = {
       id: `book-${Date.now()}`,
@@ -66,7 +67,7 @@ export async function getBookById(id: string): Promise<Book | null> {
   return invoke<Book | null>("get_book_by_id", { id });
 }
 
-export async function updateBook(id: string, input: UpdateBookInput): Promise<Book> {
+async function persistUpdateBook(id: string, input: UpdateBookInput): Promise<Book> {
   if (!isTauriEnvironment()) {
     const list = getStoredBooks();
     const idx = list.findIndex((b) => b.id === id);
@@ -94,11 +95,28 @@ export async function updateBook(id: string, input: UpdateBookInput): Promise<Bo
   return invoke<Book>("update_book", { id, input });
 }
 
-export async function deleteBook(id: string): Promise<void> {
+async function persistDeleteBook(id: string): Promise<void> {
   if (!isTauriEnvironment()) {
     const list = getStoredBooks().filter((b) => b.id !== id);
     saveStoredBooks(list);
     return;
   }
   return invoke<void>("delete_book", { id });
+}
+
+export async function createBook(input: CreateBookInput): Promise<Book> {
+  const book = await persistCreateBook(input);
+  publishDataChange("books");
+  return book;
+}
+
+export async function updateBook(id: string, input: UpdateBookInput): Promise<Book> {
+  const book = await persistUpdateBook(id, input);
+  publishDataChange("books");
+  return book;
+}
+
+export async function deleteBook(id: string): Promise<void> {
+  await persistDeleteBook(id);
+  publishDataChange("books");
 }

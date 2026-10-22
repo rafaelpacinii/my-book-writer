@@ -1,9 +1,10 @@
 import { Suspense } from "react";
-import { VersionsContent } from "./VersionsContent";
+import { RouteLoading } from "@/components/shared/RouteLoading";
+import { VersionsContent } from "@/app/books/versions/VersionsContent";
 
 export default function BookVersionsPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-background" />}>
+    <Suspense fallback={<RouteLoading />}>
       <VersionsContent />
     </Suspense>
   );

@@ -1,4 +1,5 @@
-import React from "react";
+import { LoadingRegion } from "@/components/ui/LoadingRegion";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { BookOpen, FileText, HardDrive, History } from "lucide-react";
 import type { DatabaseStats } from "@/types/settings";
 
@@ -16,18 +17,14 @@ function formatBytes(bytes: number): string {
 }
 
 export function DatabaseStatsCard({ stats, isLoading }: Props) {
-  if (isLoading || !stats) {
-    return (
-      <div className="p-4 rounded-xl border border-border bg-surface animate-pulse h-28" />
-    );
-  }
 
   return (
-    <div className="p-5 rounded-xl border border-border bg-surface flex flex-col gap-4">
+    <LoadingRegion isLoading={isLoading} label="Carregando informações dos livros" skeleton={<Skeleton className="h-56 w-full rounded-xl" />}>
+    {stats && <div className="p-5 rounded-xl border border-border bg-surface flex flex-col gap-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 text-foreground font-bold text-sm">
           <HardDrive className="w-4 h-4 text-primary" />
-          <span>Banco de Dados Local (SQLite)</span>
+          <span>Seus livros neste dispositivo</span>
         </div>
         <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-primary-soft text-primary">
           {formatBytes(stats.file_size_bytes)}
@@ -55,10 +52,12 @@ export function DatabaseStatsCard({ stats, isLoading }: Props) {
         </div>
       </div>
 
-      <p className="text-[11px] text-muted truncate font-mono bg-surface-elevated/50 p-2 rounded">
-        {stats.db_path}
-      </p>
-    </div>
+      <details className="text-xs text-muted">
+        <summary className="cursor-pointer">Informações técnicas</summary>
+        <p className="mt-2 break-all font-mono">SQLite · {stats.db_path}</p>
+      </details>
+    </div>}
+    </LoadingRegion>
   );
 }
 

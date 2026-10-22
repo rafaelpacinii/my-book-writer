@@ -1,3 +1,4 @@
+import { publishDataChange } from "@/lib/data/changes";
 import { invoke } from "@tauri-apps/api/core";
 import type {
   BackupExportResult,
@@ -58,7 +59,7 @@ export async function exportDatabaseBackup(
   });
 }
 
-export async function importDatabaseBackup(
+async function restoreDatabase(
   customPath?: string,
 ): Promise<BackupImportResult | null> {
   if (!isTauriEnvironment()) {
@@ -72,3 +73,9 @@ export async function importDatabaseBackup(
   });
 }
 
+
+export async function importDatabaseBackup(customPath?: string): Promise<BackupImportResult | null> {
+  const result = await restoreDatabase(customPath);
+  if (result) publishDataChange("restore");
+  return result;
+}

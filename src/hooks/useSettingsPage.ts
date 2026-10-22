@@ -3,39 +3,25 @@
 import { useCallback, useEffect, useState } from "react";
 import {
   exportDatabaseBackup,
-  getDatabaseStats,
   importDatabaseBackup,
 } from "@/lib/api/database";
 import { useEditorPreferences } from "@/hooks/useEditorPreferences";
-import type { DatabaseStats } from "@/types/settings";
-import type { SettingsTab } from "./types";
+import { statsResource } from "@/lib/data/appResources";
+import { useResource } from "@/hooks/useResource";
+import type { SettingsTab } from "@/components/settings/types";
 
 export function useSettingsPage() {
   const [activeTab, setActiveTab] = useState<SettingsTab>("backup");
-  const [stats, setStats] = useState<DatabaseStats | null>(null);
-  const [isLoadingStats, setIsLoadingStats] = useState(true);
+  const stats = useResource(statsResource);
+  const loadStats = stats.refresh;
+  // Chapter/version mutations can happen outside the main workspace.
+  useEffect(() => { void loadStats(); }, [loadStats]);
   const [isExporting, setIsExporting] = useState(false);
   const [isRestoring, setIsRestoring] = useState(false);
   const [isRestoreModalOpen, setIsRestoreModalOpen] = useState(false);
   const [feedback, setFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
 
   const editorPrefs = useEditorPreferences();
-
-  const loadStats = useCallback(async () => {
-    setIsLoadingStats(true);
-    try {
-      const data = await getDatabaseStats();
-      setStats(data);
-    } catch {
-      // Falha silenciosa ou mantém anterior
-    } finally {
-      setIsLoadingStats(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    void loadStats();
-  }, [loadStats]);
 
   const handleExport = useCallback(async () => {
     setIsExporting(true);
@@ -88,8 +74,10 @@ export function useSettingsPage() {
   return {
     activeTab,
     setActiveTab,
-    stats,
-    isLoadingStats,
+    stats: stats.data ?? null,
+    isLoadingStats: stats.isLoading,
+    statsError: stats.error,
+    retryStats: loadStats,
     isExporting,
     isRestoring,
     isRestoreModalOpen,

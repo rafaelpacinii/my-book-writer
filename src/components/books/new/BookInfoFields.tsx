@@ -33,7 +33,6 @@ export function BookInfoFields(props: Props) {
         value={title}
         onChange={(e) => setTitle(e.target.value)}
         error={titleError ?? undefined}
-        autoFocus
       />
 
       <Input

@@ -17,6 +17,7 @@ export function ThemePreferencesCard() {
           <button
             key={t.id}
             type="button"
+            aria-pressed={theme === t.id}
             onClick={() => setTheme(t.id)}
             className={`p-3 rounded-xl border flex flex-col items-center gap-2 text-xs font-bold transition-all cursor-pointer ${
               theme === t.id

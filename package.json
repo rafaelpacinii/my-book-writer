@@ -7,7 +7,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint src --max-warnings=0",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
@@ -15,7 +15,12 @@
     "test:e2e:report": "playwright show-report src/tests/playwright-report",
     "pdf:install": "playwright install chromium",
     "pdf:prepare": "node --experimental-strip-types src-tauri/prepareChromium.ts",
-    "tauri": "tauri"
+    "tauri": "tauri",
+    "typecheck": "tsc --noEmit --incremental false",
+    "test:ui": "playwright test ui --project=chromium",
+    "test:native": "node src/tests/native/ui.windows.mjs",
+    "check:ui": "node src/tests/check-ui.mjs",
+    "preview:static": "node src/tests/serve-static.mjs"
   },
   "dependencies": {
     "@tailwindcss/postcss": "^4.3.3",
@@ -27,11 +32,14 @@
     "tailwindcss": "^4.3.3"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.14.0",
     "@playwright/test": "^1.63.0",
     "@tauri-apps/cli": "^2.11.5",
     "@types/node": "^26.6.2",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "^16.3.5",
     "typescript": "~6.0.3",
     "vitest": "^5.0.3"
   }

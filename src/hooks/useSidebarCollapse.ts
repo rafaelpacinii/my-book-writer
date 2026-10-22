@@ -1,51 +1,43 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
+import { useLayoutEffect, useSyncExternalStore } from "react";
 
 const STORAGE_KEY = "mbw_sidebar_collapsed";
-
-let globalIsCollapsed = false;
-let isLoaded = false;
+let collapsed = false;
 const listeners = new Set<() => void>();
+const getSnapshot = () => collapsed;
+const getServerSnapshot = () => false;
 
-function getSnapshot(): boolean {
-  if (typeof window !== "undefined" && !isLoaded) {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored !== null) {
-        globalIsCollapsed = stored === "true";
-      }
-    } catch {
-      // Ignore storage read error
-    }
-    isLoaded = true;
-  }
-  return globalIsCollapsed;
+function publish(value: boolean) {
+  collapsed = value;
+  document.documentElement.dataset.sidebarCollapsed = String(value);
+  listeners.forEach((listener) => listener());
 }
 
-function getServerSnapshot(): boolean {
-  return false;
+function initialize() {
+  try { publish(localStorage.getItem(STORAGE_KEY) === "true"); }
+  catch (error) { console.warn("Não foi possível ler a preferência do menu.", error); }
 }
 
-function subscribe(callback: () => void) {
-  listeners.add(callback);
+function subscribe(listener: () => void) {
+  listeners.add(listener);
+  const onStorage = (event: StorageEvent) => {
+    if (event.key === STORAGE_KEY || event.key === null) initialize();
+  };
+  window.addEventListener("storage", onStorage);
   return () => {
-    listeners.delete(callback);
+    listeners.delete(listener);
+    window.removeEventListener("storage", onStorage);
   };
 }
 
 export function useSidebarCollapse() {
   const isCollapsed = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
-
+  useLayoutEffect(initialize, []);
   const toggle = () => {
-    globalIsCollapsed = !globalIsCollapsed;
-    try {
-      localStorage.setItem(STORAGE_KEY, String(globalIsCollapsed));
-    } catch {
-      // Ignore storage write error
-    }
-    listeners.forEach((listener) => listener());
+    publish(!collapsed);
+    try { localStorage.setItem(STORAGE_KEY, String(collapsed)); }
+    catch (error) { console.warn("A preferência do menu não será preservada ao reiniciar.", error); }
   };
-
   return { isCollapsed, toggle };
 }

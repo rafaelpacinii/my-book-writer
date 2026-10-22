@@ -1,9 +1,10 @@
 import { Suspense } from "react";
-import { SettingsContent } from "./SettingsContent";
+import { RouteLoading } from "@/components/shared/RouteLoading";
+import { SettingsContent } from "@/app/books/settings/SettingsContent";
 
 export default function BookSettingsPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-background" />}>
+    <Suspense fallback={<RouteLoading />}>
       <SettingsContent />
     </Suspense>
   );

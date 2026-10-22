@@ -1,47 +1,29 @@
 "use client";
 
-import React, { useState } from "react";
-import { useProfile } from "@/hooks/useProfile";
+import { useProfileDialog } from "@/hooks/useProfileDialog";
 import { getInitials } from "@/utils/format";
-import { ProfileModal } from "./ProfileModal";
+import { ProfileModal } from "@/components/shared/ProfileModal";
 
-interface Props {
-  isCollapsed: boolean;
-}
-
-export function SidebarUserProfile({ isCollapsed }: Props) {
-  const { profile } = useProfile();
-  const [isOpen, setIsOpen] = useState(false);
-  const initials = getInitials(profile?.display_name);
+export function SidebarUserProfile({ onOpen }: { onOpen: () => void }) {
+  const { profile, isLoading, isOpen, open, close } = useProfileDialog();
 
   return (
     <>
-      <button
-        type="button"
-        onClick={() => setIsOpen(true)}
-        title={profile?.display_name || "Perfil do Autor"}
-        aria-label="Abrir configurações do perfil"
-        className={`w-full flex items-center rounded-lg p-1.5 hover:bg-surface-elevated transition-colors text-left cursor-pointer group ${
-          isCollapsed ? "justify-center" : "gap-2.5"
-        }`}
+      <button data-sidebar-item type="button" onClick={() => { open(); onOpen(); }}
+        aria-label="Abrir configurações do perfil" title={profile?.display_name || "Perfil do autor"}
+        className="flex w-full items-center gap-3 rounded-lg py-1 text-left hover:bg-surface-hover"
       >
-        <span className="w-8 h-8 rounded-full bg-primary-soft text-primary font-bold text-xs flex items-center justify-center shrink-0 group-hover:ring-2 group-hover:ring-primary/40 transition-all">
-          {initials}
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border bg-primary-soft text-xs text-primary">
+          {isLoading ? <span className="skeleton-pulse h-4 w-4 rounded" /> : getInitials(profile?.display_name)}
         </span>
-        {!isCollapsed && (
-          <div className="min-w-0 flex-1">
-            <p className="text-[13px] font-bold text-foreground truncate leading-tight">
-              {profile?.display_name || "Autor"}
-            </p>
-            <p className="text-[11px] text-muted truncate leading-tight mt-0.5">
-              Seu espaço
-            </p>
-          </div>
-        )}
+        <span data-sidebar-expanded className="min-w-0 flex-1">
+          <span className="mb-1 block text-[9px] tracking-wider text-muted uppercase">Perfil do autor</span>
+          <span className="block truncate text-[13px] font-semibold">
+            {isLoading ? <span className="skeleton-pulse block h-3 w-20 rounded" /> : profile?.display_name || "Seu perfil"}
+          </span>
+        </span>
       </button>
-
-      <ProfileModal isOpen={isOpen} onClose={() => setIsOpen(false)} />
+      <ProfileModal isOpen={isOpen} onClose={close} />
     </>
   );
 }
-

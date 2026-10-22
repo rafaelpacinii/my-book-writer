@@ -18,7 +18,7 @@ export function NewBookFooter({ onCancel, isSubmitting }: Props) {
           variant="outline"
           onClick={onCancel}
           disabled={isSubmitting}
-          className="w-full sm:w-auto !h-11 px-6 !text-[13px]"
+          className="w-full sm:w-auto px-6"
         >
           Cancelar
         </Button>
@@ -27,7 +27,8 @@ export function NewBookFooter({ onCancel, isSubmitting }: Props) {
           type="submit"
           variant="primary"
           isLoading={isSubmitting}
-          className="w-full sm:w-auto !h-11 px-8 !text-[13px] !font-bold"
+          loadingLabel="Criando livro…"
+          className="w-full sm:w-auto px-8"
         >
           Criar livro
         </Button>

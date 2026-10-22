@@ -1,7 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
 
 const externalURL = process.env.MBW_EDITOR_TEST_URL;
-const baseURL = externalURL ?? "http://localhost:3000";
+const baseURL = externalURL ?? "http://127.0.0.1:3100";
 
 export default defineConfig({
   testDir: "./src/tests/e2e",
@@ -16,6 +16,8 @@ export default defineConfig({
   reporter: [["list"], ["html", { open: "never", outputFolder: "src/tests/playwright-report" }]],
   use: {
     baseURL,
+    locale: "pt-BR",
+    timezoneId: "America/Sao_Paulo",
     viewport: { width: 1440, height: 1000 },
     trace: "retain-on-failure",
     screenshot: "only-on-failure",
@@ -25,9 +27,14 @@ export default defineConfig({
     { name: "firefox", use: { ...devices["Desktop Firefox"] } },
   ],
   webServer: externalURL ? undefined : {
-    command: "npm run dev -- --webpack --hostname 127.0.0.1 --port 3000",
+    command: "node src/tests/run-static.mjs",
+    env: {
+      MBW_NEXT_DIST_DIR: ".next/cache/ui-e2e",
+      MBW_STATIC_PORT: "3100",
+      NODE_OPTIONS: `${process.env.NODE_OPTIONS ?? ""} --require ./src/tests/offline-next.cjs`,
+    },
     url: baseURL,
     reuseExistingServer: !process.env.CI,
-    timeout: 120_000,
+    timeout: 600_000,
   },
 });
