@@ -1,169 +1,87 @@
-# Tauri / Rust Rules
-
-These rules apply to everything inside `src-tauri/`.
-
-## Responsibilities
-
-The Tauri/Rust layer owns:
-
-- SQLite access
-- local persistence
-- filesystem access
-- native OS functionality
-- secure native operations
-- synchronization infrastructure
-
-Keep native implementation details outside the frontend.
-
-## Preferred Structure
-
-Prefer:
-
-`src-tauri/src/commands/`
-
-`src-tauri/src/database/`
-
-`src-tauri/src/domain/`
-
-`src-tauri/src/repositories/`
-
-`src-tauri/src/services/`
-
-`src-tauri/src/services/sync/`
-
-`src-tauri/src/state/`
-
-The exact structure may evolve with the project.
-
-Keep `main.rs` and `lib.rs` focused on initialization and application composition.
-
-Do not place the entire implementation inside them.
-
-## Tauri Commands
-
-Tauri commands must remain thin.
-
-Preferred flow:
-
-`command → service → repository → SQLite`
-
-Commands should primarily:
-
-- receive typed input
-- delegate work
-- return typed output
-- map errors when necessary
-
-Do not put large business rules, raw SQL, or synchronization orchestration directly inside commands.
-
-## Services
-
-Services should contain application and business operations.
-
-Use services when an operation:
-
-- coordinates repositories
-- performs domain validation
-- manages synchronization
-- contains non-trivial application behavior
-
-Avoid giant service files.
-
-Split responsibilities when necessary.
-
-## Repositories
-
-Repositories own persistence concerns.
-
-Examples:
-
-- BookRepository
-- SettingsRepository
-- SyncRepository
-
-Keep SQL and database-specific implementation inside the persistence layer whenever practical.
-
-## SQLite
-
-SQLite is the local operational database.
-
-Normal application functionality must work offline.
-
-Do not require the remote API before completing ordinary local operations.
-
-Preferred flow:
-
-`user action → Tauri command → service → repository → SQLite`
-
-## Local-First
-
-Persist changes locally first.
-
-Preferred synchronization flow:
-
-`user action → SQLite → sync queue → remote API`
-
-Network failures must not corrupt local application state.
-
-## Synchronization
-
-Keep synchronization logic isolated in dedicated services or modules.
-
-Conceptually:
-
-`SQLite ↔ Sync Service ↔ Remote API ↔ MySQL`
-
-Synchronization must account for:
-
-- pending operations
-- retries
-- soft deletes
-- conflicts
-- versions
-- sync cursors
-- interrupted connectivity
-
-Do not assume connectivity is always available.
-
-## Identifiers
-
-Entities that can be created offline must use client-generated globally unique IDs.
-
-Prefer UUID or UUIDv7 where appropriate.
-
-Do not rely on remote auto-increment IDs for entities created offline.
-
-## Errors
-
-Do not silently swallow errors.
-
-Use structured application errors.
-
-Do not expose raw SQL, SQLite, networking, or internal Rust errors directly to the UI.
-
-Map internal errors into meaningful frontend-facing errors.
-
-## Rust Quality
-
-Prefer:
-
-- explicit types
-- small modules
-- clear ownership
-- proper error propagation
-- minimal unnecessary cloning
-- idiomatic Rust
-
-Avoid unnecessary abstractions.
-
-## Before Finishing
-
-For relevant Rust changes, run:
-
-`cargo fmt --check`
-
-`cargo check`
-
-Run relevant Rust tests when they exist.
-
-Never claim a command or test passed unless it was actually executed.
+# Native Tauri / Rust Rules & AI Agent Guidelines
+
+> **Scope**: Applies to everything under `src-tauri/`.
+> **Stack**: Tauri v2, Rust (Edition 2021), SQLite (via SQLx), Headless Chromium (DevTools Protocol).
+
+---
+
+## 1. Responsibilities & Layered Architecture
+
+The Tauri/Rust layer is the native backbone of My Book Writer. It owns:
+* Direct SQLite persistence and migrations.
+* Filesystem asset storage and cryptographic hashing (SHA-256).
+* Offline PDF, EPUB, and DOCX compilation.
+* Native OS dialogs (file saving, backup exports/restorations).
+
+### The Layered Flow
+Always maintain a strict separation of concerns:
+```
+Tauri Command (Thin Bridge)
+       │
+       ▼
+Application Service (Business Logic & Validation)
+       │
+       ▼
+Repository (SQLx Queries & Persistence)
+       │
+       ▼
+SQLite Database (WAL Mode)
+```
+
+1. **Commands (`src-tauri/src/commands/`)**:
+   * Must remain thin and declarative.
+   * Parse input DTOs, delegate to the relevant service, and map internal results to `Result<T, AppError>`.
+   * **Never** write raw SQL or complex business rules inside command functions.
+
+2. **Services (`src-tauri/src/services/`)**:
+   * Contain all business rules, orchestration, and domain validation.
+   * Coordinate multiple repositories in transactions when needed.
+   * Examples: `BookService`, `ChapterService`, `ExportService`, `BackupService`.
+
+3. **Repositories (`src-tauri/src/repositories/`)**:
+   * Encapsulate all SQL queries and data mapping via `sqlx`.
+   * Never leak raw database queries into services or commands.
+
+4. **Domain Models (`src-tauri/src/domain/`)**:
+   * Define core domain structs, database entities, and command inputs/outputs (`Serialize`, `Deserialize`).
+
+---
+
+## 2. SQLite & Local-First Invariants
+
+* **Offline Autonomy**: Normal operations must complete locally without network requirements.
+* **WAL Journal Mode**: SQLite is configured with `PRAGMA journal_mode = WAL` and foreign keys enabled.
+* **UUIDv7 Identifiers**: Entities that can be created offline must use client-generated, time-sortable **UUIDv7** strings. Never rely on auto-increment IDs for offline entities.
+* **Migrations**: Schema changes must be written as sequential SQL migrations under `src-tauri/migrations/`.
+
+---
+
+## 3. High-Fidelity Export Pipeline (`services/export/`)
+
+* **PDF Generation**: Orchestrated through headless Chromium using the DevTools Protocol (`Page.printToPDF`).
+* Injects offline font files and CSS `@page` declarations honoring book trim sizes, inner/outer margins, and typography presets.
+* Do not attempt to generate PDFs using third-party web services or network calls.
+
+---
+
+## 4. Error Handling & Diagnostics
+
+* Use structured errors defined in [`src-tauri/src/error.rs`](src/error.rs) (`AppError`).
+* **Never silently swallow errors**.
+* Never leak raw SQL errors, panic traces, or unhandled internal errors to the frontend. Map them to meaningful, actionable error variants.
+
+---
+
+## 5. Verification Checklist Before Completion
+
+When modifying native code:
+```bash
+cd src-tauri
+cargo fmt --check
+cargo check
+cargo test --lib
+```
+* [ ] Verify that commands are thin and delegate to services.
+* [ ] Verify that SQL queries remain inside repositories.
+* [ ] Verify proper error mapping.
+* [ ] Never claim checks passed without executing them.
