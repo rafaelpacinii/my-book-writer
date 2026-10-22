@@ -6,9 +6,17 @@
 .resume-visual { position: relative; display: flex; justify-content: center; align-items: center; min-height: 170px; }
 .resume-visual::before { content: ''; position: absolute; width: 210px; height: 210px; border: 1px solid var(--border); border-radius: 50%; box-shadow: 0 0 0 25px color-mix(in srgb, var(--foreground) 2%, transparent), 0 0 0 26px var(--border); opacity: .65; }
 .resume-visual .book-object { width: 112px; transform: rotate(8deg); box-shadow: -7px 11px 17px color-mix(in srgb, var(--foreground) 15%, transparent); }
-.book-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
+.book-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr)); gap: 28px 24px; }
+.book-grid .book-card { display: flex; flex-direction: column; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); }
 .book-stage { height: 184px; display: flex; align-items: center; justify-content: center; border: 1px solid color-mix(in srgb, var(--border) 60%, transparent); border-radius: 7px; background: color-mix(in srgb, var(--muted) 7%, var(--surface)); position: relative; }
 .book-stage .book-object { width: 95px; }
+.book-grid .book-stage { height: auto; aspect-ratio: 33 / 35; border: 0; border-bottom: 1px solid var(--border); border-radius: 9px 9px 0 0; }
+.book-grid .book-stage .book-object { width: 55%; max-width: 180px; }
+.book-grid .book-info { display: flex; flex: 1; flex-direction: column; padding: 18px 20px 16px; }
+.book-grid .book-info h2 { min-height: 2.24em; font-size: 25px; }
+.book-grid .book-info > p { font-size: 12px; line-height: 1.5; }
+.book-grid .book-metadata { flex-direction: column; align-items: flex-start; justify-content: flex-start; gap: 5px; font-size: 11px; }
+.book-metadata > span { max-width: 100%; overflow-wrap: anywhere; }
 .book-card:hover .book-stage { border-color: var(--muted); }
 .book-card:hover .book-stage .book-object { transform: translateY(-4px) rotate(-3deg); }
 .book-list { display: flex; flex-direction: column; gap: 18px; }
@@ -20,7 +28,7 @@
 
 @media (max-width: 1100px) {
   .workspace-main { padding: 30px 28px 24px; }
-  .book-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px; }
+  .book-grid { gap: 24px 22px; }
 }
 @media (max-width: 699px) {
   .workspace-navigation { position: fixed; inset: 0 auto 0 0; z-index: 50; visibility: hidden; }

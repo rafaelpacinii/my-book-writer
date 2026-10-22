@@ -26,6 +26,8 @@ for (const theme of ["light", "dark"]) {
       page.locator(".book-card").first(),
     ];
     for (const target of targets) {
+      await target.scrollIntoViewIfNeeded();
+      await page.mouse.move(1200, 1);
       const cover = target.locator(".book-object");
       const visual = await cover.count() ? cover : target;
       const initial = await appearance(visual);
