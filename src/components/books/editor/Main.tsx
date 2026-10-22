@@ -10,6 +10,7 @@ import { EditorModals } from "./EditorModals";
 import { useMainEditorState } from "./useMainEditorState";
 import type { MainProps } from "./mainTypes";
 import { useSaveBeforeNavigation } from "@/hooks/useSaveBeforeNavigation";
+import styles from "./editorChrome.module.css";
 
 export function Main({ bookId, chapterId }: MainProps) {
   const state = useMainEditorState(bookId, chapterId);
@@ -20,7 +21,7 @@ export function Main({ bookId, chapterId }: MainProps) {
   if (!ed.chapter) return <EditorNotFound bookId={bookId} />;
 
   return (
-    <div data-editor-focus={ed.isFocusMode} className="flex h-full min-h-0 flex-col overflow-hidden bg-background text-foreground">
+    <div data-editor-focus={ed.isFocusMode} className={`${styles.workspace} flex h-full min-h-0 flex-col overflow-hidden bg-background text-foreground`}>
       <EditorTopBars state={state} bookId={bookId} />
       <EditorWorkspace
         ed={ed} rev={rev} ver={ver} chapterId={chapterId} bookId={bookId}
@@ -30,9 +31,9 @@ export function Main({ bookId, chapterId }: MainProps) {
         isVersionOpen={state.isVersionOpen}
         onCloseVersion={() => state.setIsVersionOpen(false)}
       />
-      {!ed.isFocusMode && (
-        <EditorFooter wordCount={ed.wordCount} readingTime={ed.readingTime} viewMode={ed.viewMode} />
-      )}
+      <EditorFooter wordCount={ed.wordCount} readingTime={ed.readingTime} viewMode={ed.viewMode}
+        onViewModeChange={ed.setViewMode} saveStatus={ed.saveStatus} autosaveEnabled={ed.preferences.autosaveEnabled}
+        onSave={ed.saveNow} isFocusMode={ed.isFocusMode} />
       <EditorModals
         isNewOpen={ed.isNewChapterModalOpen} onCloseNew={() => ed.setIsNewChapterModalOpen(false)} onCreateNew={ed.handleQuickCreateChapter}
         isDeleteOpen={ed.isDeleteModalOpen} onCloseDelete={() => { ed.setIsDeleteModalOpen(false); ed.setChapterToDelete(null); }}

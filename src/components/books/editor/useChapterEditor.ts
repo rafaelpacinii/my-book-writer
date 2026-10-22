@@ -22,6 +22,7 @@ import {
 } from "@/utils/chapterContent";
 import { executeFormatAction, type FormatAction } from "@/utils/textFormatting";
 import { useEditorPreferences } from "@/hooks/useEditorPreferences";
+import { useEditorChapterSidebar } from "@/hooks/useEditorChapterSidebar";
 import { matchesShortcut } from "@/utils/keyboardShortcuts";
 import type { Book, UpdateBookInput } from "@/types/book";
 import type { Chapter, ChapterSummary } from "@/types/chapter";
@@ -54,7 +55,7 @@ export function useChapterEditor(bookId: string, chapterId: string) {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [chapterToDelete, setChapterToDelete] = useState<ChapterSummary | null>(null);
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
-  const [isDrawerOpen, setIsDrawerOpen] = useState(true);
+  const { isDrawerOpen, setIsDrawerOpen } = useEditorChapterSidebar();
   const [isNewChapterModalOpen, setIsNewChapterModalOpen] = useState(false);
   const [viewMode, setViewMode] = useState<"continuous" | "paged">("continuous");
   const [isFitMode, setIsFitMode] = useState(true);
@@ -247,7 +248,7 @@ export function useChapterEditor(bookId: string, chapterId: string) {
   const handleSelectChapter = useCallback(
     async (targetChapterId: string) => {
       if (targetChapterId === chapterId) return;
-      await saveNow();
+      if (!await saveNow()) return;
       router.push(`/books/editor?bookId=${encodeURIComponent(bookId)}&chapterId=${encodeURIComponent(targetChapterId)}`);
     },
     [chapterId, bookId, saveNow, router],
@@ -255,7 +256,7 @@ export function useChapterEditor(bookId: string, chapterId: string) {
 
   const handleQuickCreateChapter = useCallback(
     async (newTitle: string, newType?: string, customName?: string) => {
-      await saveNow();
+      if (!await saveNow()) throw new Error("Não foi possível salvar o capítulo atual. Tente novamente antes de criar outro.");
       const created = await createChapter({
         book_id: bookId,
         title: newTitle,
@@ -266,7 +267,7 @@ export function useChapterEditor(bookId: string, chapterId: string) {
       setIsDrawerOpen(false);
       router.push(`/books/editor?bookId=${encodeURIComponent(bookId)}&chapterId=${encodeURIComponent(created.id)}`);
     },
-    [bookId, saveNow, router],
+    [bookId, saveNow, router, setIsDrawerOpen],
   );
 
   const requestDeleteChapter = useCallback((chap: ChapterSummary) => {

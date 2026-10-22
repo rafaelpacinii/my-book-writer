@@ -1,5 +1,6 @@
 import React from "react";
 import { History } from "lucide-react";
+import styles from "./editorChrome.module.css";
 
 interface Props {
   isOpen: boolean;
@@ -12,15 +13,16 @@ export function EditorHistoryButton({ isOpen, onToggle, count }: Props) {
     <button
       type="button"
       onClick={onToggle}
-      className={`h-11 px-4 rounded-lg border text-[13px] font-bold transition-colors cursor-pointer flex items-center gap-2 ${
+      aria-pressed={isOpen}
+      className={`${styles.action} ${
         isOpen
-          ? "border-primary bg-primary/10 text-primary"
-          : "border-control-border bg-surface hover:bg-surface-hover text-foreground"
+          ? "bg-primary-soft text-primary"
+          : "hover:bg-surface-hover text-muted hover:text-foreground"
       }`}
       title={isOpen ? "Fechar histórico de versões" : "Abrir histórico de versões"}
     >
       <History className="w-4 h-4" />
-      <span>Versões</span>
+      <span>Histórico</span>
       {count > 0 && (
         <span className="px-1.5 py-0.5 text-[11px] rounded-full bg-surface-hover font-bold text-muted">
           {count}
