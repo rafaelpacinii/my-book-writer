@@ -1,6 +1,5 @@
 /* Editorial workspace from the supplied design. Manuscript typography stays separate. */
 .workspace-main { padding: 37px 42px 24px; }
-.workspace-header { height: 66px; padding-inline: 42px; }
 .editorial-eyebrow { font: 10px var(--font-mono); letter-spacing: .13em; text-transform: uppercase; color: var(--muted); }
 .editorial-heading { font-family: var(--font-display); font-size: clamp(40px, 3.6vw, 58px); font-weight: 400; line-height: 1.05; letter-spacing: -.025em; overflow-wrap: anywhere; }
 .resume-card { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(180px, .8fr); gap: 24px; min-height: 235px; padding: 28px 32px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
@@ -21,7 +20,6 @@
 
 @media (max-width: 1100px) {
   .workspace-main { padding: 30px 28px 24px; }
-  .workspace-header { padding-inline: 28px; }
   .book-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px; }
 }
 @media (max-width: 699px) {
@@ -29,7 +27,6 @@
   .workspace-navigation[data-open="true"] { visibility: visible; }
   .workspace-sidebar { box-shadow: 12px 0 40px #0004; }
   .workspace-main { padding: 28px 20px 24px; }
-  .workspace-header { padding-inline: 20px; }
   .resume-card { grid-template-columns: minmax(0, 1fr) 110px; gap: 10px; padding: 23px 20px; }
   .resume-visual .book-object { width: 82px; }
   .resume-visual::before { width: 130px; height: 130px; }

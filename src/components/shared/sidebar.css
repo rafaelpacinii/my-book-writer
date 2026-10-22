@@ -1,9 +1,9 @@
-/* Profile-first navigation, adapted from the supplied Side Menu reference. */
+/* Sidebar navigation, adapted from the supplied Side Menu references. */
 .workspace-sidebar {
   position: relative;
-  width: 248px;
+  width: 240px;
   height: 100dvh;
-  padding: 26px 20px 20px;
+  padding: 16px 16px 20px;
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
@@ -12,7 +12,7 @@
   border-right: 1px solid var(--border);
 }
 
-.sidebar-collapse-button { right: -36px; z-index: 30; }
+.sidebar-collapse-button { width: 100%; }
 .sidebar-section-label {
   margin: 0 0 10px;
   padding-inline: 12px;
@@ -54,14 +54,18 @@
 [data-sidebar-compact] { display: none; }
 
 @media (max-height: 700px) {
-  .sidebar-recent { max-height: 60px; overflow-y: auto; }
+  .sidebar-brand-header { margin-bottom: 12px; padding-bottom: 12px; }
+  .sidebar-collapse-button { margin-top: 8px; }
+  .sidebar-navigation { padding-bottom: 12px; }
+  .sidebar-preferences { margin-top: 12px; }
+  .sidebar-recent { max-height: 40px; overflow-y: auto; }
 }
 
 @media (min-width: 700px) {
-  [data-sidebar-collapsed="true"] .sidebar-collapse-button { right: -26px; }
+  [data-sidebar-collapsed="true"] .sidebar-collapse-button { justify-content: center; padding-inline: 0; }
   [data-sidebar-collapsed="true"] [data-expand-icon] { display: block; }
   [data-sidebar-collapsed="true"] [data-collapse-icon] { display: none; }
-  [data-sidebar-collapsed="true"] .sidebar-profile-header [data-sidebar-item] { padding-inline: 0; }
+  [data-sidebar-collapsed="true"] .sidebar-theme-toggle { width: 40px; align-self: center; }
   [data-sidebar-collapsed="true"] .sidebar-section-label { padding-inline: 0; text-align: center; font-size: 8px; }
   [data-sidebar-collapsed="true"] [data-sidebar-compact] { display: inline; }
 }

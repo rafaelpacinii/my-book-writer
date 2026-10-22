@@ -5,6 +5,7 @@
 @import "../components/shared/workspace.css";
 @import "../components/shared/sidebar.css";
 @import "../components/shared/book-object.css";
+@import "../components/shared/interactions.css";
 
 @font-face {
   font-family: 'Inter';
@@ -372,15 +373,15 @@ select option {
 
 /* The head script sets this before the static sidebar is painted. */
 [data-sidebar-collapsed="true"] [data-app-sidebar] {
-  width: 4.5rem;
-  padding: 0.625rem;
+  width: 68px;
+  padding: 16px 10px 20px;
 }
 
 [data-sidebar-collapsed="true"] [data-sidebar-expanded] { display: none; }
 [data-sidebar-collapsed="true"] [data-sidebar-item] { justify-content: center; padding-inline: 0.625rem; }
 
 @media (max-width: 699px) {
-  [data-sidebar-collapsed="true"] [data-app-sidebar] { width: 248px; padding: 26px 20px 20px; }
+  [data-sidebar-collapsed="true"] [data-app-sidebar] { width: 240px; padding: 16px 16px 20px; }
   [data-sidebar-collapsed="true"] [data-sidebar-expanded] { display: revert; }
   [data-sidebar-collapsed="true"] [data-sidebar-item] { justify-content: flex-start; padding-inline: 13px; }
 }
