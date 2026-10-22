@@ -9,7 +9,7 @@ export function SidebarNav({ onNavigate }: { onNavigate: () => void }) {
   const menu = useSidebarNavigation();
 
   return (
-    <nav aria-label="Navegação principal" className="flex min-h-0 flex-1 flex-col pb-5">
+    <nav aria-label="Navegação principal" className="sidebar-navigation flex min-h-0 flex-1 flex-col pb-5">
       <div className="min-h-0 flex-1 overflow-y-auto">
         <p className="sidebar-section-label">
           <span data-sidebar-expanded>PRINCIPAL</span>
@@ -33,7 +33,7 @@ export function SidebarNav({ onNavigate }: { onNavigate: () => void }) {
           <SidebarNavLink label="Novo livro" href="/books/new" icon={Plus} onNavigate={onNavigate} />
         </div>
       </div>
-      <div className="mt-5 shrink-0 border-t border-border pt-4">
+      <div className="sidebar-preferences mt-5 shrink-0 border-t border-border pt-4">
         <p className="sidebar-section-label">
           <span data-sidebar-expanded>PREFERÊNCIAS</span>
           <span data-sidebar-compact aria-hidden="true">AJUSTES</span>

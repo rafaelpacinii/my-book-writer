@@ -1,0 +1,8 @@
+/* Keep hover feedback immediate, including when a pointer leaves mid-transition.
+   Group-hover descendants and CSS-driven book covers follow the same policy.
+   Loading animations and transitions unrelated to hover retain their timing. */
+[class*="hover:"],
+.book-stage .book-object {
+  transition-duration: 0s;
+  transition-delay: 0s;
+}

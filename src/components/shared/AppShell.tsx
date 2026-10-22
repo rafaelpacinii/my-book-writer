@@ -1,10 +1,10 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { Menu } from "lucide-react";
 import { useWorkspaceScroll } from "@/hooks/useWorkspaceScroll";
 import { useMobileNavigation } from "@/hooks/useMobileNavigation";
 import { AppSidebar } from "@/components/shared/AppSidebar";
-import { AppHeader } from "@/components/shared/AppHeader";
 
 export function AppShell({ children }: { children: ReactNode }) {
   const mainRef = useWorkspaceScroll();
@@ -25,10 +25,14 @@ export function AppShell({ children }: { children: ReactNode }) {
         <AppSidebar onNavigate={menu.close} />
       </div>
       <div className="flex min-w-0 flex-1 flex-col" inert={menu.isOpen}>
-        <AppHeader onOpenMenu={menu.open} />
         <main ref={mainRef} id="main-content" tabIndex={-1}
           className="workspace-main min-h-0 min-w-0 flex-1 overflow-y-auto"
         >
+          <button type="button" onClick={menu.open} aria-label="Abrir menu"
+            className="mb-5 flex h-10 w-10 items-center justify-center rounded-lg border border-border bg-surface text-muted hover:bg-surface-hover hover:text-foreground min-[700px]:hidden"
+          >
+            <Menu className="h-4 w-4" />
+          </button>
           {children}
         </main>
       </div>
