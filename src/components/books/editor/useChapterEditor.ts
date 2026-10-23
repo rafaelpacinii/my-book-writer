@@ -44,6 +44,7 @@ export function useChapterEditor(bookId: string, chapterId: string) {
   const originalTitleRef = useRef("");
   const originalTextRef = useRef("");
   const revisionRef = useRef(1);
+  const loadedChapterRef = useRef<string | null>(null);
   const saveInFlightRef = useRef<Promise<boolean> | null>(null);
   const latestDraftRef = useRef({ chapterId, title, text });
   latestDraftRef.current = { chapterId, title, text };
@@ -110,6 +111,8 @@ export function useChapterEditor(bookId: string, chapterId: string) {
   useEffect(() => {
     let active = true;
     setIsLoading(true);
+    loadedChapterRef.current = null;
+    setChapter(null);
 
     Promise.all([
       getBookById(bookId),
@@ -121,6 +124,7 @@ export function useChapterEditor(bookId: string, chapterId: string) {
         setBook(b);
         setChapters(chaps);
         if (chap) {
+          loadedChapterRef.current = chap.id;
           setChapter(chap);
           setTitle(chap.title);
           originalTitleRef.current = chap.title;
@@ -142,7 +146,7 @@ export function useChapterEditor(bookId: string, chapterId: string) {
 
   // Serialize saves and read the latest draft after an earlier save finishes.
   const saveNow = useCallback(async (): Promise<boolean> => {
-    if (!chapterId) return false;
+    if (!chapterId || loadedChapterRef.current !== chapterId) return false;
     while (saveInFlightRef.current) await saveInFlightRef.current;
 
     const operation = (async () => {
@@ -172,6 +176,7 @@ export function useChapterEditor(bookId: string, chapterId: string) {
             );
             revisionRef.current = updated.content_revision;
             originalTextRef.current = draft.text;
+            if (latestDraftRef.current.chapterId === chapterId) setChapter(updated);
           }
           setLastSavedAt(new Date());
         }

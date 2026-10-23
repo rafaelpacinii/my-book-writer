@@ -1,5 +1,5 @@
 use crate::domain::review::{CreateCommentInput, MarkProgressInput, ReviewComment, ReviewProgress};
-use crate::services::review_service::ReviewService;
+use crate::services::review_service::{review_error, ReviewService};
 use crate::state::AppState;
 use tauri::State;
 
@@ -10,10 +10,7 @@ pub async fn create_review_comment(
     input: CreateCommentInput,
 ) -> Result<ReviewComment, String> {
     let service = ReviewService::new(&state.db_pool);
-    service
-        .create_comment(input)
-        .await
-        .map_err(|e| e.to_string())
+    service.create_comment(input).await.map_err(review_error)
 }
 
 /// Lista todos os comentários de um capítulo
@@ -26,7 +23,7 @@ pub async fn list_review_comments(
     service
         .list_comments(&chapter_id)
         .await
-        .map_err(|e| e.to_string())
+        .map_err(review_error)
 }
 
 /// Marca um comentário como resolvido
@@ -36,10 +33,7 @@ pub async fn resolve_review_comment(
     id: String,
 ) -> Result<ReviewComment, String> {
     let service = ReviewService::new(&state.db_pool);
-    service
-        .resolve_comment(&id)
-        .await
-        .map_err(|e| e.to_string())
+    service.resolve_comment(&id).await.map_err(review_error)
 }
 
 /// Reabre um comentário previamente resolvido
@@ -49,7 +43,7 @@ pub async fn reopen_review_comment(
     id: String,
 ) -> Result<ReviewComment, String> {
     let service = ReviewService::new(&state.db_pool);
-    service.reopen_comment(&id).await.map_err(|e| e.to_string())
+    service.reopen_comment(&id).await.map_err(review_error)
 }
 
 /// Atualiza o texto de um comentário de revisão
@@ -63,14 +57,14 @@ pub async fn update_review_comment(
     service
         .update_comment(&id, &body)
         .await
-        .map_err(|e| e.to_string())
+        .map_err(review_error)
 }
 
 /// Exclui um comentário de revisão
 #[tauri::command]
 pub async fn delete_review_comment(state: State<'_, AppState>, id: String) -> Result<(), String> {
     let service = ReviewService::new(&state.db_pool);
-    service.delete_comment(&id).await.map_err(|e| e.to_string())
+    service.delete_comment(&id).await.map_err(review_error)
 }
 
 /// Obtém a marcação de progresso de revisão de um capítulo
@@ -83,7 +77,7 @@ pub async fn get_review_progress(
     service
         .get_progress(&chapter_id)
         .await
-        .map_err(|e| e.to_string())
+        .map_err(review_error)
 }
 
 /// Salva ou atualiza o progresso de revisão de um capítulo
@@ -93,8 +87,5 @@ pub async fn mark_review_progress(
     input: MarkProgressInput,
 ) -> Result<ReviewProgress, String> {
     let service = ReviewService::new(&state.db_pool);
-    service
-        .mark_progress(input)
-        .await
-        .map_err(|e| e.to_string())
+    service.mark_progress(input).await.map_err(review_error)
 }

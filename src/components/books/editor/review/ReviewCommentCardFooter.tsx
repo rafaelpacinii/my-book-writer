@@ -10,10 +10,11 @@ interface Props {
   onReopen: () => void;
   onEdit: () => void;
   onDelete: () => void;
+  disabled?: boolean;
 }
 
 export function ReviewCommentCardFooter(props: Props) {
-  const { isResolved, onResolve, onReopen, onEdit, onDelete } = props;
+  const { isResolved, onResolve, onReopen, onEdit, onDelete, disabled } = props;
   const statusClass = isResolved ? "bg-success/15 text-success" : "bg-warning/15 text-warning";
 
   return (
@@ -27,6 +28,7 @@ export function ReviewCommentCardFooter(props: Props) {
           <button
             type="button"
             onClick={onReopen}
+            disabled={disabled}
             className="flex items-center gap-1 text-[11px] font-bold text-muted hover:text-foreground transition-colors cursor-pointer mr-1"
           >
             <RotateCcw className="w-3 h-3" />
@@ -36,6 +38,7 @@ export function ReviewCommentCardFooter(props: Props) {
           <button
             type="button"
             onClick={onResolve}
+            disabled={disabled}
             className="flex items-center gap-1 text-[11px] font-bold text-primary hover:text-primary-hover transition-colors cursor-pointer mr-1"
           >
             <Check className="w-3 h-3" />
@@ -43,7 +46,7 @@ export function ReviewCommentCardFooter(props: Props) {
           </button>
         )}
 
-        <ReviewCommentMenu onEdit={onEdit} onDelete={onDelete} />
+        <ReviewCommentMenu onEdit={onEdit} onDelete={onDelete} disabled={disabled} />
       </div>
     </div>
   );

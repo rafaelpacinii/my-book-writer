@@ -1,30 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { getReviewProgress, listReviewComments } from "@/lib/api/reviews";
+import { useReviewData } from "@/hooks/useReviewData";
+import { reviewState } from "@/utils/reviewState";
 
-export function useChapterReviewStatus(chapterId: string) {
-  const [needsRecheck, setNeedsRecheck] = useState(false);
-  const [openCommentsCount, setOpenCommentsCount] = useState(0);
-
-  useEffect(() => {
-    let isMounted = true;
-    void Promise.all([
-      getReviewProgress(chapterId),
-      listReviewComments(chapterId),
-    ])
-      .then(([prog, comments]) => {
-        if (!isMounted) return;
-        setNeedsRecheck(Boolean(prog?.needs_recheck));
-        setOpenCommentsCount(comments.filter((c) => c.status === "open").length);
-      })
-      .catch(() => {});
-
-    return () => {
-      isMounted = false;
-    };
-  }, [chapterId]);
-
-  return { needsRecheck, openCommentsCount };
+export function useChapterReviewStatus(chapterId: string, revision: number) {
+  const data = useReviewData(chapterId, revision);
+  const openCommentsCount = data.comments.filter((comment) => comment.status === "open").length;
+  const state = reviewState(data.progress, revision, openCommentsCount);
+  return { needsRecheck: state === "pending" || state === "outdated", openCommentsCount,
+    isLoading: data.isLoading, error: data.error, retry: data.reload };
 }
 

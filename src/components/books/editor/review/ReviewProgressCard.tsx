@@ -1,52 +1,39 @@
 "use client";
 
-import React from "react";
-import { AlertCircle, CheckCircle2 } from "lucide-react";
+import { CheckCircle2, CircleDashed, AlertCircle } from "lucide-react";
+import type { ReviewController } from "@/components/books/editor/review/types";
 
-interface Props {
-  needsRecheck: boolean;
-  onToggle: () => void;
-}
+const labels = {
+  unreviewed: ["Não revisado", "Conclua após ler o capítulo."],
+  pending: ["Em revisão", "Resolva as anotações antes de concluir."],
+  reviewed: ["Revisado", "A versão salva deste capítulo foi revisada."],
+  outdated: ["Texto alterado", "Revise as alterações antes de concluir novamente."],
+};
 
-export function ReviewProgressCard({ needsRecheck, onToggle }: Props) {
+export function ReviewProgressCard({ review }: { review: ReviewController }) {
+  const completed = review.state === "reviewed";
+  const Icon = completed ? CheckCircle2 : review.state === "unreviewed" ? CircleDashed : AlertCircle;
+  const [title, hint] = labels[review.state];
+  const description = review.state === "pending" && !review.openCommentsCount
+    ? "Releia o capítulo e conclua a revisão." : hint;
   return (
-    <div
-      className={`p-3.5 rounded-xl border transition-colors ${
-        needsRecheck
-          ? "bg-warning/10 border-warning/30 text-warning"
-          : "bg-surface-hover/50 border-border text-muted"
-      }`}
-    >
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2 min-w-0">
-          {needsRecheck ? (
-            <AlertCircle className="w-4 h-4 shrink-0 text-warning" />
-          ) : (
-            <CheckCircle2 className="w-4 h-4 shrink-0 text-success" />
-          )}
-          <div className="min-w-0">
-            <p className="text-xs font-bold text-foreground truncate">
-              {needsRecheck ? "Revisão pendente" : "Capítulo sem pendências"}
-            </p>
-            <p className="text-[11px] text-muted truncate">
-              {needsRecheck ? "Sinalizado para rever trechos" : "Leitura em dia"}
-            </p>
-          </div>
+    <section aria-label="Progresso da revisão" className="rounded-xl border border-border bg-surface-hover/50 p-3.5">
+      <div className="flex items-start gap-2">
+        <Icon aria-hidden="true" className={`h-4 w-4 mt-0.5 shrink-0 ${completed ? "text-success" : "text-muted"}`} />
+        <div>
+          <p className="text-xs font-bold text-foreground">{title}</p>
+          <p className="mt-1 text-xs text-muted">{description}</p>
         </div>
-
-        <button
-          type="button"
-          onClick={onToggle}
-          className={`px-2.5 py-1 text-xs font-bold rounded-lg border transition-colors cursor-pointer shrink-0 ${
-            needsRecheck
-              ? "bg-warning text-primary-foreground border-transparent hover:opacity-90"
-              : "border-control-border hover:bg-surface text-foreground"
-          }`}
-        >
-          {needsRecheck ? "Concluir" : "Sinalizar"}
-        </button>
       </div>
-    </div>
+      <div className="mt-3 flex flex-wrap items-center gap-2">
+        <button type="button" disabled={review.isPending || (!completed && review.openCommentsCount > 0)}
+          onClick={() => void review.markProgress(completed)}
+          className="rounded-lg border border-control-border px-3 py-1.5 text-xs font-bold text-foreground hover:bg-surface disabled:opacity-50">
+          {review.isPending ? "Salvando..." : completed ? "Sinalizar revisão" : "Concluir revisão"}
+        </button>
+        {review.openCommentsCount > 0 && <p className="text-xs text-muted">Há comentários abertos.</p>}
+      </div>
+    </section>
   );
 }
 

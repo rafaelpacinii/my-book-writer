@@ -4,6 +4,7 @@ use crate::error::AppError;
 use crate::repositories::chapter_repository::ChapterRepository;
 use crate::repositories::chapter_version_repository::ChapterVersionRepository;
 use crate::services::chapter_version_policy::{is_restorable, needs_snapshot, word_count};
+use crate::services::review_service::ReviewService;
 use sqlx::{SqliteConnection, SqlitePool};
 
 pub struct ChapterVersionService<'a> {
@@ -95,6 +96,7 @@ impl<'a> ChapterVersionService<'a> {
         })?;
         // Antes de restaurar, salva um snapshot automático do estado que será substituído
         // Both writes commit together: a failed safety snapshot rolls the content update back.
+        ReviewService::reconcile_in(&mut tx, &updated).await?;
         let description = format!("Antes de restaurar versão #{}", version.version_number);
         ChapterVersionRepository::create_in(
             &mut tx,
@@ -192,6 +194,7 @@ impl<'a> ChapterVersionService<'a> {
                     .into(),
             )
                 })?;
+        ReviewService::reconcile_in(&mut tx, &chapter).await?;
         Self::auto_in(&mut tx, &chapter).await?;
         tx.commit().await?;
         Ok(chapter)

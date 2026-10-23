@@ -7,4 +7,5 @@ pub mod chapter_version_service;
 pub mod export;
 pub mod image_asset_service;
 pub mod profile_service;
+mod review_anchor;
 pub mod review_service;

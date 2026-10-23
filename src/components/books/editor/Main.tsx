@@ -17,7 +17,7 @@ export function Main({ bookId, chapterId }: MainProps) {
   const { ed, rev, ver } = state;
   useSaveBeforeNavigation(Boolean(ed.chapter), ed.saveNow);
 
-  if (ed.isLoading && !ed.chapter) return <EditorSkeleton />;
+  if (ed.isLoading || (ed.chapter && ed.chapter.id !== chapterId)) return <EditorSkeleton />;
   if (!ed.chapter) return <EditorNotFound bookId={bookId} />;
 
   return (

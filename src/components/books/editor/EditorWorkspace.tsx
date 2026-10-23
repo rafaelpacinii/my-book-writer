@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
+import { captureReviewAnchor } from "@/lib/editor/reviewSelection";
 import { EditorSidebar } from "./EditorSidebar";
 import { EditorCanvasSwitcher } from "./EditorCanvasSwitcher";
 import { EditorReviewPanel } from "./review/EditorReviewPanel";
@@ -15,11 +16,13 @@ export function EditorWorkspace(props: EditorWorkspaceProps) {
     isReviewOpen, onOpenReview, onCloseReview,
     isVersionOpen, onCloseVersion,
   } = props;
-  const [pendingExcerpt, setPendingExcerpt] = useState("");
-  const { position, selectedText, clearSelection } = useSelectionToolbar();
+  const { position, clearSelection } = useSelectionToolbar();
 
   const handleCommentSelection = () => {
-    setPendingExcerpt(selectedText);
+    if (rev.isPending) return;
+    const anchor = captureReviewAnchor();
+    if (!anchor) return;
+    rev.updateDraft({ anchor });
     onOpenReview();
     clearSelection();
   };
@@ -48,7 +51,6 @@ export function EditorWorkspace(props: EditorWorkspaceProps) {
       />
       <EditorReviewPanel
         rev={rev} isOpen={isReviewOpen && !ed.isFocusMode} onClose={onCloseReview}
-        pendingExcerpt={pendingExcerpt} onClearPendingExcerpt={() => setPendingExcerpt("")}
       />
       <EditorVersionPanel
         ver={ver} ed={ed} bookId={bookId} chapterId={chapterId}
