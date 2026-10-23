@@ -12,7 +12,7 @@ export function ChapterCard(props: ChapterCardProps) {
     onRename, onDelete, onMoveUp, onMoveDown, isDragging,
     isDragOver, onDragStart, onDragOver, onDragLeave, onDrop, onDragEnd,
   } = props;
-  const { needsRecheck, openCommentsCount } = useChapterReviewStatus(chapter.id);
+  const review = useChapterReviewStatus(chapter.id, chapter.content_revision);
   const chapterNumber = formatChapterBadge(chapter, index, standardIndex).badge;
   const dragClass = isDragging
     ? "opacity-35 scale-95 border-dashed border-primary"
@@ -48,8 +48,7 @@ export function ChapterCard(props: ChapterCardProps) {
 
       <ChapterCardFooter
         updatedAt={chapter.updated_at}
-        needsRecheck={needsRecheck}
-        openCommentsCount={openCommentsCount}
+        review={review}
       />
     </Link>
   );

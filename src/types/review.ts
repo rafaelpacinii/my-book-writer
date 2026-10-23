@@ -1,6 +1,18 @@
 export type AnchorState = "attached" | "removed";
 export type CommentStatus = "open" | "resolved";
 
+export interface ReviewAnchor {
+  version: 1;
+  start: number;
+  end: number;
+  quote: string;
+  prefix: string;
+  suffix: string;
+  document_hash?: string;
+}
+
+export type ReviewState = "unreviewed" | "pending" | "reviewed" | "outdated";
+
 /**
  * Representa um comentário de revisão ancorado em um trecho do capítulo.
  */

@@ -10,7 +10,8 @@ import type { MainEditorState } from "./mainTypes";
 
 export function useMainEditorState(bookId: string, chapterId: string): MainEditorState {
   const ed = useChapterEditor(bookId, chapterId);
-  const rev = useReview(chapterId, ed.chapter?.content_revision ?? 1);
+  const rev = useReview(chapterId, ed.chapter?.content_revision ?? 0, ed.saveNow,
+    ed.saveStatus !== "saved", !ed.isLoading && ed.chapter?.id === chapterId);
   const ver = useChapterVersions(chapterId, ed.chapter?.track_changes_enabled ?? false);
   const [panel, setPanel] = useState<"review" | "versions" | null>(null);
   const isReviewOpen = panel === "review";

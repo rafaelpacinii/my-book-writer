@@ -1,3 +1,6 @@
+import { storeChapterWithReview } from "@/lib/api/browserReviews";
+import { storedChapter } from "@/lib/api/browserChapterStorage";
+export { storedChapter, storeChapter } from "@/lib/api/browserChapterStorage";
 import type { Chapter } from "@/types/chapter";
 import type { ChapterVersion } from "@/types/chapterVersion";
 import { countWords, parseChapterText } from "@/utils/chapterContent";
@@ -26,19 +29,6 @@ export function storedVersions(): ChapterVersion[] {
 
 export function storeVersions(versions: ChapterVersion[]): void {
   localStorage.setItem(VERSIONS, JSON.stringify(versions));
-}
-
-export function storedChapter(id: string): Chapter {
-  const chapters = read<Chapter[]>(CHAPTERS, []);
-  if (!Array.isArray(chapters)) throw new Error("Não foi possível ler os capítulos locais. Seus dados foram preservados.");
-  const chapter = chapters.find((c) => c && c.id === id && !c.deleted_at);
-  if (!chapter) throw new Error("Capítulo não encontrado.");
-  return chapter;
-}
-
-export function storeChapter(chapter: Chapter): void {
-  const chapters = read<Chapter[]>(CHAPTERS, []);
-  localStorage.setItem(CHAPTERS, JSON.stringify(chapters.map((c) => c.id === chapter.id ? chapter : c)));
 }
 
 export function browserCreateVersion(chapter: Chapter, description?: string): ChapterVersion {
@@ -81,6 +71,6 @@ export function browserRestore(chapterId: string, versionId: string, expectedRev
   if (current.content_revision !== expectedRevision) throw new Error("O capítulo mudou desde que o histórico foi aberto. Atualize antes de restaurar.");
   browserCreateVersion(current, `Antes de restaurar versão #${version.version_number}`);
   const restored = { ...current, content_json: version.content_json, content_revision: current.content_revision + 1, updated_at: new Date().toISOString() };
-  storeChapter(restored);
+  storeChapterWithReview(restored, read<Chapter[]>(CHAPTERS, []));
   return restored;
 }

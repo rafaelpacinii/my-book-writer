@@ -24,8 +24,10 @@ export function ReviewFilterTabs({ currentFilter, onSelect, counts }: Props) {
           <button
             key={tab.key}
             type="button"
+            aria-pressed={active}
+            title={`${tab.label} (${tab.count})`}
             onClick={() => onSelect(tab.key)}
-            className={`flex-1 py-1 px-2 rounded-md font-bold transition-colors cursor-pointer text-center truncate ${
+            className={`flex-1 py-1 px-2 rounded-md font-bold cursor-pointer text-center truncate ${
               active
                 ? "bg-primary text-primary-foreground shadow-xs"
                 : "text-muted hover:text-foreground"

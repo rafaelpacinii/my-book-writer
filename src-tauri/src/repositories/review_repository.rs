@@ -1,185 +1,123 @@
-use crate::domain::review::{ReviewComment, ReviewProgress};
+use crate::domain::review::{CreateCommentInput, MarkProgressInput, ReviewComment, ReviewProgress};
 use crate::error::AppError;
-use sqlx::SqlitePool;
+use sqlx::SqliteConnection;
 
-pub struct ReviewRepository<'a> {
-    pool: &'a SqlitePool,
-}
+pub struct ReviewRepository;
 
-impl<'a> ReviewRepository<'a> {
-    pub fn new(pool: &'a SqlitePool) -> Self {
-        Self { pool }
-    }
-
-    #[allow(clippy::too_many_arguments)]
-    pub async fn create_comment(
-        &self,
+impl ReviewRepository {
+    pub async fn profile_exists(
+        connection: &mut SqliteConnection,
         id: &str,
-        chapter_id: &str,
-        author_profile_id: &str,
-        body: &str,
-        original_excerpt: &str,
-        anchor_json: Option<&str>,
-        anchor_revision: i64,
-        anchor_state: &str,
-    ) -> Result<ReviewComment, AppError> {
-        let comment = sqlx::query_as::<_, ReviewComment>(
-            r#"
-            INSERT INTO review_comments (
-                id, chapter_id, author_profile_id, body, original_excerpt,
-                anchor_json, anchor_revision, anchor_state, status,
-                created_at, updated_at
-            ) VALUES (
-                ?, ?, ?, ?, ?,
-                ?, ?, ?, 'open',
-                datetime('now'), datetime('now')
-            )
-            RETURNING *
-            "#,
+    ) -> Result<bool, AppError> {
+        Ok(
+            sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM local_profiles WHERE id = ?)")
+                .bind(id)
+                .fetch_one(connection)
+                .await?,
         )
-        .bind(id)
-        .bind(chapter_id)
-        .bind(author_profile_id)
-        .bind(body)
-        .bind(original_excerpt)
-        .bind(anchor_json)
-        .bind(anchor_revision)
-        .bind(anchor_state)
-        .fetch_one(self.pool)
-        .await?;
-
-        Ok(comment)
     }
 
-    pub async fn list_comments_by_chapter(
-        &self,
+    pub async fn create_in(
+        connection: &mut SqliteConnection,
+        id: &str,
+        input: &CreateCommentInput,
+    ) -> Result<ReviewComment, AppError> {
+        Ok(sqlx::query_as::<_, ReviewComment>(
+            "INSERT INTO review_comments (id, chapter_id, author_profile_id, body, original_excerpt,
+                anchor_json, anchor_revision, anchor_state, status, created_at, updated_at)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'open', datetime('now'), datetime('now')) RETURNING *")
+            .bind(id).bind(&input.chapter_id).bind(&input.author_profile_id)
+            .bind(input.body.trim()).bind(input.original_excerpt.trim()).bind(&input.anchor_json)
+            .bind(input.anchor_revision).bind(if input.anchor_json.is_some() { "attached" } else { "removed" })
+            .fetch_one(connection).await?)
+    }
+
+    pub async fn list_in(
+        connection: &mut SqliteConnection,
         chapter_id: &str,
     ) -> Result<Vec<ReviewComment>, AppError> {
-        let comments = sqlx::query_as::<_, ReviewComment>(
-            "SELECT * FROM review_comments WHERE chapter_id = ? ORDER BY created_at ASC",
+        Ok(sqlx::query_as(
+            "SELECT * FROM review_comments WHERE chapter_id = ? ORDER BY created_at ASC, id ASC",
         )
         .bind(chapter_id)
-        .fetch_all(self.pool)
-        .await?;
-
-        Ok(comments)
+        .fetch_all(connection)
+        .await?)
     }
 
-    pub async fn resolve_comment(&self, id: &str) -> Result<ReviewComment, AppError> {
-        let comment = sqlx::query_as::<_, ReviewComment>(
-            r#"
-            UPDATE review_comments
-            SET status = 'resolved',
-                resolved_at = datetime('now'),
-                updated_at = datetime('now')
-            WHERE id = ?
-            RETURNING *
-            "#,
-        )
-        .bind(id)
-        .fetch_one(self.pool)
-        .await?;
-
-        Ok(comment)
+    pub async fn find_in(
+        connection: &mut SqliteConnection,
+        id: &str,
+    ) -> Result<ReviewComment, AppError> {
+        sqlx::query_as::<_, ReviewComment>("SELECT r.* FROM review_comments r JOIN chapters c ON c.id = r.chapter_id WHERE r.id = ? AND c.deleted_at IS NULL")
+            .bind(id).fetch_optional(connection).await?
+            .ok_or_else(|| AppError::NotFound("Comentário não encontrado.".into()))
     }
 
-    pub async fn reopen_comment(&self, id: &str) -> Result<ReviewComment, AppError> {
-        let comment = sqlx::query_as::<_, ReviewComment>(
-            r#"
-            UPDATE review_comments
-            SET status = 'open',
-                resolved_at = NULL,
-                updated_at = datetime('now')
-            WHERE id = ?
-            RETURNING *
-            "#,
-        )
-        .bind(id)
-        .fetch_one(self.pool)
-        .await?;
-
-        Ok(comment)
+    pub async fn status_in(
+        connection: &mut SqliteConnection,
+        id: &str,
+        status: &str,
+    ) -> Result<ReviewComment, AppError> {
+        Ok(sqlx::query_as("UPDATE review_comments SET status = ?, resolved_at = CASE WHEN ? = 'resolved' THEN datetime('now') ELSE NULL END, updated_at = datetime('now') WHERE id = ? RETURNING *")
+            .bind(status).bind(status).bind(id).fetch_one(connection).await?)
     }
 
-    pub async fn update_comment_body(
-        &self,
+    pub async fn body_in(
+        connection: &mut SqliteConnection,
         id: &str,
         body: &str,
     ) -> Result<ReviewComment, AppError> {
-        let comment = sqlx::query_as::<_, ReviewComment>(
-            r#"
-            UPDATE review_comments
-            SET body = ?,
-                updated_at = datetime('now')
-            WHERE id = ?
-            RETURNING *
-            "#,
-        )
-        .bind(body)
-        .bind(id)
-        .fetch_one(self.pool)
-        .await?;
-
-        Ok(comment)
+        Ok(sqlx::query_as("UPDATE review_comments SET body = ?, updated_at = datetime('now') WHERE id = ? RETURNING *")
+            .bind(body).bind(id).fetch_one(connection).await?)
     }
 
-    pub async fn delete_comment(&self, id: &str) -> Result<(), AppError> {
+    pub async fn delete_in(connection: &mut SqliteConnection, id: &str) -> Result<(), AppError> {
         sqlx::query("DELETE FROM review_comments WHERE id = ?")
             .bind(id)
-            .execute(self.pool)
+            .execute(connection)
             .await?;
-
         Ok(())
     }
 
-    pub async fn get_progress(&self, chapter_id: &str) -> Result<Option<ReviewProgress>, AppError> {
-        let progress = sqlx::query_as::<_, ReviewProgress>(
-            "SELECT * FROM review_progress WHERE chapter_id = ?",
-        )
-        .bind(chapter_id)
-        .fetch_optional(self.pool)
-        .await?;
-
-        Ok(progress)
+    pub async fn anchor_in(
+        connection: &mut SqliteConnection,
+        id: &str,
+        anchor: Option<&str>,
+        revision: i64,
+    ) -> Result<(), AppError> {
+        sqlx::query("UPDATE review_comments SET anchor_json = ?, anchor_state = ?, anchor_revision = ? WHERE id = ?")
+            .bind(anchor).bind(if anchor.is_some() { "attached" } else { "removed" })
+            .bind(revision).bind(id).execute(connection).await?;
+        Ok(())
     }
 
-    pub async fn save_progress(
-        &self,
+    pub async fn progress_in(
+        connection: &mut SqliteConnection,
         chapter_id: &str,
-        profile_id: &str,
-        anchor_json: Option<&str>,
-        anchor_revision: i64,
-        reviewed_content_revision: i64,
-        needs_recheck: bool,
-    ) -> Result<ReviewProgress, AppError> {
-        let progress = sqlx::query_as::<_, ReviewProgress>(
-            r#"
-            INSERT INTO review_progress (
-                chapter_id, profile_id, anchor_json, anchor_revision,
-                reviewed_content_revision, needs_recheck, marked_at, updated_at
-            ) VALUES (
-                ?, ?, ?, ?,
-                ?, ?, datetime('now'), datetime('now')
-            )
-            ON CONFLICT(chapter_id) DO UPDATE SET
-                profile_id = excluded.profile_id,
-                anchor_json = excluded.anchor_json,
-                anchor_revision = excluded.anchor_revision,
-                reviewed_content_revision = excluded.reviewed_content_revision,
-                needs_recheck = excluded.needs_recheck,
-                updated_at = datetime('now')
-            RETURNING *
-            "#,
+    ) -> Result<Option<ReviewProgress>, AppError> {
+        Ok(
+            sqlx::query_as("SELECT * FROM review_progress WHERE chapter_id = ?")
+                .bind(chapter_id)
+                .fetch_optional(connection)
+                .await?,
         )
-        .bind(chapter_id)
-        .bind(profile_id)
-        .bind(anchor_json)
-        .bind(anchor_revision)
-        .bind(reviewed_content_revision)
-        .bind(needs_recheck)
-        .fetch_one(self.pool)
-        .await?;
+    }
 
-        Ok(progress)
+    pub async fn save_progress_in(
+        connection: &mut SqliteConnection,
+        input: &MarkProgressInput,
+    ) -> Result<ReviewProgress, AppError> {
+        Ok(sqlx::query_as(
+            "INSERT INTO review_progress (chapter_id, profile_id, anchor_json, anchor_revision,
+                reviewed_content_revision, needs_recheck, marked_at, updated_at)
+             VALUES (?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
+             ON CONFLICT(chapter_id) DO UPDATE SET profile_id = excluded.profile_id,
+                anchor_json = excluded.anchor_json, anchor_revision = excluded.anchor_revision,
+                reviewed_content_revision = excluded.reviewed_content_revision,
+                needs_recheck = excluded.needs_recheck, marked_at = datetime('now'), updated_at = datetime('now')
+             RETURNING *")
+            .bind(&input.chapter_id).bind(&input.profile_id).bind(&input.anchor_json)
+            .bind(input.anchor_revision).bind(input.reviewed_content_revision).bind(input.needs_recheck)
+            .fetch_one(connection).await?)
     }
 }

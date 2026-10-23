@@ -1,0 +1,14 @@
+.drawer {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  width: 384px;
+  height: 100%;
+  min-height: 0;
+  z-index: 20;
+  border-left: 1px solid var(--border);
+  background: var(--surface);
+}
+@media (max-width: 1000px) {
+  .drawer { position: absolute; inset: 0; width: 100%; border-left: 0; }
+}

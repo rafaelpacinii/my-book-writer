@@ -67,10 +67,11 @@ export function usePagedEditor(props: PagedEditorProps) {
     content?.addEventListener("beforeinput", beforeInput);
 
     const onJumpToElement = (e: Event) => {
-      const customEvent = e as CustomEvent<{ element?: HTMLElement }>;
-      const el = customEvent.detail?.element;
+      const customEvent = e as CustomEvent<{ element?: HTMLElement; range?: Range }>;
+      const el = customEvent.detail?.range ?? customEvent.detail?.element;
       const flow = flowRef.current;
       if (el && flow) {
+        e.preventDefault();
         const targetPage = getPageForElement(flow, el, dim.widthPx);
         if (targetPage > 0) {
           setCurrentPage(targetPage);
