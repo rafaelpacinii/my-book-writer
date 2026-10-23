@@ -10,8 +10,7 @@ Os 153 arquivos listados em `source/checksums.sha256` foram verificados na integ
 | --- | --- | --- |
 | Entrada, a partir de 640 px de janela | Horizontal, 320 px | `public/brand/logo-horizontal-*.svg` |
 | Entrada em janelas menores | Duas linhas, 220 px | `public/brand/logo-stacked-*.svg` |
-| Menu lateral expandido, incluindo celular | Horizontal, 48 px de altura | `public/brand/logo-horizontal-*.svg` |
-| Menu lateral recolhido | Símbolo, 48 px | `public/brand/symbol-*.svg` |
+| Menu lateral expandido ou recolhido, incluindo celular | Símbolo, 32 px | `public/brand/symbol-*.svg` |
 | Marcas de 16–24 px | Micro | `public/brand/micro-*.svg` |
 | Aba do navegador | Favicon SVG, ICO e PNG | `public/favicon.*`, `public/favicon-*.png` |
 | Atalhos web e tela inicial | Apple touch, 192, 512 e maskable | `public/`, `public/site.webmanifest` |
@@ -20,13 +19,10 @@ Os 153 arquivos listados em `source/checksums.sha256` foram verificados na integ
 
 `BrandAsset` centraliza a apresentação das variantes e usa CSS para escolher as cores
 antes da hidratação. Os vetores mantêm as proporções e os espaços internos do kit.
-A lateral expandida tem 240 px e a recolhida tem 80 px. As duas marcas têm 48 px de
-altura, com proporções preservadas. A composição horizontal ocupa aproximadamente
-197 px de largura. O cabeçalho mantém a altura ao alternar entre os dois estados.
-Esse uso compacto foi escolhido para o menu;
-na entrada, a composição horizontal mantém os 320 px indicados no kit.
-A escolha das variantes usa CSS para respeitar a preferência salva antes da hidratação;
-em janelas menores, o menu aberto sempre exibe a composição horizontal.
+A lateral expandida tem 240 px e a recolhida tem 80 px. Nos dois estados, usa somente
+o símbolo de 32 px, sem o nome do aplicativo nem busca. No menu expandido, o botão
+de recolher fica à direita; no recolhido, o botão de expandir fica abaixo do símbolo.
+As variantes clara e escura são escolhidas por CSS antes da hidratação.
 Ícones de ações, como leitura, edição e exportação, continuam sendo ícones funcionais.
 
 ## Cores e fontes

@@ -12,7 +12,7 @@
   border-right: 1px solid var(--border);
 }
 
-.sidebar-collapse-button { width: 100%; }
+.sidebar-brand-header { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .sidebar-section-label {
   margin: 0 0 10px;
   padding-inline: 12px;
@@ -55,13 +55,13 @@
 
 @media (max-height: 700px) {
   .sidebar-brand-header { margin-bottom: 12px; padding-bottom: 12px; }
-  .sidebar-collapse-button { margin-top: 8px; }
   .sidebar-navigation { padding-bottom: 12px; }
   .sidebar-preferences { margin-top: 12px; }
   .sidebar-recent { max-height: 40px; overflow-y: auto; }
 }
 
 @media (min-width: 700px) {
+  [data-sidebar-collapsed="true"] .sidebar-brand-header { flex-direction: column; }
   [data-sidebar-collapsed="true"] .sidebar-collapse-button { justify-content: center; padding-inline: 0; }
   [data-sidebar-collapsed="true"] [data-expand-icon] { display: block; }
   [data-sidebar-collapsed="true"] [data-collapse-icon] { display: none; }
