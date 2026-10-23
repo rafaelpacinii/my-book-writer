@@ -79,7 +79,7 @@ try {
   session = undefined;
   await start();
   assert.equal(await session.execute("return document.documentElement.dataset.theme;"), "dark");
-  assert.equal(await session.execute('return Math.round(document.querySelector("[data-app-sidebar]").getBoundingClientRect().width);'), 68);
+  assert.equal(await session.execute('return Math.round(document.querySelector("[data-app-sidebar]").getBoundingClientRect().width);'), 80);
   await session.click('nav a[href="/library"]');
   await waitUntil(() => session.execute("return document.body.textContent.includes(arguments[0]);", [title]), "book survives application restart");
   console.log("Native Windows UI checks passed. Actual DPI/runtime:", runtime);

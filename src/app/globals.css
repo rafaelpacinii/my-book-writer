@@ -6,8 +6,6 @@
 @import "../components/shared/sidebar.css";
 @import "../components/shared/book-object.css";
 @import "../components/shared/interactions.css";
-@import "../lib/branding/tokens.css";
-@import "../components/shared/branding.css";
 
 @font-face {
   font-family: 'Inter';
@@ -375,7 +373,7 @@ select option {
 
 /* The head script sets this before the static sidebar is painted. */
 [data-sidebar-collapsed="true"] [data-app-sidebar] {
-  width: 68px;
+  width: 80px;
   padding: 16px 10px 20px;
 }
 
