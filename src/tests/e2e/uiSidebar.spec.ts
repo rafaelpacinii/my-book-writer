@@ -29,7 +29,7 @@ for (const theme of ["light", "dark"]) {
     await page.getByRole("button", { name: "Mostrar livros recentes" }).click();
     await expect(recent).toBeVisible();
     await page.getByRole("button", { name: "Recolher menu", exact: true }).click();
-    await expect(page.locator("[data-app-sidebar]")).toHaveCSS("width", "68px");
+    await expect(page.locator("[data-app-sidebar]")).toHaveCSS("width", "80px");
     await expect(sidebar.getByRole("button", { name: "Alternar tema" })).toBeInViewport({ ratio: 1 });
     await expect(sidebar.getByRole("button", { name: "Abrir configurações do perfil" })).toBeInViewport({ ratio: 1 });
     const library = page.getByRole("navigation", { name: "Navegação principal" }).getByRole("link", { name: "Biblioteca", exact: true });
@@ -44,7 +44,7 @@ for (const theme of ["light", "dark"]) {
     expect(result.violations).toEqual([]);
     await page.reload();
     await expect(page.getByRole("button", { name: "Expandir menu" })).toBeVisible();
-    await expect(page.locator("[data-app-sidebar]")).toHaveCSS("width", "68px");
+    await expect(page.locator("[data-app-sidebar]")).toHaveCSS("width", "80px");
   });
 }
 

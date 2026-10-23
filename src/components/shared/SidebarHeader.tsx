@@ -12,10 +12,10 @@ export function SidebarHeader({ isCollapsed, onToggle, onNavigate }: Props) {
   return (
     <div data-sidebar-header className="sidebar-brand-header mb-5 shrink-0 border-b border-border pb-4">
       <Link data-sidebar-item data-sidebar-brand href="/home" onClick={onNavigate} aria-label="My Book Writer — início" title="My Book Writer"
-        className="flex h-10 items-center gap-2.5 rounded-lg px-2 text-primary hover:bg-surface-hover"
+        className="flex items-center justify-center rounded-lg text-primary hover:bg-surface-hover"
       >
-        <BrandAsset />
-        <span data-sidebar-expanded className="text-sm font-medium text-foreground">Estúdio editorial</span>
+        <BrandAsset variant="horizontal" className="sidebar-brand-horizontal" />
+        <BrandAsset className="sidebar-brand-symbol" />
       </Link>
       <button type="button" onClick={onToggle}
         aria-label={isCollapsed ? "Expandir menu" : "Recolher menu"}
