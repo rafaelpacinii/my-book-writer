@@ -15,6 +15,9 @@ for (const theme of ["light", "dark"]) {
         await page.goto(route);
         await expect(page.locator('[aria-busy="true"]')).toHaveCount(0);
         await page.evaluate(() => document.fonts.ready);
+        await page.locator("[data-brand] img:visible").evaluateAll((images) => Promise.all(
+          images.map((image) => (image as HTMLImageElement).decode()),
+        ));
         await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
         await page.addStyleTag({ content: "nextjs-portal { visibility: hidden; }" });
         await expect(page).toHaveScreenshot(`${name}-${theme}-${width}.png`, {

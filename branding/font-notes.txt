@@ -1,0 +1,10 @@
+EB Garamond: Google Fonts, SIL Open Font License 1.1.
+https://github.com/google/fonts/tree/main/ofl/ebgaramond
+SHA-256: ef9512f92f6d579e5dc75af59a5a4b1b8b47d2eda89e00b954d44520e5369027
+
+Plus Jakarta Sans: Google Fonts, SIL Open Font License 1.1.
+https://github.com/google/fonts/tree/main/ofl/plusjakartasans
+SHA-256: 89b3fb38aa0d275d7a731d0d817a4f1622b316b4d7fbdedcf02ee9099ff68bc8
+
+Book: EB Garamond 600 + B personalizado. Writer: EB Garamond 500 + i-lápis. MY: Plus Jakarta Sans 600.
+Fontes originais não modificadas; instâncias de peso usadas somente em memória para gerar os contornos.

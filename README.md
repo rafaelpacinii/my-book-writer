@@ -15,7 +15,10 @@
 <br />
 <div align="center">
   <a href="https://github.com/rafaelpacinii/my-book-writer">
-    <img src="public/tauri.svg" alt="My Book Writer Logo" width="80" height="80">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="public/brand/logo-horizontal-dark.svg">
+      <img src="public/brand/logo-horizontal-color.svg" alt="My Book Writer" width="360" height="88">
+    </picture>
   </a>
 
   <h1 align="center">My Book Writer</h1>
@@ -36,6 +39,8 @@
     <a href="#getting-started">Getting Started</a>
     ·
     <a href="#automated-testing--quality">Testing & Quality</a>
+    ·
+    <a href="branding/README.md">Brand Guidelines</a>
   </p>
 </div>
 

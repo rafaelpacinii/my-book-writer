@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { preferenceBootstrap } from "@/lib/preferences/bootstrap";
 import { PreferenceProvider } from "@/components/shared/PreferenceProvider";
@@ -7,7 +7,19 @@ import { AppDataProvider } from "@/components/shared/AppDataProvider";
 export const metadata: Metadata = {
   title: "My Book Writer",
   description: "Estúdio editorial para escritores",
+  applicationName: "My Book Writer",
+  manifest: "/site.webmanifest",
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/favicon.svg", type: "image/svg+xml", sizes: "any" },
+      { url: "/favicon-32.png", type: "image/png", sizes: "32x32" },
+    ],
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+  },
 };
+
+export const viewport: Viewport = { themeColor: "#4B5E47" };
 
 export default function RootLayout({
   children,

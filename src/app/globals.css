@@ -6,6 +6,8 @@
 @import "../components/shared/sidebar.css";
 @import "../components/shared/book-object.css";
 @import "../components/shared/interactions.css";
+@import "../lib/branding/tokens.css";
+@import "../components/shared/branding.css";
 
 @font-face {
   font-family: 'Inter';
@@ -194,12 +196,12 @@
 :root {
   color-scheme: light;
   --background: #F4F3EF;
-  --surface: #FAF9F6;
+  --surface: var(--mbw-paper);
   --surface-hover: #ECEAE4;
   --surface-elevated: #E5E3DC;
-  --foreground: #222621;
+  --foreground: var(--mbw-ink);
   --muted: #545A50;
-  --primary: #4B5E47;
+  --primary: var(--mbw-forest);
   --primary-foreground: #FFFFFF;
   --primary-hover: #3C4D38;
   --primary-soft: #E2E8D9;
@@ -212,20 +214,20 @@
   --danger: #9B3D3D;
   --danger-foreground: #FFFFFF;
   --danger-soft: #F7E5E2;
-  --paper: #FAF9F6;
-  --ink: #222621;
+  --paper: var(--mbw-paper);
+  --ink: var(--mbw-ink);
 }
 
 .dark,
 [data-theme="dark"] {
   color-scheme: dark;
-  --background: #171816;
+  --background: var(--mbw-night);
   --surface: #212320;
   --surface-hover: #2C3029;
   --surface-elevated: #353A31;
   --foreground: #ECEEE8;
   --muted: #B4BAAD;
-  --primary: #ADC2A5;
+  --primary: var(--mbw-sage);
   --primary-foreground: #182015;
   --primary-hover: #C0D3B8;
   --primary-soft: #2E382A;
@@ -238,8 +240,8 @@
   --danger: #E4A6A3;
   --danger-foreground: #261715;
   --danger-soft: #3F2928;
-  --paper: #FAF9F6;
-  --ink: #222621;
+  --paper: var(--mbw-paper);
+  --ink: var(--mbw-ink);
 }
 
 @theme {
