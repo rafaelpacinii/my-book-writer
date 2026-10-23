@@ -22,7 +22,7 @@ export function VersionsSidebar({ versions, selectedId, onSelect, onDelete }: Pr
   };
 
   return (
-    <aside className="w-80 shrink-0 border-r border-border bg-surface flex flex-col h-full select-none">
+    <aside className="w-full max-h-52 md:max-h-none md:w-80 md:h-full shrink-0 border-r border-border bg-surface flex flex-col min-h-0 select-none">
       <div className="p-4 border-b border-border">
         <h2 className="text-xs font-bold uppercase tracking-wider text-muted">
           Snapshots salvos ({versions.length})

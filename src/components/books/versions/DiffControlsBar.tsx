@@ -26,8 +26,8 @@ export function DiffControlsBar(props: Props) {
   } = props;
 
   return (
-    <div className="h-14 px-6 border-b border-border bg-surface flex items-center justify-between gap-4 select-none shrink-0 overflow-x-auto">
-      <div className="flex items-center gap-3">
+    <div role="region" aria-label="Controles de comparação" className="min-h-14 px-4 py-3 border-b border-border bg-surface flex flex-wrap items-center justify-between gap-3 select-none shrink-0">
+      <div className="flex flex-wrap items-center gap-3">
         <span className="text-xs text-muted font-medium">Comparar com:</span>
         <div className="flex p-0.5 rounded-lg border border-control-border bg-surface-hover/40 text-xs">
           <button

@@ -1,15 +1,24 @@
 import { removeLegacyPageBreaks } from "@/utils/bookPagination";
 
-export interface ChapterDoc {
+export interface ChapterNode {
+  type?: string;
+  text?: string;
+  content?: ChapterNode[];
+  blocks?: ChapterNode[];
+}
+
+export interface ChapterDoc extends ChapterNode {
   type: string;
   text?: string;
   html?: string;
   word_count?: number;
-  content?: Array<{
-    type?: string;
-    text?: string;
-    content?: Array<{ text?: string }>;
-  }>;
+}
+
+function legacyNodeText(node: ChapterNode): string {
+  if (typeof node.text === "string") return node.text;
+  const children = node.content ?? node.blocks ?? [];
+  const separator = children.some((child) => child.type !== "text" && !child.text) ? "\n\n" : "";
+  return children.map(legacyNodeText).join(separator);
 }
 
 export function extractPlainText(htmlOrText: string): string {
@@ -46,16 +55,9 @@ export function parseChapterText(contentJson: string | null | undefined): string
     if (typeof parsed.text === "string" && parsed.text) {
       return removeLegacyPageBreaks(textToHtml(parsed.text));
     }
-    if (Array.isArray(parsed.content)) {
-      const parts: string[] = [];
-      for (const node of parsed.content) {
-        if (node.text) parts.push(node.text);
-        else if (Array.isArray(node.content)) {
-          const inner = node.content.map((c) => c.text || "").join("");
-          if (inner) parts.push(inner);
-        }
-      }
-      return textToHtml(parts.join("\n\n"));
+    const nodes = parsed.content ?? parsed.blocks;
+    if (Array.isArray(nodes)) {
+      return textToHtml(nodes.map(legacyNodeText).join("\n\n"));
     }
     return "<p><br></p>";
   } catch {

@@ -1,7 +1,7 @@
 use crate::domain::chapter::{Chapter, ChapterSummary};
 use crate::error::AppError;
 use crate::repositories::book_repository::touch_book;
-use sqlx::SqlitePool;
+use sqlx::{SqliteConnection, SqlitePool};
 
 pub struct ChapterRepository<'a> {
     pool: &'a SqlitePool,
@@ -80,11 +80,18 @@ impl<'a> ChapterRepository<'a> {
     }
 
     pub async fn find_by_id(&self, id: &str) -> Result<Option<Chapter>, AppError> {
+        Self::find_in(&mut *self.pool.acquire().await?, id).await
+    }
+
+    pub async fn find_in(
+        connection: &mut SqliteConnection,
+        id: &str,
+    ) -> Result<Option<Chapter>, AppError> {
         let chapter = sqlx::query_as::<_, Chapter>(
             "SELECT * FROM chapters WHERE id = ? AND deleted_at IS NULL",
         )
         .bind(id)
-        .fetch_optional(self.pool)
+        .fetch_optional(connection)
         .await?;
 
         Ok(chapter)
@@ -143,7 +150,18 @@ impl<'a> ChapterRepository<'a> {
         expected_revision: i64,
         content_json: &str,
     ) -> Result<Option<Chapter>, AppError> {
-        let mut tx = self.pool.begin().await?;
+        let mut tx = self.pool.begin_with("BEGIN IMMEDIATE").await?;
+        let chapter = Self::save_content_in(&mut tx, id, expected_revision, content_json).await?;
+        tx.commit().await?;
+        Ok(chapter)
+    }
+
+    pub async fn save_content_in(
+        connection: &mut SqliteConnection,
+        id: &str,
+        expected_revision: i64,
+        content_json: &str,
+    ) -> Result<Option<Chapter>, AppError> {
         let chapter = sqlx::query_as::<_, Chapter>(
             r#"
             UPDATE chapters
@@ -157,13 +175,12 @@ impl<'a> ChapterRepository<'a> {
         .bind(content_json)
         .bind(id)
         .bind(expected_revision)
-        .fetch_optional(&mut *tx)
+        .fetch_optional(&mut *connection)
         .await?;
 
         if let Some(saved) = &chapter {
-            touch_book(&mut *tx, &saved.book_id).await?;
+            touch_book(&mut *connection, &saved.book_id).await?;
         }
-        tx.commit().await?;
         Ok(chapter)
     }
 

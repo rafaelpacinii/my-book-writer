@@ -14,6 +14,7 @@ export function EditorHistoryButton({ isOpen, onToggle, count }: Props) {
       type="button"
       onClick={onToggle}
       aria-pressed={isOpen}
+      aria-label={isOpen ? "Fechar histórico de versões" : "Abrir histórico de versões"}
       className={`${styles.action} ${
         isOpen
           ? "bg-primary-soft text-primary"

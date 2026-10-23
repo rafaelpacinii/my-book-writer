@@ -32,4 +32,27 @@ describe("computeWordDiff", () => {
     const nonUnchanged = indexed.parts.filter((p) => p.type !== "unchanged");
     expect(nonUnchanged[0].changeIndex).toBe(1);
   });
+
+  it("reconstructs both texts for repeated tokens and changes at every position", () => {
+    let seed = 17;
+    const randomText = () => Array.from({ length: 45 }, () => {
+      seed = (seed * 48271) % 2147483647;
+      return ["a", "b", " ", "\n", "c"][seed % 5];
+    }).join("");
+    for (let pass = 0; pass < 200; pass++) {
+      const before = randomText(), after = randomText();
+      const diff = computeWordDiff(before, after);
+      expect(diff.filter((p) => p.type !== "added").map((p) => p.value).join("")).toBe(before);
+      expect(diff.filter((p) => p.type !== "removed").map((p) => p.value).join("")).toBe(after);
+    }
+  });
+
+  it("handles long chapters and complete rewrites without a quadratic matrix", () => {
+    const before = Array.from({ length: 15_000 }, (_, index) => `antigo${index}`).join(" ");
+    const after = Array.from({ length: 15_000 }, (_, index) => `novo${index}`).join(" ");
+    const diff = computeWordDiff(before, after);
+    expect(diff.filter((p) => p.type !== "added").map((p) => p.value).join("")).toBe(before);
+    expect(diff.filter((p) => p.type !== "removed").map((p) => p.value).join("")).toBe(after);
+    expect(computeWordDiff(before, before + " conclusão").some((p) => p.type === "added" && p.value.includes("conclusão"))).toBe(true);
+  });
 });

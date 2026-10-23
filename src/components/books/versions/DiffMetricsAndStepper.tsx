@@ -17,7 +17,7 @@ interface Props {
 
 export function DiffMetricsAndStepper(p: Props) {
   return (
-    <div className="flex items-center gap-4">
+    <div className="flex flex-wrap items-center gap-3">
       <div className="flex items-center gap-2 text-xs">
         <span className="font-bold text-foreground">{p.totalChanges} alterações</span>
         {p.additions > 0 && <span className="px-1.5 py-0.5 rounded bg-success-soft text-success font-bold">+{p.additions}</span>}
@@ -33,7 +33,7 @@ export function DiffMetricsAndStepper(p: Props) {
           <ChevronLeft className="w-4 h-4" />
         </button>
         <span className="text-xs font-mono text-muted px-2 min-w-[70px] text-center">
-          {p.totalChanges > 0 ? `${p.activeChangeIndex || 1}/${p.totalChanges}` : "0/0"}
+          {p.totalChanges > 0 ? `${p.activeChangeIndex}/${p.totalChanges}` : "0/0"}
         </span>
         <button
           type="button" onClick={p.onNext} disabled={p.totalChanges === 0}

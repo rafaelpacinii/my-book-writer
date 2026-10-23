@@ -16,6 +16,9 @@ export interface VersionsPageState {
   compareBase: CompareBase;
   layoutMode: DiffLayoutMode;
   isLoading: boolean;
+  error: string | null;
+  reload: () => void;
+  createVersion: () => Promise<void>;
   diffResult: {
     parts: IndexedDiffPart[];
     totalChanges: number;

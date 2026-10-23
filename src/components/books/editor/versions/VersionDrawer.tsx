@@ -3,19 +3,14 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { VersionDrawerHeader } from "./VersionDrawerHeader";
-import { TrackChangesToggle } from "./TrackChangesToggle";
-import { NewSnapshotForm } from "./NewSnapshotForm";
-import { VersionList } from "./VersionList";
+import { VersionDrawerBody } from "./VersionDrawerBody";
+import { useHistoryAction } from "@/hooks/useHistoryAction";
 import { DeleteVersionModal } from "@/components/books/versions/DeleteVersionModal";
 import type { VersionDrawerProps } from "./types";
 
 export function VersionDrawer(props: VersionDrawerProps) {
-  const {
-    isOpen, onClose, versions, selectedVersion,
-    trackChanges, onToggleTrackChanges, onCreateSnapshot,
-    onDeleteVersion, bookId, chapterId,
-  } = props;
-
+  const { isOpen, onClose, versions, onDeleteVersion, bookId, chapterId } = props;
+  const navigation = useHistoryAction(chapterId);
   const router = useRouter();
   const [versionToDelete, setVersionToDelete] = useState<{ id: string; versionNumber: number } | null>(null);
 
@@ -23,9 +18,12 @@ export function VersionDrawer(props: VersionDrawerProps) {
 
   const handleSelect = (versionId: string) => {
     if (!bookId || !chapterId) return;
-    router.push(
-      `/books/versions?bookId=${encodeURIComponent(bookId)}&chapterId=${encodeURIComponent(chapterId)}&versionId=${encodeURIComponent(versionId)}`
-    );
+    void navigation.run(async () => {
+      if (!await props.onBeforeNavigate()) throw new Error("Salve o rascunho antes de abrir a comparação.");
+      router.push(
+        `/books/versions?bookId=${encodeURIComponent(bookId)}&chapterId=${encodeURIComponent(chapterId)}&versionId=${encodeURIComponent(versionId)}`
+      );
+    });
   };
 
   const handleRequestDelete = (versionId: string) => {
@@ -40,23 +38,15 @@ export function VersionDrawer(props: VersionDrawerProps) {
   };
 
   return (
-    <aside className="w-80 sm:w-96 border-l border-border bg-surface flex flex-col shrink-0 h-full z-20">
+    <aside aria-label="Histórico de versões" className="absolute inset-y-0 right-0 w-full max-w-sm min-[1100px]:static min-[1100px]:w-96 border-l border-border bg-surface flex flex-col shrink-0 h-full z-20">
       <VersionDrawerHeader
         count={versions.length}
         onClose={onClose}
         bookId={bookId}
         chapterId={chapterId}
       />
-      <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-4">
-        <TrackChangesToggle enabled={trackChanges} onToggle={onToggleTrackChanges} />
-        <NewSnapshotForm onCreate={onCreateSnapshot} />
-        <VersionList
-          versions={versions}
-          selectedId={selectedVersion?.id}
-          onSelect={handleSelect}
-          onDelete={handleRequestDelete}
-        />
-      </div>
+      <VersionDrawerBody {...props} error={navigation.error || props.error}
+        onSelect={handleSelect} onDelete={handleRequestDelete} />
       <DeleteVersionModal
         isOpen={Boolean(versionToDelete)}
         onClose={() => setVersionToDelete(null)}

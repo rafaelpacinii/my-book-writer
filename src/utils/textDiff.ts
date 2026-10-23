@@ -9,43 +9,60 @@ export interface IndexedDiffPart extends DiffPart {
  * Retorna as partes marcadas como adicionadas, removidas ou inalteradas.
  */
 export function computeWordDiff(oldText: string, newText: string): DiffPart[] {
-  const oldWords = tokenize(oldText);
-  const newWords = tokenize(newText);
+  const oldWords = tokenize(oldText), newWords = tokenize(newText);
+  let prefix = 0, suffix = 0;
+  while (prefix < Math.min(oldWords.length, newWords.length) && oldWords[prefix] === newWords[prefix]) prefix++;
+  while (suffix < Math.min(oldWords.length, newWords.length) - prefix
+    && oldWords[oldWords.length - 1 - suffix] === newWords[newWords.length - 1 - suffix]) suffix++;
+  const before = oldWords.slice(prefix, oldWords.length - suffix);
+  const after = newWords.slice(prefix, newWords.length - suffix);
+  const changes = boundedMyers(before, after);
+  return groupConsecutiveDiffParts([
+    { type: "unchanged", value: oldWords.slice(0, prefix).join("") },
+    ...changes,
+    { type: "unchanged", value: oldWords.slice(oldWords.length - suffix).join("") },
+  ].filter((part) => part.value) as DiffPart[]);
+}
 
-  const n = oldWords.length;
-  const m = newWords.length;
-
-  const dp: number[][] = Array.from({ length: n + 1 }, () => new Array(m + 1).fill(0));
-
-  for (let i = 0; i < n; i++) {
-    for (let j = 0; j < m; j++) {
-      if (oldWords[i] === newWords[j]) {
-        dp[i + 1][j + 1] = dp[i][j] + 1;
-      } else {
-        dp[i + 1][j + 1] = Math.max(dp[i + 1][j], dp[i][j + 1]);
-      }
+/** Bound work for entire manuscripts; retain exact text even for extensive rewrites. */
+function boundedMyers(before: string[], after: string[]): DiffPart[] {
+  const trace: Map<number, number>[] = [];
+  const frontier = new Map<number, number>([[1, 0]]);
+  let work = 0;
+  for (let depth = 0; depth <= Math.min(before.length + after.length, 256); depth++) {
+    trace.push(new Map(frontier));
+    for (let diagonal = -depth; diagonal <= depth; diagonal += 2) {
+      let x = diagonal === -depth || (diagonal !== depth && (frontier.get(diagonal - 1) ?? -1) < (frontier.get(diagonal + 1) ?? -1))
+        ? frontier.get(diagonal + 1) ?? 0 : (frontier.get(diagonal - 1) ?? 0) + 1;
+      let y = x - diagonal;
+      while (x < before.length && y < after.length && before[x] === after[y]) { x++; y++; work++; }
+      if (++work > 2_000_000) return replacement(before, after);
+      frontier.set(diagonal, x);
+      if (x >= before.length && y >= after.length) return backtrack(trace, before, after);
     }
   }
+  return replacement(before, after);
+}
 
-  const parts: DiffPart[] = [];
-  let i = n;
-  let j = m;
+function replacement(before: string[], after: string[]): DiffPart[] {
+  return [{ type: "removed", value: before.join("") }, { type: "added", value: after.join("") }];
+}
 
-  while (i > 0 || j > 0) {
-    if (i > 0 && j > 0 && oldWords[i - 1] === newWords[j - 1]) {
-      parts.unshift({ type: "unchanged", value: oldWords[i - 1] });
-      i--;
-      j--;
-    } else if (j > 0 && (i === 0 || dp[i][j - 1] >= dp[i - 1][j])) {
-      parts.unshift({ type: "added", value: newWords[j - 1] });
-      j--;
-    } else if (i > 0 && (j === 0 || dp[i][j - 1] < dp[i - 1][j])) {
-      parts.unshift({ type: "removed", value: oldWords[i - 1] });
-      i--;
+function backtrack(trace: Map<number, number>[], before: string[], after: string[]): DiffPart[] {
+  let x = before.length, y = after.length;
+  const reversed: DiffPart[] = [];
+  for (let depth = trace.length - 1; depth >= 0; depth--) {
+    const frontier = trace[depth], diagonal = x - y;
+    const previousDiagonal = diagonal === -depth || (diagonal !== depth && (frontier.get(diagonal - 1) ?? -1) < (frontier.get(diagonal + 1) ?? -1))
+      ? diagonal + 1 : diagonal - 1;
+    const previousX = frontier.get(previousDiagonal) ?? 0, previousY = previousX - previousDiagonal;
+    while (x > previousX && y > previousY) { reversed.push({ type: "unchanged", value: before[--x] }); y--; }
+    if (depth > 0) {
+      if (x === previousX) reversed.push({ type: "added", value: after[--y] });
+      else reversed.push({ type: "removed", value: before[--x] });
     }
   }
-
-  return groupConsecutiveDiffParts(parts);
+  return reversed.reverse();
 }
 
 export function indexDiffChanges(parts: DiffPart[]): {

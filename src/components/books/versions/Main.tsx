@@ -2,6 +2,8 @@
 
 import React from "react";
 import { VersionsHeader } from "./VersionsHeader";
+import { ErrorState } from "@/components/shared/ErrorState";
+import { VersionsEmpty } from "./VersionsEmpty";
 import { VersionsWorkspace } from "./VersionsWorkspace";
 import { useVersionsPage } from "./useVersionsPage";
 
@@ -32,10 +34,14 @@ export function Main({ bookId, chapterId, initialVersionId }: MainProps) {
         chapterId={chapterId}
         bookTitle={state.bookTitle}
         chapterTitle={state.chapterTitle}
+        isLoading={state.isLoading || Boolean(state.error)}
+        onRefresh={state.reload}
         versionNumber={state.selectedVersion?.version_number}
         onRestore={state.restoreCurrentVersion}
       />
-      <VersionsWorkspace state={state} />
+      {state.error ? <ErrorState message={state.error} onRetry={state.reload} />
+        : !state.selectedVersion ? <VersionsEmpty bookId={bookId} chapterId={chapterId} onCreate={state.createVersion} />
+        : <VersionsWorkspace state={state} />}
     </div>
   );
 }

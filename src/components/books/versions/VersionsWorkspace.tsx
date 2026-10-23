@@ -8,13 +8,13 @@ import { DiffSplitView } from "./DiffSplitView";
 import type { VersionsPageState } from "./types";
 
 export function VersionsWorkspace({ state }: { state: VersionsPageState }) {
-  const leftLabel = `Snapshot #${state.selectedVersion?.version_number ?? ""}`;
+  const leftLabel = `Snapshot #${(state.compareBase === "current" ? state.selectedVersion : state.previousVersion)?.version_number ?? ""}`;
   const rightLabel = state.compareBase === "current"
     ? "Texto Atual no Editor"
-    : `Snapshot #${state.previousVersion?.version_number ?? ""}`;
+    : `Snapshot #${state.selectedVersion?.version_number ?? ""}`;
 
   return (
-    <div className="flex flex-1 min-h-0 overflow-hidden">
+    <div className="flex flex-1 flex-col md:flex-row min-h-0 overflow-hidden">
       <VersionsSidebar
         versions={state.versions}
         selectedId={state.selectedVersion?.id}
@@ -37,6 +37,7 @@ export function VersionsWorkspace({ state }: { state: VersionsPageState }) {
           hasPreviousVersion={Boolean(state.previousVersion)}
         />
 
+        <p className="px-4 py-2 text-xs text-muted">A comparação destaca o texto. A restauração também recupera a formatação.</p>
         <div className="flex-1 overflow-y-auto">
           {state.layoutMode === "unified" ? (
             <DiffUnifiedView
@@ -46,6 +47,7 @@ export function VersionsWorkspace({ state }: { state: VersionsPageState }) {
           ) : (
             <DiffSplitView
               parts={state.diffResult.parts}
+              activeChangeIndex={state.activeChangeIndex}
               leftLabel={leftLabel}
               rightLabel={rightLabel}
             />

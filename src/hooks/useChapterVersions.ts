@@ -1,111 +1,70 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import {
-  createChapterVersion,
-  deleteChapterVersion,
-  getChapterVersion,
-  listChapterVersions,
-  restoreChapterVersion,
-  setChapterTrackChanges,
-} from "@/lib/api/versions";
-import type { ChapterVersion, ChapterVersionSummary } from "@/types/chapterVersion";
-import type { Chapter } from "@/types/chapter";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { checkpointChapterHistory, createChapterVersion, deleteChapterVersion, listChapterVersions, setChapterTrackChanges } from "@/lib/api/versions";
+import { historyError } from "@/utils/versionHistory";
+import type { ChapterVersionSummary } from "@/types/chapterVersion";
 
 export function useChapterVersions(chapterId: string, initialTrackChanges = false) {
   const [versions, setVersions] = useState<ChapterVersionSummary[]>([]);
-  const [selectedVersion, setSelectedVersion] = useState<ChapterVersion | null>(null);
+  const [loadedChapterId, setLoadedChapterId] = useState(chapterId);
   const [trackChanges, setTrackChanges] = useState(initialTrackChanges);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isComparing, setIsComparing] = useState(false);
+  const [isLoading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const context = useRef(chapterId);
+  context.current = chapterId;
+  const request = useRef(0);
+  const cancelLoad = useCallback(() => { request.current++; }, []);
 
-  useEffect(() => {
-    setTrackChanges(initialTrackChanges);
-  }, [initialTrackChanges]);
-
+  useEffect(() => { setTrackChanges(initialTrackChanges); }, [chapterId, initialTrackChanges]);
   const loadVersions = useCallback(async () => {
-    if (!chapterId) return;
-    setIsLoading(true);
+    const token = ++request.current;
+    if (!chapterId) { setVersions([]); setLoading(false); return; }
+    setLoading(true);
     try {
       const list = await listChapterVersions(chapterId);
-      setVersions(list);
+      if (context.current === chapterId && token === request.current) { setVersions(list); setLoadedChapterId(chapterId); setError(null); }
+    } catch (cause) {
+      if (context.current === chapterId && token === request.current) setError(historyError(cause));
     } finally {
-      setIsLoading(false);
+      if (context.current === chapterId && token === request.current) setLoading(false);
     }
   }, [chapterId]);
+  useEffect(() => {
+    setVersions([]);
+    setError(null);
+    void loadVersions();
+    return cancelLoad;
+  }, [loadVersions, cancelLoad]);
 
   useEffect(() => {
-    void loadVersions();
-  }, [loadVersions]);
+    if (!trackChanges || !chapterId) return;
+    let active = true, pending = false;
+    const timer = setInterval(async () => {
+      if (pending) return;
+      pending = true;
+      try {
+        await checkpointChapterHistory(chapterId);
+        if (active) await loadVersions();
+      } catch (cause) { if (active) setError(historyError(cause)); }
+      finally { pending = false; }
+    }, 30_000);
+    return () => { active = false; clearInterval(timer); };
+  }, [chapterId, trackChanges, loadVersions]);
 
-  const handleCreateSnapshot = useCallback(
-    async (description?: string) => {
-      if (!chapterId) return;
-      await createChapterVersion(chapterId, description);
-      await loadVersions();
-    },
-    [chapterId, loadVersions],
-  );
-
-  const handleSelectVersion = useCallback(async (versionId: string) => {
-    setIsLoading(true);
-    try {
-      const ver = await getChapterVersion(versionId);
-      setSelectedVersion(ver);
-      setIsComparing(true);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  const handleRestoreVersion = useCallback(
-    async (versionId: string): Promise<Chapter | null> => {
-      if (!chapterId) return null;
-      const restored = await restoreChapterVersion(chapterId, versionId);
-      await loadVersions();
-      setIsComparing(false);
-      setSelectedVersion(null);
-      return restored;
-    },
-    [chapterId, loadVersions],
-  );
-
-  const handleDeleteVersion = useCallback(
-    async (versionId: string) => {
-      await deleteChapterVersion(versionId);
-      if (selectedVersion?.id === versionId) {
-        setSelectedVersion(null);
-        setIsComparing(false);
-      }
-      await loadVersions();
-    },
-    [selectedVersion, loadVersions],
-  );
-
-  const handleToggleTrackChanges = useCallback(
-    async (enabled: boolean) => {
-      if (!chapterId) return;
-      await setChapterTrackChanges(chapterId, enabled);
-      setTrackChanges(enabled);
-      await loadVersions();
-    },
-    [chapterId, loadVersions],
-  );
-
-  return {
-    versions,
-    selectedVersion,
-    trackChanges,
-    isLoading,
-    isComparing,
-    setIsComparing,
-    setSelectedVersion,
-    handleCreateSnapshot,
-    handleSelectVersion,
-    handleRestoreVersion,
-    handleDeleteVersion,
-    handleToggleTrackChanges,
-    refreshVersions: loadVersions,
+  const handleCreateSnapshot = async (description?: string) => {
+    await createChapterVersion(chapterId, description);
+    await loadVersions();
   };
+  const handleDeleteVersion = async (versionId: string) => {
+    await deleteChapterVersion(versionId);
+    await loadVersions();
+  };
+  const handleToggleTrackChanges = async (enabled: boolean) => {
+    await setChapterTrackChanges(chapterId, enabled);
+    if (context.current === chapterId) setTrackChanges(enabled);
+    await loadVersions();
+  };
+  return { versions: loadedChapterId === chapterId ? versions : [], trackChanges,
+    isLoading, error, handleCreateSnapshot, handleDeleteVersion, handleToggleTrackChanges, refreshVersions: loadVersions };
 }
-
