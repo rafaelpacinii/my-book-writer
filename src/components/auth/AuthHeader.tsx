@@ -1,25 +1,22 @@
 "use client";
 
 import React from "react";
-import { BookOpen, Moon, Sun } from "lucide-react";
+import { Moon, Sun } from "lucide-react";
+import { BrandAsset } from "@/components/shared/BrandAsset";
 import { useTheme } from "@/hooks/useTheme";
 
 export function AuthHeader() {
   const { resolvedTheme, toggleTheme } = useTheme();
 
   return (
-    <header className="flex items-center justify-between w-full h-18 px-8 lg:px-16">
-      <div className="flex items-center gap-3">
-        <BookOpen className="w-7.5 h-7.5 text-primary" strokeWidth={1.7} aria-hidden="true" />
-        <span className="font-bold text-[18px] text-foreground tracking-tight">
-          my book writer
-        </span>
-      </div>
+    <header className="flex w-full items-start justify-between gap-4 px-5 py-4 sm:items-center sm:px-8 lg:px-16">
+      <BrandAsset variant="horizontal" className="auth-brand-horizontal" />
+      <BrandAsset variant="stacked" className="auth-brand-stacked" />
 
       <button
         onClick={toggleTheme}
         aria-label={`Alternar para tema ${resolvedTheme === "dark" ? "claro" : "escuro"}`}
-        className="p-2 rounded-lg text-muted hover:text-foreground hover:bg-surface border border-transparent hover:border-border transition-colors cursor-pointer"
+        className="shrink-0 p-2 rounded-lg text-muted hover:text-foreground hover:bg-surface border border-transparent hover:border-border transition-colors cursor-pointer"
       >
         {resolvedTheme === "dark" ? (
           <Sun className="w-5.5 h-5.5" strokeWidth={1.8} />

@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { BookOpen, PanelLeftClose, PanelLeftOpen, X } from "lucide-react";
+import { PanelLeftClose, PanelLeftOpen, X } from "lucide-react";
+import { BrandAsset } from "@/components/shared/BrandAsset";
 
 interface Props {
   isCollapsed: boolean;
@@ -10,11 +11,11 @@ interface Props {
 export function SidebarHeader({ isCollapsed, onToggle, onNavigate }: Props) {
   return (
     <div data-sidebar-header className="sidebar-brand-header mb-5 shrink-0 border-b border-border pb-4">
-      <Link data-sidebar-item href="/home" onClick={onNavigate} aria-label="my book writer — início"
+      <Link data-sidebar-item data-sidebar-brand href="/home" onClick={onNavigate} aria-label="My Book Writer — início" title="My Book Writer"
         className="flex h-10 items-center gap-2.5 rounded-lg px-2 text-primary hover:bg-surface-hover"
       >
-        <BookOpen className="h-6 w-6 shrink-0" strokeWidth={1.5} />
-        <span data-sidebar-expanded className="font-display text-[22px] leading-none text-foreground">my book writer.</span>
+        <BrandAsset />
+        <span data-sidebar-expanded className="text-sm font-medium text-foreground">Estúdio editorial</span>
       </Link>
       <button type="button" onClick={onToggle}
         aria-label={isCollapsed ? "Expandir menu" : "Recolher menu"}
