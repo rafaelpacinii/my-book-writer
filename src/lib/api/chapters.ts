@@ -1,3 +1,4 @@
+import { browserCheckpoint } from "@/lib/api/browserHistory";
 import { invoke } from "@tauri-apps/api/core";
 import type { Chapter, ChapterSummary, CreateChapterInput } from "@/types/chapter";
 
@@ -142,6 +143,7 @@ export async function saveChapterContent(
       content_revision: expectedRevision + 1,
       updated_at: new Date().toISOString(),
     };
+    browserCheckpoint(updated);
     list[idx] = updated;
     saveStoredChapters(list);
     return updated;

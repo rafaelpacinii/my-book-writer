@@ -105,24 +105,9 @@ impl<'a> ChapterService<'a> {
             ));
         }
 
-        let repo = ChapterRepository::new(self.pool);
-        let updated = repo
-            .save_content(id, expected_revision, content_json)
-            .await?;
-
-        match updated {
-            Some(chapter) => {
-                if chapter.track_changes_enabled {
-                    let version_service = ChapterVersionService::new(self.pool);
-                    let _ = version_service.maybe_auto_snapshot(&chapter).await;
-                }
-                Ok(chapter)
-            }
-            None => Err(AppError::Validation(
-                "Conflito de edição: o capítulo foi modificado por outra operação ou não existe."
-                    .into(),
-            )),
-        }
+        ChapterVersionService::new(self.pool)
+            .save_with_history(id, expected_revision, content_json)
+            .await
     }
 
     pub async fn reorder_chapters(

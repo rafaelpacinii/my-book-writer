@@ -4,170 +4,100 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getBookById } from "@/lib/api/books";
 import { getChapterById } from "@/lib/api/chapters";
-import {
-  deleteChapterVersion,
-  getChapterVersion,
-  listChapterVersions,
-  restoreChapterVersion,
-} from "@/lib/api/versions";
+import { createChapterVersion, deleteChapterVersion, getChapterVersion, listChapterVersions, restoreChapterVersion } from "@/lib/api/versions";
 import { extractPlainText, parseChapterText } from "@/utils/chapterContent";
 import { computeWordDiff, indexDiffChanges } from "@/utils/textDiff";
+import { historyError } from "@/utils/versionHistory";
+import type { Chapter } from "@/types/chapter";
 import type { ChapterVersion, ChapterVersionSummary } from "@/types/chapterVersion";
 import type { CompareBase, DiffLayoutMode, VersionsPageState } from "./types";
 
-export function useVersionsPage(
-  bookId: string,
-  chapterId: string,
-  initialVersionId?: string
-): VersionsPageState {
-  const router = useRouter();
-  const [bookTitle, setBookTitle] = useState("");
-  const [chapterTitle, setChapterTitle] = useState("");
-  const [currentContentHtml, setCurrentContentHtml] = useState("");
-  const [versions, setVersions] = useState<ChapterVersionSummary[]>([]);
-  const [selectedVersion, setSelectedVersion] = useState<ChapterVersion | null>(null);
-  const [previousVersion, setPreviousVersion] = useState<ChapterVersion | null>(null);
-  const [compareBase, setCompareBase] = useState<CompareBase>("current");
-  const [layoutMode, setLayoutMode] = useState<DiffLayoutMode>("unified");
-  const [isLoading, setIsLoading] = useState(true);
-  const [activeChangeIndex, setActiveChangeIndex] = useState(0);
-
-  const loadData = useCallback(async () => {
-    if (!bookId || !chapterId) return;
-    setIsLoading(true);
-    try {
-      const [book, chapter, vers] = await Promise.all([
-        getBookById(bookId),
-        getChapterById(chapterId),
-        listChapterVersions(chapterId),
-      ]);
-      if (book) setBookTitle(book.title);
-      if (chapter) {
-        setChapterTitle(chapter.title);
-        setCurrentContentHtml(parseChapterText(chapter.content_json));
-      }
-      setVersions(vers);
-      if (vers.length > 0) {
-        const targetId =
-          initialVersionId && vers.some((v) => v.id === initialVersionId)
-            ? initialVersionId
-            : vers[0].id;
-        const fullVer = await getChapterVersion(targetId);
-        setSelectedVersion(fullVer);
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  }, [bookId, chapterId, initialVersionId]);
-
-  useEffect(() => {
-    void loadData();
-  }, [loadData]);
-
-  // Carrega a versão anterior quando a snapshot selecionada muda
-  useEffect(() => {
-    if (!selectedVersion || versions.length === 0) {
-      setPreviousVersion(null);
-      return;
-    }
-    const idx = versions.findIndex((v) => v.id === selectedVersion.id);
-    const prevSummary = idx >= 0 && idx < versions.length - 1 ? versions[idx + 1] : null;
-    if (prevSummary) {
-      void getChapterVersion(prevSummary.id).then(setPreviousVersion);
-    } else {
-      setPreviousVersion(null);
-    }
-  }, [selectedVersion, versions]);
-
-  const selectVersion = useCallback(async (versionId: string) => {
-    setIsLoading(true);
-    try {
-      const ver = await getChapterVersion(versionId);
-      setSelectedVersion(ver);
-      setActiveChangeIndex(0);
-      if (typeof window !== "undefined") {
-        const url = new URL(window.location.href);
-        url.searchParams.set("versionId", versionId);
-        window.history.replaceState({}, "", url.toString());
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  const diffResult = useMemo(() => {
-    if (!selectedVersion) {
-      return { parts: [], totalChanges: 0, additions: 0, deletions: 0 };
-    }
-    let oldRaw = "";
-    let newRaw = "";
-
-    if (compareBase === "current") {
-      oldRaw = extractPlainText(parseChapterText(selectedVersion.content_json));
-      newRaw = extractPlainText(currentContentHtml);
-    } else {
-      oldRaw = previousVersion
-        ? extractPlainText(parseChapterText(previousVersion.content_json))
-        : "";
-      newRaw = extractPlainText(parseChapterText(selectedVersion.content_json));
-    }
-
-    const diff = computeWordDiff(oldRaw, newRaw);
-    return indexDiffChanges(diff);
-  }, [selectedVersion, compareBase, currentContentHtml, previousVersion]);
-
-  const scrollToChange = useCallback((changeIdx: number) => {
-    if (typeof document === "undefined" || changeIdx <= 0) return;
-    const target = document.querySelector(`[data-change-id="change-${changeIdx}"]`);
-    if (target) {
-      target.scrollIntoView({ behavior: "smooth", block: "center" });
-    }
-  }, []);
-
-  const nextChange = useCallback(() => {
-    if (diffResult.totalChanges === 0) return;
-    const next = activeChangeIndex >= diffResult.totalChanges ? 1 : activeChangeIndex + 1;
-    setActiveChangeIndex(next);
-    scrollToChange(next);
-  }, [activeChangeIndex, diffResult.totalChanges, scrollToChange]);
-
-  const prevChange = useCallback(() => {
-    if (diffResult.totalChanges === 0) return;
-    const prev = activeChangeIndex <= 1 ? diffResult.totalChanges : activeChangeIndex - 1;
-    setActiveChangeIndex(prev);
-    scrollToChange(prev);
-  }, [activeChangeIndex, diffResult.totalChanges, scrollToChange]);
-
-  const restoreCurrentVersion = useCallback(async (): Promise<boolean> => {
-    if (!selectedVersion || !chapterId) return false;
-    await restoreChapterVersion(chapterId, selectedVersion.id);
-    router.push(`/books/editor?bookId=${encodeURIComponent(bookId)}&chapterId=${encodeURIComponent(chapterId)}`);
-    return true;
-  }, [selectedVersion, chapterId, bookId, router]);
-
-  const deleteVersion = useCallback(
-    async (versionId: string) => {
-      await deleteChapterVersion(versionId);
-      const remaining = versions.filter((v) => v.id !== versionId);
-      setVersions(remaining);
-      if (selectedVersion?.id === versionId) {
-        if (remaining.length > 0) {
-          const nextVer = await getChapterVersion(remaining[0].id);
-          setSelectedVersion(nextVer);
-        } else {
-          setSelectedVersion(null);
-        }
-      }
-    },
-    [selectedVersion, versions]
-  );
-
-  return {
-    bookId, chapterId, bookTitle, chapterTitle, currentContentHtml,
-    versions, selectedVersion, previousVersion, compareBase, layoutMode,
-    isLoading, diffResult, activeChangeIndex,
-    setCompareBase, setLayoutMode, selectVersion,
-    nextChange, prevChange, restoreCurrentVersion, deleteVersion,
-  };
+interface HistoryData {
+  bookTitle: string;
+  chapter: Chapter;
+  versions: ChapterVersionSummary[];
+  selected: ChapterVersion | null;
+  previous: ChapterVersion | null;
 }
 
+export function useVersionsPage(bookId: string, chapterId: string, initialVersionId?: string): VersionsPageState {
+  const router = useRouter();
+  const [data, setData] = useState<HistoryData | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setLoading] = useState(true);
+  const [refresh, setRefresh] = useState(0);
+  const [base, setBase] = useState<CompareBase>("current");
+  const [layoutMode, setLayoutMode] = useState<DiffLayoutMode>("unified");
+  const [activeChangeIndex, setActiveChangeIndex] = useState(0);
+  const reload = useCallback(() => setRefresh((value) => value + 1), []);
+
+  useEffect(() => {
+    let active = true;
+    setLoading(true);
+    setError(null);
+    setActiveChangeIndex(0);
+    const load = async () => {
+      if (!bookId || !chapterId) throw new Error("Selecione um livro e um capítulo para abrir o histórico.");
+      const [book, chapter, versions] = await Promise.all([getBookById(bookId), getChapterById(chapterId), listChapterVersions(chapterId)]);
+      if (!book || book.deleted_at || !chapter || chapter.book_id !== bookId) throw new Error("O livro ou capítulo não foi encontrado.");
+      const target = initialVersionId ? versions.find((v) => v.id === initialVersionId) : versions[0];
+      if (initialVersionId && !target) throw new Error("Esta versão não foi encontrada. Volte ao editor e atualize o histórico.");
+      const index = versions.findIndex((v) => v.id === target?.id);
+      // Carrega a versão anterior quando a snapshot selecionada muda.
+      const [selected, previous] = await Promise.all([
+        target ? getChapterVersion(target.id) : null,
+        index >= 0 && versions[index + 1] ? getChapterVersion(versions[index + 1].id) : null,
+      ]);
+      if ((target && !selected) || (selected && selected.chapter_id !== chapterId) || (previous && previous.chapter_id !== chapterId)) {
+        throw new Error("Não foi possível carregar esta versão. Atualize o histórico.");
+      }
+      if (active) setData({ bookTitle: book.title, chapter, versions, selected, previous });
+    };
+    void load().catch((cause) => { if (active) { setError(historyError(cause)); setData(null); } })
+      .finally(() => { if (active) setLoading(false); });
+    return () => { active = false; };
+  }, [bookId, chapterId, initialVersionId, refresh]);
+
+  const compareBase = base === "previous" && data?.previous ? "previous" : "current";
+  const currentContentHtml = data ? parseChapterText(data.chapter.content_json) : "";
+  const diffResult = useMemo(() => {
+    const oldVersion = compareBase === "previous" ? data?.previous : data?.selected;
+    const oldText = oldVersion ? extractPlainText(parseChapterText(oldVersion.content_json)) : "";
+    const newText = compareBase === "previous" ? extractPlainText(parseChapterText(data?.selected?.content_json)) : extractPlainText(currentContentHtml);
+    return data?.selected ? indexDiffChanges(computeWordDiff(oldText, newText)) : indexDiffChanges([]);
+  }, [data, compareBase, currentContentHtml]);
+
+  const setVersionUrl = (id?: string) => {
+    const params = new URLSearchParams({ bookId, chapterId });
+    if (id) params.set("versionId", id);
+    router.replace(`/books/versions?${params}`, { scroll: false });
+  };
+  const selectVersion = async (id: string) => { setVersionUrl(id); };
+  const setCompareBase = (value: CompareBase) => { setBase(value); setActiveChangeIndex(0); };
+  const navigateChange = (direction: number) => {
+    const count = diffResult.totalChanges;
+    if (!count) return;
+    const next = activeChangeIndex === 0 ? direction > 0 ? 1 : count : ((activeChangeIndex - 1 + direction + count) % count) + 1;
+    setActiveChangeIndex(next);
+    document.querySelector(`[data-change-id="change-${next}"]`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+  };
+  const restoreCurrentVersion = async (): Promise<boolean> => {
+    if (!data?.selected || isLoading) return false;
+    await restoreChapterVersion(chapterId, data.selected.id, data.chapter.content_revision);
+    router.push(`/books/editor?bookId=${encodeURIComponent(bookId)}&chapterId=${encodeURIComponent(chapterId)}`);
+    return true;
+  };
+  const deleteVersion = async (id: string) => {
+    await deleteChapterVersion(id);
+    if (initialVersionId === id) setVersionUrl(data?.versions.find((v) => v.id !== id)?.id);
+    reload();
+  };
+  const createVersion = async () => { await createChapterVersion(chapterId); reload(); };
+  return {
+    bookId, chapterId, bookTitle: data?.bookTitle ?? "", chapterTitle: data?.chapter.title ?? "", currentContentHtml,
+    versions: data?.versions ?? [], selectedVersion: data?.selected ?? null, previousVersion: data?.previous ?? null,
+    compareBase, layoutMode, isLoading, error, reload, createVersion, diffResult, activeChangeIndex,
+    setCompareBase, setLayoutMode, selectVersion, nextChange: () => navigateChange(1), prevChange: () => navigateChange(-1),
+    restoreCurrentVersion, deleteVersion,
+  };
+}

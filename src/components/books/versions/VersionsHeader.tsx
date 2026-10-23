@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
-import { RotateCcw } from "lucide-react";
+import React from "react";
+import { RestoreVersionButton } from "./RestoreVersionButton";
+import { Button } from "@/components/ui/Button";
 import { BookBreadcrumbs } from "@/components/shared/BookBreadcrumbs";
 
 interface Props {
@@ -11,24 +12,12 @@ interface Props {
   chapterTitle: string;
   versionNumber?: number;
   onRestore: () => Promise<boolean>;
+  isLoading: boolean;
+  onRefresh: () => void;
 }
 
 export function VersionsHeader(props: Props) {
   const { bookId, chapterId, bookTitle, chapterTitle, versionNumber, onRestore } = props;
-  const [isRestoring, setIsRestoring] = useState(false);
-
-  const handleRestore = async () => {
-    if (!window.confirm(`Tem certeza que deseja restaurar a Versão #${versionNumber}? O texto atual será salvo em um novo snapshot de segurança.`)) {
-      return;
-    }
-    setIsRestoring(true);
-    try {
-      await onRestore();
-    } finally {
-      setIsRestoring(false);
-    }
-  };
-
   const editorUrl = `/books/editor?bookId=${encodeURIComponent(bookId)}&chapterId=${encodeURIComponent(chapterId)}`;
 
   return (
@@ -43,17 +32,10 @@ export function VersionsHeader(props: Props) {
         </div>
       </div>
 
-      {versionNumber !== undefined && (
-        <button
-          type="button"
-          onClick={handleRestore}
-          disabled={isRestoring}
-          className="h-11 px-4 rounded-lg bg-primary hover:bg-primary-hover text-primary-foreground text-[13px] font-bold flex items-center gap-2 transition-colors disabled:opacity-40 cursor-pointer"
-        >
-          <RotateCcw className="w-4 h-4" />
-          <span>Restaurar versão #{versionNumber}</span>
-        </button>
-      )}
+      <div className="flex flex-wrap gap-2">
+        <Button variant="outline" disabled={props.isLoading} onClick={props.onRefresh}>Atualizar comparação</Button>
+        {versionNumber !== undefined && <RestoreVersionButton versionNumber={versionNumber} disabled={props.isLoading} onRestore={onRestore} />}
+      </div>
     </header>
   );
 }

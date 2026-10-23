@@ -1,7 +1,7 @@
 use crate::domain::chapter::Chapter;
 use crate::domain::chapter_version::{ChapterVersion, ChapterVersionSummary};
 use crate::error::AppError;
-use sqlx::SqlitePool;
+use sqlx::{SqliteConnection, SqlitePool};
 use uuid::Uuid;
 
 pub struct ChapterVersionRepository<'a> {
@@ -20,18 +20,26 @@ impl<'a> ChapterVersionRepository<'a> {
         description: Option<&str>,
         word_count: i64,
     ) -> Result<ChapterVersion, AppError> {
-        let mut tx = self.pool.begin().await?;
+        let mut tx = self.pool.begin_with("BEGIN IMMEDIATE").await?;
+        let version = Self::create_in(&mut tx, chapter, description, word_count).await?;
+        tx.commit().await?;
+        Ok(version)
+    }
 
-        // Determina o próximo version_number
+    pub async fn create_in(
+        connection: &mut SqliteConnection,
+        chapter: &Chapter,
+        description: Option<&str>,
+        word_count: i64,
+    ) -> Result<ChapterVersion, AppError> {
+        // Determina o próximo version_number sem reutilizar números excluídos.
         let next_number: i64 = sqlx::query_scalar(
-            r#"
-            SELECT COALESCE(MAX(version_number), 0) + 1
-            FROM chapter_versions
-            WHERE chapter_id = ?
-            "#,
+            "INSERT INTO chapter_version_counters (chapter_id, last_number) VALUES (?, 1)
+             ON CONFLICT(chapter_id) DO UPDATE SET last_number = last_number + 1
+             RETURNING last_number",
         )
         .bind(&chapter.id)
-        .fetch_one(&mut *tx)
+        .fetch_one(&mut *connection)
         .await?;
 
         let id = Uuid::now_v7().to_string();
@@ -52,10 +60,8 @@ impl<'a> ChapterVersionRepository<'a> {
         .bind(&chapter.content_json)
         .bind(description)
         .bind(word_count)
-        .fetch_one(&mut *tx)
+        .fetch_one(&mut *connection)
         .await?;
-
-        tx.commit().await?;
         Ok(version)
     }
 
@@ -81,6 +87,13 @@ impl<'a> ChapterVersionRepository<'a> {
 
     /// Busca uma versão completa pelo ID
     pub async fn find_by_id(&self, id: &str) -> Result<Option<ChapterVersion>, AppError> {
+        Self::find_in(&mut *self.pool.acquire().await?, id).await
+    }
+
+    pub async fn find_in(
+        connection: &mut SqliteConnection,
+        id: &str,
+    ) -> Result<Option<ChapterVersion>, AppError> {
         let version = sqlx::query_as::<_, ChapterVersion>(
             r#"
             SELECT id, chapter_id, version_number, title, content_json, description, word_count, created_at
@@ -89,7 +102,7 @@ impl<'a> ChapterVersionRepository<'a> {
             "#,
         )
         .bind(id)
-        .fetch_optional(self.pool)
+        .fetch_optional(connection)
         .await?;
 
         Ok(version)
@@ -111,6 +124,14 @@ impl<'a> ChapterVersionRepository<'a> {
         chapter_id: &str,
         enabled: bool,
     ) -> Result<Chapter, AppError> {
+        Self::set_track_in(&mut *self.pool.acquire().await?, chapter_id, enabled).await
+    }
+
+    pub async fn set_track_in(
+        connection: &mut SqliteConnection,
+        chapter_id: &str,
+        enabled: bool,
+    ) -> Result<Chapter, AppError> {
         let chapter = sqlx::query_as::<_, Chapter>(
             r#"
             UPDATE chapters
@@ -121,7 +142,7 @@ impl<'a> ChapterVersionRepository<'a> {
         )
         .bind(enabled)
         .bind(chapter_id)
-        .fetch_one(self.pool)
+        .fetch_one(connection)
         .await?;
 
         Ok(chapter)
@@ -130,6 +151,13 @@ impl<'a> ChapterVersionRepository<'a> {
     /// Busca a versão mais recente de um capítulo (pelo version_number DESC)
     pub async fn find_latest_by_chapter(
         &self,
+        chapter_id: &str,
+    ) -> Result<Option<ChapterVersion>, AppError> {
+        Self::latest_in(&mut *self.pool.acquire().await?, chapter_id).await
+    }
+
+    pub async fn latest_in(
+        connection: &mut SqliteConnection,
         chapter_id: &str,
     ) -> Result<Option<ChapterVersion>, AppError> {
         let version = sqlx::query_as::<_, ChapterVersion>(
@@ -142,7 +170,7 @@ impl<'a> ChapterVersionRepository<'a> {
             "#,
         )
         .bind(chapter_id)
-        .fetch_optional(self.pool)
+        .fetch_optional(connection)
         .await?;
 
         Ok(version)
@@ -150,6 +178,13 @@ impl<'a> ChapterVersionRepository<'a> {
 
     /// Retorna quantos segundos se passaram desde a criação de uma versão
     pub async fn seconds_since_version(&self, version_id: &str) -> Result<i64, AppError> {
+        Self::seconds_in(&mut *self.pool.acquire().await?, version_id).await
+    }
+
+    pub async fn seconds_in(
+        connection: &mut SqliteConnection,
+        version_id: &str,
+    ) -> Result<i64, AppError> {
         let seconds: Option<i64> = sqlx::query_scalar(
             r#"
             SELECT CAST((strftime('%s', 'now') - strftime('%s', created_at)) AS INTEGER)
@@ -158,7 +193,7 @@ impl<'a> ChapterVersionRepository<'a> {
             "#,
         )
         .bind(version_id)
-        .fetch_optional(self.pool)
+        .fetch_optional(connection)
         .await?;
 
         Ok(seconds.unwrap_or(0))

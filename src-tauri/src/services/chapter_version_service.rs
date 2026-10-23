@@ -3,7 +3,8 @@ use crate::domain::chapter_version::{ChapterVersion, ChapterVersionSummary};
 use crate::error::AppError;
 use crate::repositories::chapter_repository::ChapterRepository;
 use crate::repositories::chapter_version_repository::ChapterVersionRepository;
-use sqlx::SqlitePool;
+use crate::services::chapter_version_policy::{is_restorable, needs_snapshot, word_count};
+use sqlx::{SqliteConnection, SqlitePool};
 
 pub struct ChapterVersionService<'a> {
     pool: &'a SqlitePool,
@@ -14,22 +15,29 @@ impl<'a> ChapterVersionService<'a> {
         Self { pool }
     }
 
+    async fn chapter(connection: &mut SqliteConnection, id: &str) -> Result<Chapter, AppError> {
+        ChapterRepository::find_in(connection, id)
+            .await?
+            .ok_or_else(|| AppError::NotFound("Capítulo não encontrado".into()))
+    }
+
     /// Salva um snapshot da versão atual do capítulo
     pub async fn create_version(
         &self,
         chapter_id: &str,
         description: Option<&str>,
     ) -> Result<ChapterVersion, AppError> {
-        let chapter_repo = ChapterRepository::new(self.pool);
-        let chapter = chapter_repo
-            .find_by_id(chapter_id)
-            .await?
-            .ok_or_else(|| AppError::Validation("Capítulo não encontrado".into()))?;
-
-        let word_count = extract_words_from_json(&chapter.content_json);
-
-        let repo = ChapterVersionRepository::new(self.pool);
-        repo.create_version(&chapter, description, word_count).await
+        let mut tx = self.pool.begin_with("BEGIN IMMEDIATE").await?;
+        let chapter = Self::chapter(&mut tx, chapter_id).await?;
+        let version = ChapterVersionRepository::create_in(
+            &mut tx,
+            &chapter,
+            description,
+            word_count(&chapter.content_json),
+        )
+        .await?;
+        tx.commit().await?;
+        Ok(version)
     }
 
     /// Lista todos os snapshots históricos de um capítulo
@@ -37,14 +45,16 @@ impl<'a> ChapterVersionService<'a> {
         &self,
         chapter_id: &str,
     ) -> Result<Vec<ChapterVersionSummary>, AppError> {
-        let repo = ChapterVersionRepository::new(self.pool);
-        repo.list_by_chapter(chapter_id).await
+        ChapterVersionRepository::new(self.pool)
+            .list_by_chapter(chapter_id)
+            .await
     }
 
     /// Obtém uma versão específica por ID
     pub async fn get_version(&self, version_id: &str) -> Result<Option<ChapterVersion>, AppError> {
-        let repo = ChapterVersionRepository::new(self.pool);
-        repo.find_by_id(version_id).await
+        ChapterVersionRepository::new(self.pool)
+            .find_by_id(version_id)
+            .await
     }
 
     /// Restaura o conteúdo de uma versão no capítulo atual
@@ -52,52 +62,56 @@ impl<'a> ChapterVersionService<'a> {
         &self,
         chapter_id: &str,
         version_id: &str,
+        expected_revision: i64,
     ) -> Result<Chapter, AppError> {
-        let repo = ChapterVersionRepository::new(self.pool);
-        let version = repo
-            .find_by_id(version_id)
+        let mut tx = self.pool.begin_with("BEGIN IMMEDIATE").await?;
+        let version = ChapterVersionRepository::find_in(&mut tx, version_id)
             .await?
-            .ok_or_else(|| AppError::Validation("Versão não encontrada".into()))?;
-
+            .ok_or_else(|| AppError::NotFound("Versão não encontrada".into()))?;
         if version.chapter_id != chapter_id {
             return Err(AppError::Validation(
                 "A versão não pertence ao capítulo selecionado".into(),
             ));
         }
-
-        let chapter_repo = ChapterRepository::new(self.pool);
-        let current_chapter = chapter_repo
-            .find_by_id(chapter_id)
-            .await?
-            .ok_or_else(|| AppError::Validation("Capítulo não encontrado".into()))?;
-
-        // Antes de restaurar, salva um snapshot automático do estado que será substituído
-        let current_word_count = extract_words_from_json(&current_chapter.content_json);
-        let auto_desc = format!("Antes de restaurar versão #{}", version.version_number);
-        repo.create_version(&current_chapter, Some(&auto_desc), current_word_count)
-            .await?;
-
-        // Atualiza o conteúdo do capítulo com a nova versão
-        let updated = chapter_repo
-            .save_content(
-                chapter_id,
-                current_chapter.content_revision,
-                &version.content_json,
-            )
-            .await?;
-
-        match updated {
-            Some(chap) => Ok(chap),
-            None => Err(AppError::Validation(
-                "Conflito de edição ao tentar restaurar versão".into(),
-            )),
+        if !is_restorable(&version.content_json) {
+            return Err(AppError::Validation(
+                "O conteúdo desta versão é inválido e não pode ser restaurado.".into(),
+            ));
         }
+        let current = Self::chapter(&mut tx, chapter_id).await?;
+        // Atualiza o conteúdo do capítulo com a nova versão
+        let updated = ChapterRepository::save_content_in(
+            &mut tx,
+            chapter_id,
+            expected_revision,
+            &version.content_json,
+        )
+        .await?
+        .ok_or_else(|| {
+            AppError::Validation(
+                "O capítulo mudou desde que o histórico foi aberto. Atualize antes de restaurar."
+                    .into(),
+            )
+        })?;
+        // Antes de restaurar, salva um snapshot automático do estado que será substituído
+        // Both writes commit together: a failed safety snapshot rolls the content update back.
+        let description = format!("Antes de restaurar versão #{}", version.version_number);
+        ChapterVersionRepository::create_in(
+            &mut tx,
+            &current,
+            Some(&description),
+            word_count(&current.content_json),
+        )
+        .await?;
+        tx.commit().await?;
+        Ok(updated)
     }
 
     /// Exclui um snapshot
     pub async fn delete_version(&self, version_id: &str) -> Result<bool, AppError> {
-        let repo = ChapterVersionRepository::new(self.pool);
-        repo.delete_version(version_id).await
+        ChapterVersionRepository::new(self.pool)
+            .delete_version(version_id)
+            .await
     }
 
     /// Ativa ou desativa o rastreamento de alterações para um capítulo
@@ -106,68 +120,84 @@ impl<'a> ChapterVersionService<'a> {
         chapter_id: &str,
         enabled: bool,
     ) -> Result<Chapter, AppError> {
-        let repo = ChapterVersionRepository::new(self.pool);
-        let chapter = repo.set_track_changes(chapter_id, enabled).await?;
-
+        let mut tx = self.pool.begin_with("BEGIN IMMEDIATE").await?;
+        let chapter = ChapterVersionRepository::set_track_in(&mut tx, chapter_id, enabled).await?;
         if enabled {
-            let latest = repo.find_latest_by_chapter(chapter_id).await?;
-            if latest.is_none() {
-                let word_count = extract_words_from_json(&chapter.content_json);
-                let _ = repo
-                    .create_version(&chapter, Some("Início do rastreamento"), word_count)
-                    .await;
+            let latest = ChapterVersionRepository::latest_in(&mut tx, chapter_id).await?;
+            if latest.is_none_or(|last| last.content_json != chapter.content_json) {
+                ChapterVersionRepository::create_in(
+                    &mut tx,
+                    &chapter,
+                    Some("Início do rastreamento"),
+                    word_count(&chapter.content_json),
+                )
+                .await?;
             }
         }
-
+        tx.commit().await?;
         Ok(chapter)
     }
 
     /// Cria um snapshot automático se as condições de rastreamento forem atendidas
-    pub async fn maybe_auto_snapshot(
-        &self,
+    async fn auto_in(
+        connection: &mut SqliteConnection,
         chapter: &Chapter,
     ) -> Result<Option<ChapterVersion>, AppError> {
         if !chapter.track_changes_enabled {
             return Ok(None);
         }
-
-        let repo = ChapterVersionRepository::new(self.pool);
-        let latest = repo.find_latest_by_chapter(&chapter.id).await?;
-        let current_words = extract_words_from_json(&chapter.content_json);
-
-        let should_create = match latest {
-            None => true,
-            Some(ref last) => {
-                if last.content_json == chapter.content_json {
-                    false
-                } else {
-                    let word_diff = (current_words - last.word_count).abs();
-                    let seconds_elapsed = repo.seconds_since_version(&last.id).await.unwrap_or(0);
-                    word_diff >= 30 || seconds_elapsed >= 180
-                }
-            }
+        let latest = ChapterVersionRepository::latest_in(connection, &chapter.id).await?;
+        let should_create = if let Some(last) = latest {
+            let seconds = ChapterVersionRepository::seconds_in(connection, &last.id).await?;
+            needs_snapshot(&last.content_json, &chapter.content_json, seconds)
+        } else {
+            true
         };
-
         if should_create {
-            let version = repo
-                .create_version(chapter, Some("Snapshot automático"), current_words)
-                .await?;
-            Ok(Some(version))
+            Ok(Some(
+                ChapterVersionRepository::create_in(
+                    connection,
+                    chapter,
+                    Some("Snapshot automático"),
+                    word_count(&chapter.content_json),
+                )
+                .await?,
+            ))
         } else {
             Ok(None)
         }
     }
+
+    pub async fn checkpoint(&self, chapter_id: &str) -> Result<Option<ChapterVersion>, AppError> {
+        let mut tx = self.pool.begin_with("BEGIN IMMEDIATE").await?;
+        let chapter = Self::chapter(&mut tx, chapter_id).await?;
+        let version = Self::auto_in(&mut tx, &chapter).await?;
+        tx.commit().await?;
+        Ok(version)
+    }
+
+    pub async fn save_with_history(
+        &self,
+        id: &str,
+        expected_revision: i64,
+        content_json: &str,
+    ) -> Result<Chapter, AppError> {
+        let mut tx = self.pool.begin_with("BEGIN IMMEDIATE").await?;
+        let chapter =
+            ChapterRepository::save_content_in(&mut tx, id, expected_revision, content_json)
+                .await?
+                .ok_or_else(|| {
+                    AppError::Validation(
+                "Conflito de edição: o capítulo foi modificado por outra operação ou não existe."
+                    .into(),
+            )
+                })?;
+        Self::auto_in(&mut tx, &chapter).await?;
+        tx.commit().await?;
+        Ok(chapter)
+    }
 }
 
-/// Extrai a contagem de palavras do JSON canônico de forma simples
-fn extract_words_from_json(content_json: &str) -> i64 {
-    if let Ok(val) = serde_json::from_str::<serde_json::Value>(content_json) {
-        if let Some(wc) = val.get("word_count").and_then(|w| w.as_i64()) {
-            return wc;
-        }
-        if let Some(text) = val.get("text").and_then(|t| t.as_str()) {
-            return text.split_whitespace().count() as i64;
-        }
-    }
-    0
-}
+#[cfg(test)]
+#[path = "chapter_version_tests.rs"]
+mod tests;

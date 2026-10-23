@@ -17,31 +17,26 @@ interface Props {
 export function EditorVersionPanel({ ver, ed, bookId, chapterId, isOpen, onClose }: Props) {
   if (!isOpen) return null;
 
-  const handleRestore = async (versionId: string) => {
-    const updated = await ver.handleRestoreVersion(versionId);
-    if (updated) {
-      await ed.saveNow();
-      window.location.reload();
-    }
+  const saveFirst = async () => {
+    if (!await ed.saveNow()) throw new Error("Não foi possível salvar o rascunho. Tente novamente antes de continuar.");
   };
 
   return (
     <VersionDrawer
+      key={chapterId}
       isOpen={isOpen}
       onClose={onClose}
       bookId={bookId}
       chapterId={chapterId}
       versions={ver.versions}
-      selectedVersion={ver.selectedVersion}
       trackChanges={ver.trackChanges}
-      onToggleTrackChanges={ver.handleToggleTrackChanges}
-      onCreateSnapshot={ver.handleCreateSnapshot}
-      onSelectVersion={ver.handleSelectVersion}
-      onRestoreVersion={handleRestore}
+      onToggleTrackChanges={async (enabled) => { await saveFirst(); await ver.handleToggleTrackChanges(enabled); }}
+      onCreateSnapshot={async (description) => { await saveFirst(); await ver.handleCreateSnapshot(description); }}
       onDeleteVersion={ver.handleDeleteVersion}
-      isComparing={ver.isComparing}
-      onCloseDiff={() => ver.setIsComparing(false)}
-      currentContentHtml={ed.text}
+      onBeforeNavigate={ed.saveNow}
+      isLoading={ver.isLoading}
+      error={ver.error}
+      onRetry={ver.refreshVersions}
     />
   );
 }

@@ -86,6 +86,7 @@ pub fn run() {
             commands::chapter_version_commands::restore_chapter_version,
             commands::chapter_version_commands::delete_chapter_version,
             commands::chapter_version_commands::set_chapter_track_changes,
+            commands::chapter_version_commands::checkpoint_chapter_history,
             // Backup & Banco de Dados SQLite
             commands::backup_commands::get_database_stats,
             commands::backup_commands::export_database_backup,

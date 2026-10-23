@@ -3,11 +3,12 @@ import type { IndexedDiffPart } from "@/utils/textDiff";
 
 interface Props {
   parts: IndexedDiffPart[];
+  activeChangeIndex: number;
   leftLabel: string;
   rightLabel: string;
 }
 
-export function DiffSplitView({ parts, leftLabel, rightLabel }: Props) {
+export function DiffSplitView({ parts, leftLabel, rightLabel, activeChangeIndex }: Props) {
   const leftParts = parts.filter((p) => p.type !== "added");
   const rightParts = parts.filter((p) => p.type !== "removed");
 
@@ -20,7 +21,8 @@ export function DiffSplitView({ parts, leftLabel, rightLabel }: Props) {
         <div className="text-base leading-relaxed whitespace-pre-wrap text-foreground">
           {leftParts.map((part, idx) => (
             part.type === "removed" ? (
-              <del key={idx} className="bg-rose-500/20 text-rose-900 dark:text-rose-200 line-through rounded-[2px] opacity-80">
+              <del key={idx} data-change-id={`change-${part.changeIndex}`} data-active={part.changeIndex === activeChangeIndex}
+                className="data-[active=true]:ring-2 bg-danger-soft text-danger line-through rounded-[2px]">
                 {part.value}
               </del>
             ) : <span key={idx}>{part.value}</span>
@@ -35,7 +37,8 @@ export function DiffSplitView({ parts, leftLabel, rightLabel }: Props) {
         <div className="text-base leading-relaxed whitespace-pre-wrap text-foreground">
           {rightParts.map((part, idx) => (
             part.type === "added" ? (
-              <ins key={idx} className="bg-emerald-500/20 text-emerald-900 dark:text-emerald-200 no-underline rounded-[2px]">
+              <ins key={idx} data-change-id={`change-${part.changeIndex}`} data-active={part.changeIndex === activeChangeIndex}
+                className="data-[active=true]:ring-2 bg-success-soft text-success no-underline rounded-[2px]">
                 {part.value}
               </ins>
             ) : <span key={idx}>{part.value}</span>
