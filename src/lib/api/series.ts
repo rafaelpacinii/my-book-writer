@@ -107,12 +107,13 @@ export async function updateSeries(id: string, input: UpdateSeriesInput): Promis
     list[idx] = updated;
     saveStoredSeries(list);
 
-    if (input.universe_id && nextUniverse) {
+    if (input.clear_universe || input.universe_id !== undefined) {
       const books = getStoredBooks();
       let changedBooks = false;
       books.forEach((b) => {
         if (b.series_id === id && !b.deleted_at) {
           b.universe_id = nextUniverse;
+          b.updated_at = updated.updated_at;
           changedBooks = true;
         }
       });

@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createBook, getBookById, listBooks, updateBook } from "./books";
-import { createSeries, deleteSeries, listSeries, reorderSeriesBooks } from "./series";
+import { createSeries, deleteSeries, listSeries, reorderSeriesBooks, updateSeries } from "./series";
+import { subscribeDataChanges } from "@/lib/data/changes";
 import { createUniverse, deleteUniverse, listUniverses } from "./universes";
 
 describe("universes and series persistence and volume auto-numbering", () => {
@@ -76,6 +77,53 @@ describe("universes and series persistence and volume auto-numbering", () => {
     await updateBook(b1.id, { clear_series: true });
     const remainingLast = await getBookById(b2.id);
     expect(remainingLast?.series_volume).toBe(2);
+  });
+
+  it("moves a series between universes without detaching books or changing volumes", async () => {
+    const first = await createUniverse({ profile_id: profileId, name: "Primeiro mundo" });
+    const second = await createUniverse({ profile_id: profileId, name: "Segundo mundo" });
+    const series = await createSeries({ profile_id: profileId, name: "Saga" });
+    const created = await Promise.all(["Início", "Fim"].map((title) => createBook({
+      profile_id: profileId, format_id: "fmt-br-14x21", font_preset_id: "font-merriweather",
+      title, author_name: "Autor", series_id: series.id,
+    })));
+    await updateSeries(series.id, { universe_id: first.id });
+    await updateSeries(series.id, { universe_id: second.id });
+    for (const [index, book] of created.entries()) {
+      expect(await getBookById(book.id)).toMatchObject({
+        series_id: series.id, universe_id: second.id, series_volume: index + 1,
+      });
+    }
+    await updateBook(created[0].id, { universe_id: first.id });
+    expect(await getBookById(created[0].id)).toMatchObject({ series_id: series.id, universe_id: first.id, series_volume: 1 });
+  });
+
+  it.each([
+    { linked: true, input: { clear_universe: true } },
+    { linked: true, input: { universe_id: "" } },
+    { linked: false, input: { clear_universe: true } },
+  ])("removes universe membership from series books (linked=$linked, input=$input)", async ({ linked, input }) => {
+    const universe = await createUniverse({ profile_id: profileId, name: "Mundo" });
+    const series = await createSeries({ profile_id: profileId, name: "Saga", universe_id: linked ? universe.id : null });
+    const makeBook = (title: string, seriesId?: string) => createBook({
+      profile_id: profileId, format_id: "fmt-br-14x21", font_preset_id: "font-merriweather",
+      title, author_name: "Autor", series_id: seriesId, universe_id: universe.id,
+    });
+    const volumes = [await makeBook("Primeiro", series.id), await makeBook("Segundo", series.id)];
+    const standalone = await makeBook("Avulso");
+    await updateSeries(series.id, { name: "Saga renomeada" });
+    expect((await getBookById(volumes[0].id))?.universe_id).toBe(universe.id);
+    const changes: string[] = [];
+    const unsubscribe = subscribeDataChanges((change) => changes.push(change));
+    try { await updateSeries(series.id, input); }
+    finally { unsubscribe(); }
+    expect(changes).toContain("books");
+    for (const [index, volume] of volumes.entries()) {
+      expect(await getBookById(volume.id)).toMatchObject({ universe_id: null, series_id: series.id, series_volume: index + 1 });
+    }
+    expect((await getBookById(standalone.id))?.universe_id).toBe(universe.id);
+    expect(await listBooks(profileId)).toHaveLength(3);
+    expect((await listSeries(profileId))[0].universe_id).toBeNull();
   });
 
   it("cleans up references when deleting a series or universe", async () => {

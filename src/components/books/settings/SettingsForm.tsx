@@ -1,3 +1,4 @@
+import { BookSeriesSelect } from "@/components/shared/BookSeriesSelect";
 import React from "react";
 import { BookSectionCard, BookSectionColumns } from "@/components/books/shared/BookSectionPage";
 import { CoverPreview } from "@/components/books/new/CoverPreview";
@@ -22,6 +23,9 @@ export function SettingsForm({ settings: s }: Props) {
             formatId={s.formatId} setFormatId={s.setFormatId} formats={s.formats}
             fontId={s.fontId} setFontId={s.setFontId} fonts={s.fonts}
           />
+          <BookSeriesSelect series={s.seriesData.series} value={s.seriesId} onChange={s.setSeriesId}
+            isLoading={s.seriesData.isLoading} error={s.seriesData.error} disabled={s.isSubmitting}
+            onRetry={() => { void s.seriesData.refreshSeries(); }} />
           <SettingsLayoutFields
             fontSize={s.fontSize} setFontSize={s.setFontSize}
             lineHeight={s.lineHeight} setLineHeight={s.setLineHeight}

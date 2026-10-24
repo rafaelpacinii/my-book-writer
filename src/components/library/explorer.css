@@ -1,0 +1,29 @@
+/* Collections use the same cover canvas as books, with three permanent slots. */
+.collection-stack { position: relative; width: 55%; max-width: 180px; aspect-ratio: 14 / 21; }
+.collection-cover { position: absolute; inset: 0; transform-origin: 50% 80%; }
+.collection-cover[data-slot="0"] { z-index: 3; transform: translate(-4%, 3%) rotate(-17deg); }
+.collection-cover[data-slot="1"] { z-index: 2; transform: translate(4%, -1%) rotate(-8deg); }
+.collection-cover[data-slot="2"] { z-index: 1; transform: translate(9%, -4%); }
+.book-grid .collection-cover .book-object,
+.book-list .collection-cover .book-object { width: 100%; max-width: none; }
+.collection-empty-cover { display: block; width: 100%; height: 100%; background: color-mix(in srgb, var(--primary) 18%, transparent); border-radius: 1px 4px 4px 1px; }
+.collection-card:hover .book-stage .book-object { transform: none; }
+.collection-card[data-drop-active="true"] { outline: 2px solid var(--primary); outline-offset: 3px; background: var(--primary-soft); }
+.book-list .collection-stack { width: 50%; }
+.collection-card .collection-stage { overflow: hidden; isolation: isolate; }
+.book-card[draggable="true"] { cursor: grab; }
+.book-card[draggable="true"]:active { cursor: grabbing; }
+
+/* Universes open the covers into a fan; series keep the sequential stack. */
+.collection-stack[data-kind="universe"] .collection-cover[data-slot="0"] {
+  z-index: 1;
+  transform: translate(-24%, 3%) rotate(-14deg) scale(.74);
+}
+.collection-stack[data-kind="universe"] .collection-cover[data-slot="1"] {
+  z-index: 3;
+  transform: translate(0, -6%) scale(.74);
+}
+.collection-stack[data-kind="universe"] .collection-cover[data-slot="2"] {
+  z-index: 2;
+  transform: translate(24%, 3%) rotate(14deg) scale(.74);
+}

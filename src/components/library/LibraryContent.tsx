@@ -1,21 +1,38 @@
 import { LibraryFilters } from "@/components/library/LibraryFilters";
 import { LibraryResultsBar } from "@/components/library/LibraryResultsBar";
-import { BookGrid } from "@/components/library/BookGrid";
+import { LibraryGroups } from "@/components/library/LibraryGroups";
 import { LibraryEmpty } from "@/components/library/LibraryEmpty";
+import { LibraryFolderEmpty } from "@/components/library/LibraryFolderEmpty";
 import { LibraryNoResults } from "@/components/library/LibraryNoResults";
+import { SeriesBookGrid } from "@/components/library/SeriesBookGrid";
+import { LinkButton } from "@/components/ui/LinkButton";
 import type { useLibrary } from "@/hooks/useLibrary";
 
 export function LibraryContent({ lib }: { lib: ReturnType<typeof useLibrary> }) {
-  if (!lib.books.length) return <LibraryEmpty />;
+  if (lib.scope.kind === "missing") return (
+    <div className="rounded-xl border border-border bg-surface p-8 text-center">
+      <h2 className="font-display text-2xl">Coleção não encontrada</h2>
+      <p className="mt-2 text-sm text-muted">Ela pode ter sido excluída ou movida.</p>
+      <LinkButton href="/library" className="mt-5">Voltar à Biblioteca</LinkButton>
+    </div>
+  );
+  if (!lib.books.length && !lib.collections.length) return <LibraryEmpty />;
+  const scope = lib.scope;
   return (
     <section aria-label="Seu acervo">
-      <LibraryResultsBar isFiltered={lib.isFiltered} totalResults={lib.filteredBooks.length}
-        totalBooks={lib.books.length} onClearFilters={lib.handleClearFilters}
-      />
+      <LibraryResultsBar isFiltered={lib.isFiltered} totalResults={lib.entries.length}
+        totalBooks={lib.scopedEntries.length} onClearFilters={lib.handleClearFilters} />
       <LibraryFilters lib={lib} />
-      {lib.filteredBooks.length ? (
-        <BookGrid books={lib.filteredBooks} formatMap={lib.formatMap} fontMap={lib.fontMap} view={lib.view} />
-      ) : <LibraryNoResults onClearFilters={lib.handleClearFilters} />}
+      {lib.entries.length ? scope.kind === "series" ? (
+        <section aria-label={`Série ${scope.collection.name}`}>
+          <SeriesBookGrid books={lib.entries.flatMap((entry) => entry.kind === "book" ? [entry.book] : [])}
+            allBooks={scope.books} formatMap={lib.formatMap} fontMap={lib.fontMap} view={lib.view}
+            disabled={lib.busy} move={lib.move}
+            onReorder={(ids) => { void lib.seriesManager.reorder(scope.collection.id, ids); }} />
+        </section>
+      ) : <LibraryGroups lib={lib} /> : lib.isFiltered ? (
+        <LibraryNoResults onClearFilters={lib.handleClearFilters} />
+      ) : scope.kind !== "root" ? <LibraryFolderEmpty kind={scope.kind} /> : <LibraryEmpty />}
     </section>
   );
 }

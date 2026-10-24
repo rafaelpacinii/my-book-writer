@@ -27,6 +27,8 @@ export async function mockUI(page: Page, options: { delay?: number; failBooks?: 
           case "update_profile":
             profile = { ...profile, display_name: String(args?.displayName) };
             return profile;
+          case "list_series": return [];
+          case "list_universes": return [];
           case "list_books":
             if (runtime.uiFailBooks-- > 0) throw new Error("Não foi possível carregar seus livros.");
             return runtime.uiBooks;

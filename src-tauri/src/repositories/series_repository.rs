@@ -169,7 +169,7 @@ impl<'a> SeriesRepository<'a> {
         .fetch_one(&mut *tx)
         .await?;
 
-        if let Some(Some(uid)) = universe_id {
+        if let Some(uid) = universe_id {
             sqlx::query(
                 "UPDATE books SET universe_id = ?, updated_at = datetime('now') WHERE series_id = ? AND deleted_at IS NULL",
             )
@@ -302,4 +302,3 @@ impl<'a> SeriesRepository<'a> {
         Ok(())
     }
 }
-
