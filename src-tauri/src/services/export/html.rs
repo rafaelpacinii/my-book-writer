@@ -1,12 +1,9 @@
-use super::{
-    content::{chapter_html, escape_html},
-    fonts::font_css,
-};
+use super::{content::escape_html, fonts::font_css};
 use crate::error::AppError;
 use crate::repositories::export_repository::BookExportSnapshot;
 
 pub fn render_book(snapshot: &BookExportSnapshot) -> Result<String, AppError> {
-    validate_layout(snapshot)?;
+    super::validation::validate(snapshot, super::validation::ExportFormat::Pdf)?;
     let book = &snapshot.book;
     let font = font_css(&snapshot.font.family_name)?;
     let title = escape_html(&book.title);
@@ -39,7 +36,7 @@ pub fn render_book(snapshot: &BookExportSnapshot) -> Result<String, AppError> {
                 format!("Capítulo {std_idx:02}")
             }
         };
-        let html = chapter_html(&chapter.content_json)?;
+        let html = super::validation::chapter_content(chapter, idx)?;
         let heading_html = if is_special {
             format!("<h2>{}</h2>", escape_html(&chapter.title))
         } else {
@@ -120,7 +117,7 @@ pub fn render_book(snapshot: &BookExportSnapshot) -> Result<String, AppError> {
     ))
 }
 
-fn render_front_matter(snapshot: &BookExportSnapshot) -> String {
+pub(super) fn render_front_matter(snapshot: &BookExportSnapshot) -> String {
     let Some(fm) = &snapshot.front_matter else {
         return String::new();
     };
@@ -347,38 +344,4 @@ fn css_string(text: &str) -> String {
         })
         .collect::<String>();
     format!("\"{escaped}\"")
-}
-
-fn validate_layout(snapshot: &BookExportSnapshot) -> Result<(), AppError> {
-    let book = &snapshot.book;
-    let size = book.font_size_pt;
-    let line_height = book.line_height_ratio;
-    let margins = [
-        book.margin_top_um,
-        book.margin_bottom_um,
-        book.margin_left_um,
-        book.margin_right_um,
-    ];
-    let usable_width = snapshot.format.width_um - book.margin_left_um - book.margin_right_um;
-    let usable_height = (snapshot.format.height_um - book.margin_top_um - book.margin_bottom_um)
-        as f64
-        - size * 4.0 * 25400.0 / 72.0;
-    if !size.is_finite()
-        || !(6.0..=72.0).contains(&size)
-        || !line_height.is_finite()
-        || !(1.0..=3.0).contains(&line_height)
-        || margins.iter().any(|margin| *margin < 0)
-        || usable_width < 10000
-        || usable_height < size * line_height * 25400.0 / 72.0
-    {
-        return Err(AppError::Export(
-            "As configurações de página não deixam espaço suficiente para o texto.".into(),
-        ));
-    }
-    if snapshot.chapters.is_empty() {
-        return Err(AppError::Export(
-            "Adicione pelo menos um capítulo antes de exportar.".into(),
-        ));
-    }
-    Ok(())
 }

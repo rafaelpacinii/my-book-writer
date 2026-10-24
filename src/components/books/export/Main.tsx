@@ -1,57 +1,38 @@
 "use client";
 
-import { useState } from "react";
 import { BookSectionPage, BookSectionColumns, BookSectionCard } from "@/components/books/shared/BookSectionPage";
 import { ErrorState } from "@/components/shared/ErrorState";
 import { ExportReviewCard } from "@/components/books/export/ExportReviewCard";
-import { usePdfExport } from "@/hooks/usePdfExport";
-import { useEpubExport } from "@/hooks/useEpubExport";
-import { useDocxExport } from "@/hooks/useDocxExport";
-import type { ExportFormat } from "@/types/export";
+import { useBookExport } from "@/hooks/useBookExport";
 import { ExportHeader } from "./ExportHeader";
 import { ExportFormatSelector } from "./ExportFormatSelector";
-import { PdfExportCard } from "./PdfExportCard";
-import { EpubExportCard } from "./EpubExportCard";
-import { DocxExportCard } from "./DocxExportCard";
+import { ExportFormatPanel } from "./ExportFormatPanel";
+import { ExportIssues } from "./ExportIssues";
 
 export function Main({ bookId }: { bookId: string }) {
-  const [format, setFormat] = useState<ExportFormat>("pdf");
-  const pdf = usePdfExport(bookId);
-  const epub = useEpubExport(bookId, pdf.info?.chapter_count);
-  const docx = useDocxExport(bookId, pdf.info?.chapter_count);
-
-  const error = format === "pdf" ? pdf.error : format === "epub" ? epub.error : docx.error;
-  const result = format === "pdf" ? pdf.result : format === "epub" ? epub.result : docx.result;
-
+  const state = useBookExport(bookId);
   return (
     <BookSectionPage>
-      <ExportHeader bookId={bookId} bookTitle={pdf.info?.title} />
-      {pdf.isLoading && <p role="status" className="text-muted">Carregando o livro…</p>}
-      {pdf.info && (
+      <ExportHeader bookId={bookId} bookTitle={state.info?.title} />
+      {state.isLoading && <p role="status" className="text-muted">Carregando o livro…</p>}
+      {state.info && (
         <BookSectionColumns>
           <BookSectionCard className="min-w-0 lg:col-span-7">
-            <ExportFormatSelector format={format} onChange={setFormat} />
-            <div id="export-format-panel" role="tabpanel" aria-labelledby={`export-format-panel-${format}`} tabIndex={0}>
-              {format === "pdf" && (
-                <PdfExportCard info={pdf.info} isExporting={pdf.isExporting} onExport={() => void pdf.exportPdf()} />
-              )}
-              {format === "epub" && (
-                <EpubExportCard info={pdf.info} isExporting={epub.isExporting} onExport={() => void epub.exportEpub()} />
-              )}
-              {format === "docx" && (
-                <DocxExportCard info={pdf.info} isExporting={docx.isExporting} onExport={() => void docx.exportDocx()} />
-              )}
-            </div>
+            <ExportFormatSelector format={state.format} onChange={state.setFormat} />
+            <ExportIssues bookId={bookId} info={state.info} format={state.format}
+              disabled={state.isExporting} onReload={state.reload} />
+            <ExportFormatPanel info={state.info} format={state.format} pendingFormat={state.pendingFormat}
+              onExport={() => void state.exportBook()} />
           </BookSectionCard>
           <ExportReviewCard bookId={bookId} />
         </BookSectionColumns>
       )}
-      {error && (pdf.info ? <p role="alert" className="text-danger mt-4">{error}</p> : <ErrorState message={error} onRetry={pdf.reload} />)}
-      {result && (
-        <p role="status" className="text-success mt-4 break-words">
-          Arquivo salvo em: {result.path}
-        </p>
-      )}
+      {state.error && (state.loadError ? <ErrorState message={state.error} onRetry={state.reload} />
+        : <p role="alert" className="mt-4 text-danger">{state.error}</p>)}
+      {state.pendingFormat && <p role="status" className="mt-4 text-muted">Preparando exportação {state.pendingFormat.toUpperCase()}…</p>}
+      {state.cancelled && <p role="status" className="mt-4 text-muted">Exportação cancelada. Nenhum arquivo foi salvo.</p>}
+      {state.result && <p role="status" className="mt-4 break-words text-success">Arquivo salvo em: {state.result.path}</p>}
+      {state.result?.warning && <p role="alert" className="mt-2 text-warning">{state.result.warning}</p>}
     </BookSectionPage>
   );
 }

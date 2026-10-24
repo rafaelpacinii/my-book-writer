@@ -2792,6 +2792,7 @@ dependencies = [
  "docx-rs",
  "epub-builder",
  "lopdf",
+ "quick-xml 0.42.0",
  "scraper",
  "serde",
  "serde_json",
@@ -2806,6 +2807,7 @@ dependencies = [
  "thiserror 2.0.20",
  "tungstenite",
  "uuid",
+ "zip 6.0.0",
 ]
 
 [[package]]

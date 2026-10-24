@@ -5,10 +5,11 @@ import type { PdfExportInfo } from "@/types/export";
 interface Props {
   info: PdfExportInfo;
   isExporting: boolean;
+  disabled: boolean;
   onExport: () => void;
 }
 
-export function PdfExportCard({ info, isExporting, onExport }: Props) {
+export function PdfExportCard({ info, isExporting, disabled, onExport }: Props) {
   return (
     <section>
       <h2 className="text-lg font-bold text-foreground">PDF</h2>
@@ -18,9 +19,7 @@ export function PdfExportCard({ info, isExporting, onExport }: Props) {
         <div><dt className="text-muted">Fonte</dt><dd className="font-semibold mt-1">{info.font_name}</dd></div>
         <div><dt className="text-muted">Capítulos</dt><dd className="font-semibold mt-1">{info.chapter_count}</dd></div>
       </dl>
-      {info.unavailable_reason && <p className="text-muted mb-4">{info.unavailable_reason}</p>}
-      {!info.chapter_count && <p className="text-muted mb-4">Adicione pelo menos um capítulo antes de exportar.</p>}
-      <Button onClick={onExport} disabled={!info.available || !info.chapter_count || isExporting}>
+      <Button onClick={onExport} disabled={disabled} aria-busy={isExporting}>
         {isExporting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <FileDown className="w-4 h-4 mr-2" />}
         {isExporting ? "Gerando PDF…" : "Exportar PDF"}
       </Button>

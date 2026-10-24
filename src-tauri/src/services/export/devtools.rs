@@ -120,7 +120,7 @@ impl DevTools {
                 "Não foi possível carregar as fontes do livro.".into(),
             ));
         }
-        let _ = self.call(
+        let pagination = self.call(
             "Runtime.evaluate",
             json!({
                 "expression": r#"(() => {
@@ -137,7 +137,12 @@ impl DevTools {
                 })()"#,
                 "returnByValue": true,
             }),
-        );
+        )?;
+        if pagination.get("exceptionDetails").is_some() {
+            return Err(AppError::Export(
+                "Não foi possível atualizar o sumário do PDF. Tente novamente.".into(),
+            ));
+        }
         let result = self.call(
             "Page.printToPDF",
             json!({
