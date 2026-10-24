@@ -1,4 +1,6 @@
 import { PanelLeftClose, PanelLeftOpen, X } from "lucide-react";
+import { useSidebarTooltip } from "@/hooks/useSidebarTooltip";
+import { SidebarTooltip } from "@/components/shared/SidebarTooltip";
 
 interface Props {
   isCollapsed: boolean;
@@ -7,17 +9,22 @@ interface Props {
 }
 
 export function SidebarHeader({ isCollapsed, onToggle, onNavigate }: Props) {
+  const tooltip = useSidebarTooltip({ always: true });
+  const label = isCollapsed ? "Expandir menu" : "Recolher menu";
+
   return (
     <div data-sidebar-header className="sidebar-brand-header mb-3 shrink-0 border-b border-border pb-2">
-      <button type="button" onClick={onToggle}
-        aria-label={isCollapsed ? "Expandir menu" : "Recolher menu"}
-        title={isCollapsed ? "Expandir menu" : "Recolher menu"}
+      <button type="button" onClick={() => { tooltip.hide(); onToggle(); }}
+        aria-label={label}
         aria-expanded={!isCollapsed}
+        aria-describedby={tooltip.position ? tooltip.id : undefined}
+        onMouseEnter={tooltip.show} onMouseLeave={tooltip.hide} onFocus={tooltip.show} onBlur={tooltip.hide}
         className="sidebar-collapse-button hidden h-8 w-8 items-center justify-center rounded-md text-muted hover:bg-surface-hover hover:text-foreground min-[700px]:flex"
       >
         <PanelLeftClose data-collapse-icon className="h-4 w-4" />
         <PanelLeftOpen data-expand-icon className="hidden h-4 w-4" />
       </button>
+      <SidebarTooltip id={tooltip.id} label={label} position={tooltip.position} />
       <button type="button" onClick={onNavigate} aria-label="Fechar menu"
         className="flex h-8 w-8 items-center justify-center rounded-md text-muted hover:bg-surface-hover hover:text-foreground min-[700px]:hidden"
       >

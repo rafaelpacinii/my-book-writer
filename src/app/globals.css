@@ -374,17 +374,34 @@ select option {
 
 /* The head script sets this before the static sidebar is painted. */
 [data-sidebar-collapsed="true"] [data-app-sidebar] {
-  width: 80px;
-  padding: 16px 10px 20px;
+  width: 56px;
+  padding: 12px 8px 16px;
 }
 
 [data-sidebar-collapsed="true"] [data-sidebar-expanded] { display: none; }
-[data-sidebar-collapsed="true"] [data-sidebar-item] { justify-content: center; padding-inline: 0.625rem; }
+[data-sidebar-collapsed="true"] [data-sidebar-item] {
+  width: 36px;
+  height: 36px;
+  min-height: 36px;
+  max-width: 36px;
+  flex: none;
+  padding: 0;
+  margin-inline: auto;
+  justify-content: center;
+  border-radius: 8px;
+}
 
 @media (max-width: 699px) {
   [data-sidebar-collapsed="true"] [data-app-sidebar] { width: 240px; padding: 16px 16px 20px; }
   [data-sidebar-collapsed="true"] [data-sidebar-expanded] { display: revert; }
-  [data-sidebar-collapsed="true"] [data-sidebar-item] { justify-content: flex-start; padding-inline: 13px; }
+  [data-sidebar-collapsed="true"] [data-sidebar-item] {
+    width: auto;
+    height: auto;
+    min-height: 44px;
+    padding-inline: 13px;
+    justify-content: flex-start;
+    margin-inline: 0;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

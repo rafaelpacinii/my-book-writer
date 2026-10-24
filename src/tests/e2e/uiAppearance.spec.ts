@@ -18,7 +18,7 @@ for (const theme of ["light", "dark"]) {
     await page.route(/\/_next\/static\/.*\.js/, async (route) => { await hydration; await route.fallback(); });
     await page.goto("/home", { waitUntil: "commit" });
     await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
-    await expect(page.locator("[data-app-sidebar]")).toHaveCSS("width", "80px");
+    await expect(page.locator("[data-app-sidebar]")).toHaveCSS("width", "56px");
     release();
     await expect(page.getByRole("button", { name: "Expandir menu" })).toBeVisible();
     await page.getByRole("button", { name: "Alternar tema" }).click();
