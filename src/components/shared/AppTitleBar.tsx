@@ -13,7 +13,7 @@ export function AppTitleBar() {
     <>
       <div data-app-titlebar className="app-titlebar" role="region" aria-label="Barra de título">
         <div data-tauri-drag-region className="titlebar-drag-region">
-          <span data-titlebar-brand className="titlebar-brand" aria-hidden="true">
+          <span data-titlebar-brand className="titlebar-brand">
             <BrandAsset variant="micro" />
           </span>
           <span className="titlebar-title">My Book Writer</span>

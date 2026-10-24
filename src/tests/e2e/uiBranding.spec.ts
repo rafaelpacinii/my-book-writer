@@ -20,7 +20,7 @@ for (const theme of ["light", "dark"]) {
     await expect(header.locator("[data-brand]")).toHaveCount(0);
     expect((await header.boundingBox())!.height).toBeLessThan(48);
     await page.getByRole("button", { name: "Recolher menu", exact: true }).click();
-    await expect(page.locator("[data-app-sidebar]")).toHaveCSS("width", "80px");
+    await expect(page.locator("[data-app-sidebar]")).toHaveCSS("width", "56px");
     const titlebarBrand = page.locator("[data-titlebar-brand]");
     await expect(titlebarBrand.getByRole("img", { name: "My Book Writer", exact: true })).toBeInViewport({ ratio: 1 });
     await expect(page.getByRole("link", { name: "My Book Writer — início" })).toHaveCount(0);

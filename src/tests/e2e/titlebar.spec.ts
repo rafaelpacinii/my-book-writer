@@ -54,6 +54,28 @@ test("window controls invoke native operations and track external resize", async
   expect(calls).toContain("plugin:window|close");
   await expect(page.locator(".titlebar-drag-region")).toHaveAttribute("data-tauri-drag-region");
   await expect(page.locator(".window-controls [data-tauri-drag-region]")).toHaveCount(0);
+
+  await page.mouse.move(0, 0);
+  const closeBtn = page.getByRole("button", { name: "Fechar janela", exact: true });
+  await closeBtn.hover();
+  const closeTooltip = page.getByRole("tooltip", { name: "Fechar", exact: true });
+  await expect(closeTooltip).toBeVisible();
+  const closeBox = (await closeTooltip.boundingBox())!;
+  const viewport = page.viewportSize()!;
+  expect(closeBox.x + closeBox.width).toBeLessThanOrEqual(viewport.width);
+  expect(closeBox.x).toBeGreaterThanOrEqual(0);
+
+  await page.mouse.move(0, 0);
+  const minBtn = page.getByRole("button", { name: "Minimizar janela", exact: true });
+  await minBtn.hover();
+  await expect(page.getByRole("tooltip", { name: "Minimizar", exact: true })).toBeVisible();
+
+  await page.mouse.move(0, 0);
+  const maxBtn = page.getByRole("button", { name: "Restaurar janela", exact: true });
+  await maxBtn.hover();
+  await expect(page.getByRole("tooltip", { name: "Restaurar janela", exact: true })).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("tooltip")).toHaveCount(0);
 });
 
 test("native operation errors are visible and recoverable", async ({ page }) => {

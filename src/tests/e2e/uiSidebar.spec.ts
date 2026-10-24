@@ -12,7 +12,7 @@ for (const theme of ["light", "dark"]) {
     const sidebar = page.getByRole("complementary", { name: "Menu principal" });
     await expect(page.locator(".workspace-header")).toHaveCount(0);
     await expect(sidebar).toHaveCSS("width", "240px");
-    const brand = await page.getByRole("link", { name: "My Book Writer — início" }).boundingBox();
+    const brand = await page.locator("[data-titlebar-brand]").boundingBox();
     await expect(sidebar.locator("[data-brand]")).toHaveCount(0);
     const themeToggle = await sidebar.getByRole("button", { name: "Alternar tema" }).boundingBox();
     const profile = await sidebar.getByRole("button", { name: "Abrir configurações do perfil" }).boundingBox();
@@ -30,10 +30,13 @@ for (const theme of ["light", "dark"]) {
     await page.getByRole("button", { name: "Mostrar livros recentes" }).click();
     await expect(recent).toBeVisible();
     await page.getByRole("button", { name: "Recolher menu", exact: true }).click();
-    await expect(page.locator("[data-app-sidebar]")).toHaveCSS("width", "80px");
+    await expect(page.locator("[data-app-sidebar]")).toHaveCSS("width", "56px");
     await expect(sidebar.getByRole("button", { name: "Alternar tema" })).toBeInViewport({ ratio: 1 });
     await expect(sidebar.getByRole("button", { name: "Abrir configurações do perfil" })).toBeInViewport({ ratio: 1 });
     const library = page.getByRole("navigation", { name: "Navegação principal" }).getByRole("link", { name: "Biblioteca", exact: true });
+    const libraryBox = (await library.boundingBox())!;
+    expect(Math.round(libraryBox.width)).toBe(36);
+    expect(Math.round(libraryBox.height)).toBe(36);
     await library.hover();
     await expect(page.getByRole("tooltip", { name: "Biblioteca", exact: true })).toBeVisible();
     await page.mouse.move(500, 30);
@@ -41,11 +44,22 @@ for (const theme of ["light", "dark"]) {
     await expect(page.getByRole("tooltip", { name: "Biblioteca", exact: true })).toBeVisible();
     await page.keyboard.press("Escape");
     await expect(page.getByRole("tooltip")).toHaveCount(0);
+    const expandBtn = page.getByRole("button", { name: "Expandir menu", exact: true });
+    await expandBtn.hover();
+    await expect(page.getByRole("tooltip", { name: "Expandir menu", exact: true })).toBeVisible();
+    const themeBtn = sidebar.getByRole("button", { name: "Alternar tema", exact: true });
+    await themeBtn.hover();
+    await expect(page.getByRole("tooltip", { name: theme === "dark" ? "Tema claro" : "Tema escuro", exact: true })).toBeVisible();
+    const profileBtn = sidebar.getByRole("button", { name: "Abrir configurações do perfil", exact: true });
+    await profileBtn.hover();
+    await expect(page.getByRole("tooltip", { name: "Helena Duarte", exact: true })).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(page.getByRole("tooltip")).toHaveCount(0);
     const result = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa"]).analyze();
     expect(result.violations).toEqual([]);
     await page.reload();
     await expect(page.getByRole("button", { name: "Expandir menu" })).toBeVisible();
-    await expect(page.locator("[data-app-sidebar]")).toHaveCSS("width", "80px");
+    await expect(page.locator("[data-app-sidebar]")).toHaveCSS("width", "56px");
   });
 }
 
