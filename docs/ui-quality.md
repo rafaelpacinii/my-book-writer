@@ -32,6 +32,7 @@ Capas personalizadas mantêm a imagem importada; capas automáticas usam uma var
 
 ## Contratos de UI
 
+- **Barra de título:** a barra integrada e fina de 32 px substitui a decoração do sistema no Tauri e acompanha os temas claro, escuro e sistema desde a primeira pintura. O logotipo estilizado (16 px) fica na barra como elemento visual integrado à região de arraste, sem comportamento de link; o menu lateral mantém apenas seu controle de expansão no cabeçalho. A região com o nome do aplicativo permite arrastar a janela e maximizar/restaurar com duplo clique. Os botões de minimizar, maximizar/restaurar e fechar usam a API nativa e têm nomes acessíveis. O conteúdo, a gaveta de navegação e os diálogos respeitam a altura reservada. No navegador, a marca permanece e os controles de janela ficam ocultos.
 - **Estrutura:** PageContent limita a largura a 1390 px; PageHeader usa EB Garamond de 40–58 px, descrição de 12 px e área opcional de ações. A tipografia do manuscrito permanece independente. Usar as mesmas primitivas de campos, botões, bordas e foco nas quatro telas.
 - **Carregamento inicial:** reservar o espaço do conteúdo e marcar a região com aria-busy. LoadingRegion mostra skeleton pulsante somente após 150 ms; não impõe uma duração mínima. Mostrar feedback somente onde há trabalho assíncrono real.
 - **Atualização:** preservar dados existentes enquanto a nova consulta está pendente. Uma navegação para dados disponíveis não deve inserir novos placeholders. Não alterar o tema, o tamanho do menu ou imagens já decodificadas durante a montagem.
@@ -59,6 +60,8 @@ Referências: [preferências antes da hidratação](https://nextjs.org/docs/app/
 ## Validação e CI
 
 A suíte de navegador usa dados fictícios, nunca o SQLite do usuário. Os cenários cobrem os dois temas em 800×600, 1280×720 e 1440×1000; Início e Biblioteca também passam pela matriz 360, 390, 430, 600, 820, 1024, 1366, 1440 e 1920 px, tema do sistema, movimento reduzido, carregamento lento, erros/retry, navegação repetida, criação de livro e restauração. axe complementa a revisão manual; não certifica todos os critérios de acessibilidade.
+
+`titlebar.spec.ts` cobre a marca antes da hidratação, o espaço disponível, os controles e seus erros recuperáveis. A ponte de janela é simulada nesses testes: as chamadas e os eventos são verificados, mas o arraste e o comportamento do gerenciador de janelas exigem conferência no aplicativo nativo. Ao escolher Sistema, a integração envia `null` à API de tema do Tauri para continuar acompanhando o sistema operacional; escolher um tema explícito prevalece sobre essa preferência.
 
 ```bash
 npm run typecheck
@@ -111,6 +114,7 @@ Antes de liberar a versão:
 - [ ] Executar a suíte Windows e revisar seus artifacts.
 - [ ] Repetir em escala real de 100%, 125% e 150%, reiniciando o aplicativo após mudar a configuração de tela. Registrar os resultados separadamente; alterar deviceScaleFactor no navegador não substitui DPI do Windows.
 - [ ] Instalar o pacote e repetir primeira abertura, retornar às páginas, minimizar/restaurar e trocar de monitor.
+- [ ] Na barra integrada, conferir arraste, duplo clique, minimizar, maximizar/restaurar e fechar; trocar entre Claro, Escuro e Sistema e reabrir o aplicativo para conferir o tema salvo.
 - [ ] Desconectar a internet e verificar criação, edição, salvamento e reabertura de livros.
 - [ ] Conferir contraste em hover/foco/seleção e navegação de teclado nos diálogos e campos.
 

@@ -6,6 +6,7 @@
 @import "../components/shared/sidebar.css";
 @import "../components/shared/book-object.css";
 @import "../components/shared/interactions.css";
+@import "../components/shared/titlebar.css";
 
 @font-face {
   font-family: 'Inter';

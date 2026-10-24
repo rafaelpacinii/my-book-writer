@@ -1,44 +1,38 @@
 import { test, expect } from "@/tests/e2e/fixtures";
 
 for (const theme of ["light", "dark"]) {
-  test(`@ui ${theme} sidebar renders the official mark before hydration and keeps it legible when collapsed`, async ({ page }) => {
+  test(`@ui ${theme} titlebar renders the official mark before hydration and frees the sidebar`, async ({ page }) => {
     await page.addInitScript((theme) => localStorage.setItem("mbw-theme-preference", theme), theme);
     let release!: () => void;
     const hydration = new Promise<void>((resolve) => { release = resolve; });
     await page.route(/\/_next\/static\/.*\.js/, async (route) => { await hydration; await route.fallback(); });
     try {
       await page.goto("/home", { waitUntil: "commit" });
-      const brand = page.locator("[data-sidebar-brand] [data-brand=symbol]");
+      const brand = page.locator("[data-titlebar-brand] [data-brand=micro]");
       await expect(brand).toBeVisible();
       await expect(brand).toBeInViewport({ ratio: 1 });
-      await expect(brand).toHaveCSS("height", "32px");
+      await expect(brand).toHaveCSS("height", "16px");
       await expect(brand.locator(theme === "dark" ? ".brand-dark" : ".brand-light")).toBeVisible();
       await expect(brand.locator(theme === "dark" ? ".brand-light" : ".brand-dark")).toBeHidden();
     } finally { release(); }
     await page.waitForLoadState("load");
     const header = page.locator("[data-sidebar-header]");
-    await expect(header).toHaveText("");
-    const markBounds = (await header.locator("[data-brand=symbol]").boundingBox())!;
-    const toggleBounds = (await header.getByRole("button", { name: "Recolher menu", exact: true }).boundingBox())!;
-    expect(toggleBounds.x).toBeGreaterThan(markBounds.x + markBounds.width);
-    expect(toggleBounds.y + toggleBounds.height / 2).toBeCloseTo(markBounds.y + markBounds.height / 2, 1);
+    await expect(header.locator("[data-brand]")).toHaveCount(0);
+    expect((await header.boundingBox())!.height).toBeLessThan(48);
     await page.getByRole("button", { name: "Recolher menu", exact: true }).click();
     await expect(page.locator("[data-app-sidebar]")).toHaveCSS("width", "80px");
-    const brandLink = page.getByRole("link", { name: "My Book Writer — início", exact: true });
-    await expect(brandLink.locator("[data-brand=horizontal]")).toHaveCount(0);
-    await expect(brandLink.locator("[data-brand=symbol]")).toHaveCSS("height", "32px");
-    await expect(brandLink.getByRole("img", { name: "My Book Writer", exact: true })).toBeInViewport({ ratio: 1 });
+    const titlebarBrand = page.locator("[data-titlebar-brand]");
+    await expect(titlebarBrand.getByRole("img", { name: "My Book Writer", exact: true })).toBeInViewport({ ratio: 1 });
+    await expect(page.getByRole("link", { name: "My Book Writer — início" })).toHaveCount(0);
     await page.reload();
-    await expect(brandLink.locator("[data-brand=symbol]")).toBeVisible();
+    await expect(titlebarBrand.locator("[data-brand=micro]")).toBeVisible();
     await page.getByRole("button", { name: "Expandir menu", exact: true }).click();
-    await expect(brandLink.locator("[data-brand=symbol]")).toBeVisible();
-    await expect(brandLink.getByRole("img", { name: "My Book Writer", exact: true })).toHaveCount(1);
-    await page.getByRole("button", { name: "Recolher menu", exact: true }).click();
+    await expect(titlebarBrand.getByRole("img", { name: "My Book Writer", exact: true })).toHaveCount(1);
     await page.setViewportSize({ width: 390, height: 600 });
     await page.getByRole("button", { name: "Abrir menu", exact: true }).click();
-    await expect(brandLink.locator("[data-brand=symbol]")).toBeInViewport({ ratio: 1 });
-    await brandLink.click();
-    await expect(page).toHaveURL(/\/home$/);
+    await expect(titlebarBrand.locator("[data-brand=micro]")).toBeInViewport({ ratio: 1 });
+    await page.getByRole("button", { name: "Fechar menu", exact: true }).click();
+    await expect(page.getByRole("dialog", { name: "Menu principal" })).toHaveCount(0);
   });
 
   test(`@ui ${theme} onboarding uses approved logo sizes and changes variants with theme`, async ({ page }) => {

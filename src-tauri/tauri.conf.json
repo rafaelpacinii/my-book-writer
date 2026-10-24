@@ -12,7 +12,10 @@
   "app": {
     "windows": [
       {
+        "label": "main",
         "title": "My Book Writer",
+        "decorations": false,
+        "shadow": true,
         "width": 800,
         "height": 600
       }

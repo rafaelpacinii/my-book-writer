@@ -27,7 +27,7 @@ export function Modal({ isOpen, onClose, title, children, footer }: ModalProps) 
       aria-labelledby={title ? titleId : undefined}
       aria-label={title ? undefined : "Diálogo"}
       aria-modal="true"
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs"
+      className="application-modal fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs"
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
       <div className="bg-surface rounded-xl border border-border shadow-xl max-w-lg w-full max-h-[90vh] flex flex-col overflow-hidden">
