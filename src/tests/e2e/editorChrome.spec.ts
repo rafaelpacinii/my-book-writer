@@ -124,6 +124,6 @@ test("compact editor keeps formatting, layout and focus accessible without horiz
     await page.getByRole("button", { name: "Modo foco", exact: true }).click();
     await expect(page.locator("[data-app-sidebar]")).toBeHidden();
     await page.getByRole("button", { name: "Sair do foco", exact: true }).click();
-    await expect(header.getByRole("navigation", { name: "Caminho de navegação" })).toBeVisible();
+    await expect(page.locator("[data-app-titlebar]").getByRole("navigation", { name: "Caminho contextual" })).toBeVisible();
   }
 });

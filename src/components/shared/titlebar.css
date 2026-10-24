@@ -50,10 +50,12 @@
   display: flex;
   align-items: center;
   min-width: 0;
+  overflow: hidden;
   pointer-events: auto;
 }
 .titlebar-crumbs {
   display: flex;
+  min-width: 0;
   align-items: center;
   gap: 6px;
   list-style: none;
@@ -63,6 +65,7 @@
 }
 .titlebar-crumb-item {
   display: flex;
+  min-width: 0;
   align-items: center;
   gap: 6px;
   white-space: nowrap;
@@ -78,6 +81,7 @@
   text-decoration: none;
   transition: color 0.15s ease;
   max-width: 140px;
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -91,13 +95,14 @@
   color: var(--foreground);
   font-weight: 500;
   max-width: 160px;
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   pointer-events: none;
 }
 @media (max-width: 540px) {
-  .titlebar-separator, .titlebar-nav { display: none; }
+  .titlebar-title, .titlebar-separator { display: none; }
 }
 .window-controls { display: none; flex-shrink: 0; }
 [data-desktop="true"] .window-controls { display: flex; }

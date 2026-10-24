@@ -44,7 +44,7 @@ export function Main({ bookId }: Props) {
 
   return (
     <BookSectionPage>
-      <SettingsHeader bookId={bookId} bookTitle={s.book.title} />
+      <SettingsHeader />
       <SettingsForm settings={s} />
 
       <DeleteBookModal

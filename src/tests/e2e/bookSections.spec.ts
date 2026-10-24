@@ -24,7 +24,7 @@ test("book settings, front matter and export share the same content width, heade
         padding: style.padding, radius: style.borderRadius };
     }));
     await expect(page.getByRole("navigation", { name: "Navegação principal" })).toBeVisible();
-    await expect(page.getByRole("navigation", { name: "Caminho de navegação" }).getByRole("link", { name: book.title, exact: true })).toBeVisible();
+    await expect(page.getByRole("navigation", { name: "Caminho contextual" }).getByRole("link", { name: book.title, exact: true })).toBeVisible();
   }
   expect(geometry[0].width).toBe(1390);
   expect(geometry[1]).toEqual(geometry[0]);
@@ -60,7 +60,7 @@ test("front matter breadcrumbs and contextual preview links protect unsaved edit
   const dialog = page.getByRole("dialog", { name: "Descartar alterações?" });
   await dialog.getByRole("button", { name: "Continuar editando" }).click();
   await expect(page.getByLabel("Subtítulo da obra (opcional)")).toHaveValue("Rascunho pendente");
-  await page.getByRole("navigation", { name: "Caminho de navegação" }).getByRole("link", { name: book.title, exact: true }).click();
+  await page.getByRole("navigation", { name: "Caminho contextual" }).getByRole("link", { name: book.title, exact: true }).click();
   await dialog.getByRole("button", { name: "Descartar e voltar" }).click();
   await expect(page).toHaveURL(`/books/view${query}`);
 });

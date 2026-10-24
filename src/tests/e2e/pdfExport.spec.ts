@@ -111,7 +111,7 @@ test("manually saved editor text is available before opening export from the boo
   await editor.fill("Texto escrito imediatamente antes da exportação.");
   await page.keyboard.press("Control+s");
   await expect(page.getByText("Salvo neste dispositivo", { exact: true })).toBeVisible();
-  await page.getByRole("navigation", { name: "Caminho de navegação" }).getByRole("link", { name: book.title, exact: true }).click();
+  await page.getByRole("navigation", { name: "Caminho contextual" }).getByRole("link", { name: book.title, exact: true }).click();
   await page.getByRole("link", { name: "Exportar", exact: true }).click();
   await expect(page).toHaveURL(new RegExp("/books/export\\?"));
   const saved = await page.evaluate(() => localStorage.getItem("pdf_saved_chapter"));
@@ -137,7 +137,7 @@ test("a second manual save includes edits made while the first save is still run
   await editor.fill("Versão mais recente escrita durante o salvamento.");
   await page.keyboard.press("Control+s");
   await expect(page.getByText("Salvo neste dispositivo", { exact: true })).toBeVisible();
-  await page.getByRole("navigation", { name: "Caminho de navegação" }).getByRole("link", { name: book.title, exact: true }).click();
+  await page.getByRole("navigation", { name: "Caminho contextual" }).getByRole("link", { name: book.title, exact: true }).click();
   await page.getByRole("link", { name: "Exportar", exact: true }).click();
   await expect(page).toHaveURL(new RegExp("/books/export\\?"));
   const saved = await page.evaluate(() => localStorage.getItem("pdf_saved_chapter"));

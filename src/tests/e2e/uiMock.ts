@@ -30,6 +30,7 @@ export async function mockUI(page: Page, options: { delay?: number; failBooks?: 
           case "list_books":
             if (runtime.uiFailBooks-- > 0) throw new Error("Não foi possível carregar seus livros.");
             return runtime.uiBooks;
+          case "get_book_by_id": return runtime.uiBooks.find((item) => item.id === args?.id) ?? null;
           case "list_book_formats": return [{ ...format, id: book.format_id }];
           case "list_font_presets": return [{ ...font, id: book.font_preset_id }];
           case "get_database_stats": return {
