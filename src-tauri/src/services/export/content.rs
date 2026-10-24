@@ -17,11 +17,23 @@ pub fn chapter_html(json: &str) -> Result<String, AppError> {
             e,
         )
     })?;
-    let source = if let Some(html) = doc.get("html").and_then(Value::as_str) {
+    let source = if let Some(html) = doc
+        .get("html")
+        .and_then(Value::as_str)
+        .filter(|html| !html.is_empty())
+    {
         html.to_string()
-    } else if let Some(text) = doc.get("text").and_then(Value::as_str) {
+    } else if let Some(text) = doc
+        .get("text")
+        .and_then(Value::as_str)
+        .filter(|text| !text.is_empty())
+    {
         plain_html(text)
-    } else if let Some(nodes) = doc.get("content").and_then(Value::as_array) {
+    } else if let Some(nodes) = doc
+        .get("content")
+        .or_else(|| doc.get("blocks"))
+        .and_then(Value::as_array)
+    {
         nodes
             .iter()
             .map(|node| {
@@ -30,6 +42,10 @@ pub fn chapter_html(json: &str) -> Result<String, AppError> {
                 plain_html(&text)
             })
             .collect()
+    } else if doc.get("html").and_then(Value::as_str).is_some()
+        || doc.get("text").and_then(Value::as_str).is_some()
+    {
+        String::new()
     } else {
         return Err(AppError::Export(
             "Formato de capítulo não reconhecido para exportação.".into(),
@@ -51,6 +67,38 @@ fn is_blank(html: &str) -> bool {
             .root_element()
             .text()
             .all(|text| text.trim().is_empty())
+}
+
+pub fn has_visible_text(html: &str) -> bool {
+    Html::parse_fragment(html)
+        .root_element()
+        .text()
+        .any(|text| {
+            text.chars().any(|character| {
+                !character.is_whitespace()
+                    && !matches!(character, '\u{200b}' | '\u{200c}' | '\u{200d}' | '\u{feff}')
+            })
+        })
+}
+
+pub fn as_xhtml(html: &str) -> String {
+    let mut output = html.to_owned();
+    for tag in ["<br", "<hr"] {
+        let mut cursor = 0;
+        while let Some(start) = output[cursor..].find(tag) {
+            let start = cursor + start;
+            let Some(end) = output[start..].find('>').map(|end| start + end) else {
+                break;
+            };
+            if !output[..end].ends_with('/') {
+                output.insert_str(end, " /");
+                cursor = end + 3;
+            } else {
+                cursor = end + 1;
+            }
+        }
+    }
+    output
 }
 
 fn normalize_blocks(blocks: Vec<String>) -> String {
@@ -76,9 +124,20 @@ fn normalize_blocks(blocks: Vec<String>) -> String {
 fn collect_text(value: &Value, output: &mut String) {
     if let Some(text) = value.get("text").and_then(Value::as_str) {
         output.push_str(text);
+        return;
     }
-    if let Some(children) = value.get("content").and_then(Value::as_array) {
-        for child in children {
+    if let Some(children) = value
+        .get("content")
+        .or_else(|| value.get("blocks"))
+        .and_then(Value::as_array)
+    {
+        let separate = children.iter().any(|child| {
+            child.get("type").and_then(Value::as_str) != Some("text") && child.get("text").is_none()
+        });
+        for (index, child) in children.iter().enumerate() {
+            if separate && index > 0 {
+                output.push_str("\n\n");
+            }
             collect_text(child, output);
         }
     }
@@ -117,6 +176,9 @@ fn render_node(node: &Node, element: Option<ElementRef<'_>>) -> Result<String, A
         return Err(AppError::Export(
             "A exportação de imagens dentro dos capítulos ainda não está disponível.".into(),
         ));
+    }
+    if name == "table" {
+        return Err(AppError::Export("A exportação de tabelas dentro dos capítulos ainda não está disponível. Converta a tabela em texto antes de exportar.".into()));
     }
     if element.value().attr("data-page-break") == Some("true") {
         return Ok(String::new());

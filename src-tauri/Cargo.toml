@@ -35,6 +35,8 @@ tungstenite = "0.30"
 tauri-plugin-dialog = "2"
 epub-builder = "0.8.3"
 docx-rs = "0.4.22"
+zip = { version = "6", default-features = false, features = ["deflate"] }
+quick-xml = "0.42"
 
 [dev-dependencies]
 lopdf = "0.45"

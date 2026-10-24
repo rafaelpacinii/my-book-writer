@@ -5,10 +5,11 @@ import type { PdfExportInfo } from "@/types/export";
 interface Props {
   info: PdfExportInfo;
   isExporting: boolean;
+  disabled: boolean;
   onExport: () => void;
 }
 
-export function DocxExportCard({ info, isExporting, onExport }: Props) {
+export function DocxExportCard({ info, isExporting, disabled, onExport }: Props) {
   return (
     <section>
       <h2 className="text-lg font-bold text-foreground">Documento Word (.docx)</h2>
@@ -19,12 +20,11 @@ export function DocxExportCard({ info, isExporting, onExport }: Props) {
         <div><dt className="text-muted">Capítulos</dt><dd className="font-semibold mt-1">{info.chapter_count}</dd></div>
         <div><dt className="text-muted">Compatibilidade</dt><dd className="font-semibold mt-1">Microsoft Word, LibreOffice, Google Docs</dd></div>
       </dl>
-      {!info.chapter_count && <p className="text-muted mb-4">Adicione pelo menos um capítulo antes de exportar.</p>}
-      <Button onClick={onExport} disabled={!info.chapter_count || isExporting}>
+      <Button onClick={onExport} disabled={disabled} aria-busy={isExporting}>
         {isExporting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <FileText className="w-4 h-4 mr-2" />}
         {isExporting ? "Gerando DOCX…" : "Exportar DOCX"}
       </Button>
-      <p className="text-xs text-muted mt-4">Mantém o mesmo formato de página, margens, fonte e quebras do livro.</p>
+      <p className="text-xs text-muted mt-4">Usa a diagramação do PDF como referência. O editor de texto pode redistribuir linhas e páginas; atualize os campos do sumário ao abrir.</p>
     </section>
   );
 }

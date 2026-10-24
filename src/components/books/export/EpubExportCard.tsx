@@ -5,10 +5,11 @@ import type { PdfExportInfo } from "@/types/export";
 interface Props {
   info: PdfExportInfo;
   isExporting: boolean;
+  disabled: boolean;
   onExport: () => void;
 }
 
-export function EpubExportCard({ info, isExporting, onExport }: Props) {
+export function EpubExportCard({ info, isExporting, disabled, onExport }: Props) {
   return (
     <section>
       <h2 className="text-lg font-bold text-foreground">eBook EPUB</h2>
@@ -19,8 +20,7 @@ export function EpubExportCard({ info, isExporting, onExport }: Props) {
         <div><dt className="text-muted">Capítulos</dt><dd className="font-semibold mt-1">{info.chapter_count}</dd></div>
         <div><dt className="text-muted">Compatibilidade</dt><dd className="font-semibold mt-1">Kindle, Kobo, Apple Books</dd></div>
       </dl>
-      {!info.chapter_count && <p className="text-muted mb-4">Adicione pelo menos um capítulo antes de exportar.</p>}
-      <Button onClick={onExport} disabled={!info.chapter_count || isExporting}>
+      <Button onClick={onExport} disabled={disabled} aria-busy={isExporting}>
         {isExporting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <BookDown className="w-4 h-4 mr-2" />}
         {isExporting ? "Gerando EPUB…" : "Exportar EPUB"}
       </Button>

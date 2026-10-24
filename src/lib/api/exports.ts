@@ -5,6 +5,7 @@ import { listBookFormats, listFontPresets } from "@/lib/api/catalog";
 import type { DocxExportResult, EpubExportResult, PdfExportInfo, PdfExportResult } from "@/types/export";
 
 export async function getPdfExportInfo(bookId: string): Promise<PdfExportInfo> {
+  if (!bookId.trim()) throw new Error("Selecione um livro na biblioteca para abrir a exportação.");
   if (isTauri()) return invoke<PdfExportInfo>("get_pdf_export_info", { bookId });
   const [book, chapters, formats, fonts] = await Promise.all([
     getBookById(bookId), listChapters(bookId), listBookFormats(), listFontPresets(),
@@ -16,6 +17,8 @@ export async function getPdfExportInfo(bookId: string): Promise<PdfExportInfo> {
     font_name: fonts.find((font) => font.id === book.font_preset_id)?.name ?? "Fonte não encontrada",
     available: false,
     unavailable_reason: "A exportação está disponível no aplicativo desktop.",
+    desktop_available: false,
+    issues: chapters.length ? [] : [{ code: "empty_book", message: "Adicione pelo menos um capítulo antes de exportar.", chapter_id: null, formats: ["pdf", "epub", "docx"] }],
   };
 }
 

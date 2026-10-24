@@ -1,6 +1,5 @@
 use super::{chromium, html, output};
 use crate::error::AppError;
-use crate::repositories::book_repository::touch_book;
 use crate::repositories::export_repository::read_snapshot;
 use crate::state::AppState;
 use serde::Serialize;
@@ -16,11 +15,14 @@ pub struct PdfExportInfo {
     pub chapter_count: usize,
     pub available: bool,
     pub unavailable_reason: Option<String>,
+    pub desktop_available: bool,
+    pub issues: Vec<super::validation::ExportIssue>,
 }
 
 #[derive(Serialize)]
 pub struct PdfExportResult {
     pub path: String,
+    pub warning: Option<String>,
 }
 
 fn resource_dir(app: &tauri::AppHandle) -> Result<std::path::PathBuf, AppError> {
@@ -46,6 +48,7 @@ pub async fn info(
         .and_then(|root| chromium::executable(&root))
         .map(|_| ());
     let unavailable_reason = readiness.err().map(|error| error.to_string());
+    let issues = super::validation::issues(&snapshot);
     Ok(PdfExportInfo {
         title: snapshot.book.title,
         author: snapshot.book.author_name,
@@ -54,6 +57,8 @@ pub async fn info(
         chapter_count: snapshot.chapters.len(),
         available: unavailable_reason.is_none(),
         unavailable_reason,
+        desktop_available: true,
+        issues,
     })
 }
 
@@ -64,57 +69,38 @@ pub async fn export(
 ) -> Result<Option<PdfExportResult>, AppError> {
     let snapshot = read_snapshot(&state.db_pool, book_id).await?;
     let binary = chromium::executable(&resource_dir(&app)?)?;
-    let document = html::render_book(&snapshot)?;
-    let filename = suggested_filename(&snapshot.book.title);
-    let result = tauri::async_runtime::spawn_blocking(move || {
-        let Some(chosen) = app
-            .dialog()
-            .file()
-            .set_title("Exportar livro em PDF")
-            .add_filter("Documento PDF", &["pdf"])
-            .set_file_name(filename)
-            .blocking_save_file()
-        else {
-            return Ok(None);
-        };
-        let destination = chosen
-            .into_path()
-            .map_err(|e| super::export_error("O destino escolhido não é um arquivo local.", e))?;
-        if destination
-            .extension()
-            .is_none_or(|extension| !extension.eq_ignore_ascii_case("pdf"))
-        {
-            return Err(AppError::Export(
-                "O nome do arquivo deve terminar em .pdf.".into(),
-            ));
-        }
-        let bytes = chromium::render_pdf(&binary, &document)?;
-        output::save_pdf(&destination, &bytes)?;
-        Ok(Some(PdfExportResult {
-            path: destination.to_string_lossy().into_owned(),
-        }))
-    })
+    super::validation::validate(&snapshot, super::validation::ExportFormat::Pdf)?;
+    let filename = output::suggested_filename(&snapshot.book.title, "pdf");
+    let mut result = tauri::async_runtime::spawn_blocking(
+        move || -> Result<Option<PdfExportResult>, AppError> {
+            let Some(chosen) = app
+                .dialog()
+                .file()
+                .set_title("Exportar livro em PDF")
+                .add_filter("Documento PDF", &["pdf"])
+                .set_file_name(filename)
+                .blocking_save_file()
+            else {
+                return Ok(None);
+            };
+            let destination = chosen.into_path().map_err(|e| {
+                super::export_error("O destino escolhido não é um arquivo local.", e)
+            })?;
+            output::validate_extension(&destination, "pdf")?;
+            let document = html::render_book(&snapshot)?;
+            let bytes = chromium::render_pdf(&binary, &document)?;
+            output::save_pdf(&destination, &bytes)?;
+            Ok(Some(PdfExportResult {
+                path: destination.to_string_lossy().into_owned(),
+                warning: None,
+            }))
+        },
+    )
     .await
     .map_err(|e| super::export_error("A exportação foi interrompida. Tente novamente.", e))??;
 
-    if result.is_some() {
-        touch_book(&state.db_pool, book_id).await?;
+    if let Some(saved) = &mut result {
+        saved.warning = output::record_saved(&state.db_pool, book_id).await;
     }
     Ok(result)
-}
-
-fn suggested_filename(title: &str) -> String {
-    let name: String = title
-        .chars()
-        .map(|character| {
-            if character.is_control() || "<>:\"/\\|?*".contains(character) {
-                '_'
-            } else {
-                character
-            }
-        })
-        .take(100)
-        .collect();
-    let name = name.trim().trim_matches('.');
-    format!("{}.pdf", if name.is_empty() { "Livro" } else { name })
 }

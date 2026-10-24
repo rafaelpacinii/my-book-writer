@@ -1,7 +1,16 @@
 use crate::error::AppError;
 use base64::{engine::general_purpose::STANDARD, Engine};
 
-type FontFace = (&'static [u8], u16, &'static str);
+pub(super) type FontFace = (&'static [u8], u16, &'static str);
+
+// Word resolves embedded fonts by their internal family name, not the CSS alias.
+pub(super) fn docx_family(family: &str) -> &str {
+    match family {
+        "Merriweather" => "Merriweather 24pt",
+        "Inter" => "Inter 18pt",
+        family => family,
+    }
+}
 
 macro_rules! faces {
     ($directory:literal, $name:literal) => {
@@ -58,7 +67,7 @@ macro_rules! faces {
     };
 }
 
-pub fn font_css(family: &str) -> Result<String, AppError> {
+pub(super) fn font_faces(family: &str) -> Result<Vec<FontFace>, AppError> {
     let faces: &[FontFace] = match family {
         "Merriweather" => faces!("merriweather", "Merriweather"),
         "Inter" => faces!("inter", "Inter"),
@@ -88,6 +97,11 @@ pub fn font_css(family: &str) -> Result<String, AppError> {
             ))
         }
     };
+    Ok(faces.to_vec())
+}
+
+pub fn font_css(family: &str) -> Result<String, AppError> {
+    let faces = font_faces(family)?;
     Ok(faces.iter().map(|(bytes, weight, style)| format!(
         "@font-face{{font-family:'{family}';font-weight:{weight};font-style:{style};src:url(data:font/ttf;base64,{}) format('truetype');}}", STANDARD.encode(bytes),
     )).collect())

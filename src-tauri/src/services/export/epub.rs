@@ -1,10 +1,6 @@
 use crate::error::AppError;
-use crate::repositories::book_repository::touch_book;
 use crate::repositories::export_repository::{read_snapshot, BookExportSnapshot};
-use crate::services::export::{
-    content::{chapter_html, escape_html},
-    output,
-};
+use crate::services::export::{content::escape_html, output};
 use crate::state::AppState;
 use epub_builder::{EpubBuilder, EpubContent, ReferenceType, ZipLibrary};
 use serde::Serialize;
@@ -13,20 +9,18 @@ use tauri_plugin_dialog::DialogExt;
 #[derive(Serialize)]
 pub struct EpubExportResult {
     pub path: String,
+    pub warning: Option<String>,
 }
 
 pub fn render_epub(snapshot: &BookExportSnapshot) -> Result<Vec<u8>, AppError> {
-    if snapshot.chapters.is_empty() {
-        return Err(AppError::Export(
-            "Adicione pelo menos um capítulo antes de exportar.".into(),
-        ));
-    }
+    super::validation::validate(snapshot, super::validation::ExportFormat::Epub)?;
 
     let mut builder = EpubBuilder::new(
         ZipLibrary::new()
             .map_err(|e| super::export_error("Falha ao inicializar gerador de EPUB.", e))?,
     )
     .map_err(|e| super::export_error("Falha ao configurar gerador de EPUB.", e))?;
+    builder.epub_version(epub_builder::EpubVersion::V30);
 
     builder
         .metadata("author", &snapshot.book.author_name)
@@ -80,7 +74,8 @@ pub fn render_epub(snapshot: &BookExportSnapshot) -> Result<Vec<u8>, AppError> {
             }
         };
         let heading_escaped = escape_html(&heading_label);
-        let content_html = chapter_html(&chapter.content_json)?;
+        let content_html =
+            super::content::as_xhtml(&super::validation::chapter_content(chapter, index)?);
         let title_escaped = escape_html(&chapter.title);
         let chapter_num = index + 1;
         let xhtml = format!(
@@ -129,59 +124,40 @@ pub async fn export(
     book_id: &str,
 ) -> Result<Option<EpubExportResult>, AppError> {
     let snapshot = read_snapshot(&state.db_pool, book_id).await?;
-    let bytes = render_epub(&snapshot)?;
-    let filename = suggested_filename(&snapshot.book.title);
+    super::validation::validate(&snapshot, super::validation::ExportFormat::Epub)?;
+    let filename = output::suggested_filename(&snapshot.book.title, "epub");
 
-    let result = tauri::async_runtime::spawn_blocking(move || {
-        let Some(chosen) = app
-            .dialog()
-            .file()
-            .set_title("Exportar livro em EPUB")
-            .add_filter("eBook EPUB", &["epub"])
-            .set_file_name(filename)
-            .blocking_save_file()
-        else {
-            return Ok(None);
-        };
-        let destination = chosen
-            .into_path()
-            .map_err(|e| super::export_error("O destino escolhido não é um arquivo local.", e))?;
-        if destination
-            .extension()
-            .is_none_or(|ext| !ext.eq_ignore_ascii_case("epub"))
-        {
-            return Err(AppError::Export(
-                "O nome do arquivo deve terminar em .epub.".into(),
-            ));
-        }
-        output::save_epub(&destination, &bytes)?;
-        Ok(Some(EpubExportResult {
-            path: destination.to_string_lossy().into_owned(),
-        }))
-    })
+    let mut result = tauri::async_runtime::spawn_blocking(
+        move || -> Result<Option<EpubExportResult>, AppError> {
+            let Some(chosen) = app
+                .dialog()
+                .file()
+                .set_title("Exportar livro em EPUB")
+                .add_filter("eBook EPUB", &["epub"])
+                .set_file_name(filename)
+                .blocking_save_file()
+            else {
+                return Ok(None);
+            };
+            let destination = chosen.into_path().map_err(|e| {
+                super::export_error("O destino escolhido não é um arquivo local.", e)
+            })?;
+            output::validate_extension(&destination, "epub")?;
+            let bytes = render_epub(&snapshot)?;
+            output::save_epub(&destination, &bytes)?;
+            Ok(Some(EpubExportResult {
+                path: destination.to_string_lossy().into_owned(),
+                warning: None,
+            }))
+        },
+    )
     .await
     .map_err(|e| super::export_error("A exportação foi interrompida. Tente novamente.", e))??;
 
-    if result.is_some() {
-        touch_book(&state.db_pool, book_id).await?;
+    if let Some(saved) = &mut result {
+        saved.warning = output::record_saved(&state.db_pool, book_id).await;
     }
     Ok(result)
-}
-
-fn suggested_filename(title: &str) -> String {
-    let name: String = title
-        .chars()
-        .map(|character| {
-            if character.is_control() || "<>:\"/\\|?*".contains(character) {
-                '_'
-            } else {
-                character
-            }
-        })
-        .take(100)
-        .collect();
-    let name = name.trim().trim_matches('.');
-    format!("{}.epub", if name.is_empty() { "Livro" } else { name })
 }
 
 fn add_front_matter_epub(
@@ -400,7 +376,7 @@ fn add_front_matter_epub(
             };
             let chapter_num = i + 1;
             links.push_str(&format!(
-                "<li><a href=\"chapter_{chapter_num}.xhtml\">{}</a></li>",
+                "<li><a href=\"chapter_{chapter_num:03}.xhtml\">{}</a></li>",
                 escape_html(&label)
             ));
         }

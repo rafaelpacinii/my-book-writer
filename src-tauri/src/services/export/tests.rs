@@ -12,7 +12,7 @@ use crate::domain::{
 use crate::repositories::export_repository::BookExportSnapshot;
 use serde_json::json;
 
-fn snapshot() -> BookExportSnapshot {
+pub(super) fn snapshot() -> BookExportSnapshot {
     BookExportSnapshot {
         book: serde_json::from_value(json!({
             "id":"export-test", "profile_id":"profile", "format_id":"format", "font_preset_id":"font",
@@ -27,7 +27,7 @@ fn snapshot() -> BookExportSnapshot {
     }
 }
 
-fn chapter(id: &str, title: &str, html: &str) -> Chapter {
+pub(super) fn chapter(id: &str, title: &str, html: &str) -> Chapter {
     Chapter {
         id: id.into(),
         book_id: "export-test".into(),

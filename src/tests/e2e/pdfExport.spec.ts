@@ -42,6 +42,7 @@ async function mockDesktop(page: import("@playwright/test").Page, mode: string) 
           case "get_pdf_export_info": return {
             title: book.title, author: book.author_name, format_name: "14 × 21 cm", font_name: "Merriweather",
             chapter_count: mode === "empty" ? 0 : 1, available: mode !== "missing",
+            desktop_available: true, issues: [],
             unavailable_reason: mode === "missing" ? "O Chromium local não está disponível." : null,
           };
           case "export_book_pdf": {

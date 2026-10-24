@@ -2,7 +2,8 @@ import { createServer } from "node:http";
 import { readFile, stat } from "node:fs/promises";
 import { resolve, extname, sep } from "node:path";
 
-const root = resolve("out");
+// With output: "export", Next uses a custom distDir as the exported site directory.
+const root = resolve(process.env.MBW_STATIC_DIR || process.env.MBW_NEXT_DIST_DIR || "out");
 const port = Number(process.env.MBW_STATIC_PORT ?? 3100);
 const types = { ".html": "text/html; charset=utf-8", ".js": "text/javascript", ".css": "text/css", ".json": "application/json", ".svg": "image/svg+xml", ".png": "image/png", ".ttf": "font/ttf", ".txt": "text/plain; charset=utf-8" };
 await stat(root);
