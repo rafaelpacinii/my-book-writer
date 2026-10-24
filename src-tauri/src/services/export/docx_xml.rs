@@ -1,4 +1,7 @@
-use quick_xml::{events::Event, Reader, Writer};
+use quick_xml::{
+    events::{BytesStart, Event},
+    Reader, Writer,
+};
 use std::io::{Error, ErrorKind};
 
 type XmlResult<T> = Result<T, Box<dyn std::error::Error>>;
@@ -24,6 +27,15 @@ fn write_event(
     parent: &str,
     writer: &mut Writer<Vec<u8>>,
 ) -> XmlResult<()> {
+    let event = match event {
+        Event::Empty(start) if start.name().as_ref() == "w:gridCol" => {
+            Event::Empty(grid_column(start)?)
+        }
+        Event::Start(start) if start.name().as_ref() == "w:gridCol" => {
+            Event::Start(grid_column(start)?)
+        }
+        event => event,
+    };
     let Event::Start(start) = event else {
         writer.write_event(event)?;
         return Ok(());
@@ -57,7 +69,7 @@ fn write_event(
                 // Style/default paragraph properties cannot contain run properties.
                 // The generator inserts an empty rPr even when none was configured.
                 if name == "w:pPr"
-                    && matches!(parent, "w:style" | "w:pPrDefault")
+                    && matches!(parent, "w:style" | "w:pPrDefault" | "w:lvl")
                     && child_name == "w:rPr"
                 {
                     if matches!(&event, Event::Empty(child) if child.attributes().next().is_none())
@@ -78,6 +90,42 @@ fn write_event(
             }
         }
     }
+}
+
+fn grid_column(start: BytesStart<'_>) -> XmlResult<BytesStart<'static>> {
+    // docx-rs writes tcW's w:type attribute on gridCol, where only w:w is valid.
+    let mut column = BytesStart::new("w:gridCol");
+    for attribute in start.attributes() {
+        let attribute = attribute?;
+        if attribute.key.as_ref() != "w:type" {
+            column.push_attribute(attribute);
+        }
+    }
+    Ok(column.into_owned())
+}
+
+pub fn image_descriptions(bytes: &[u8], descriptions: &[String]) -> XmlResult<Vec<u8>> {
+    let mut reader = Reader::from_reader(bytes);
+    let mut writer = Writer::new(Vec::new());
+    let mut descriptions = descriptions.iter();
+    loop {
+        let event = match reader.read_event()? {
+            Event::Eof => break,
+            Event::Empty(mut start) if start.name().as_ref() == "wp:docPr" => {
+                let description = descriptions
+                    .next()
+                    .ok_or_else(|| invalid("Missing DOCX image description"))?;
+                start.push_attribute(("descr", description.as_str()));
+                Event::Empty(start)
+            }
+            event => event,
+        };
+        writer.write_event(event)?;
+    }
+    if descriptions.next().is_some() {
+        return Err(invalid("Unused DOCX image description"));
+    }
+    Ok(writer.into_inner())
 }
 
 fn invalid(message: &str) -> Box<dyn std::error::Error> {
@@ -115,6 +163,10 @@ fn property_order(name: &str) -> Option<&'static str> {
         "w:settings" => Some(
             "w:zoom w:embedTrueTypeFonts w:defaultTabStop w:updateFields w:compat",
         ),
+        "w:numPr" => Some("w:ilvl w:numId w:numberingChange w:ins"),
+        "w:lvl" => Some("w:start w:numFmt w:lvlRestart w:pStyle w:isLgl w:suff w:lvlText w:lvlPicBulletId w:legacy w:lvlJc w:pPr w:rPr"),
+        "w:tblPr" => Some("w:tblStyle w:tblpPr w:tblOverlap w:bidiVisual w:tblStyleRowBandSize w:tblStyleColBandSize w:tblW w:jc w:tblCellSpacing w:tblInd w:tblBorders w:shd w:tblLayout w:tblCellMar w:tblLook w:tblCaption w:tblDescription w:tblPrChange"),
+        "w:tcPr" => Some("w:cnfStyle w:tcW w:gridSpan w:hMerge w:vMerge w:tcBorders w:shd w:noWrap w:tcMar w:textDirection w:tcFitText w:vAlign w:hideMark w:cellIns w:cellDel w:cellMerge w:tcPrChange"),
         _ => None,
     }
 }

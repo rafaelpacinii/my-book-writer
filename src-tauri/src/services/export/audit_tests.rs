@@ -5,7 +5,7 @@ use super::{
 use serde_json::json;
 use std::io::{Cursor, Read};
 
-fn entries(bytes: &[u8]) -> std::collections::HashMap<String, Vec<u8>> {
+pub(super) fn entries(bytes: &[u8]) -> std::collections::HashMap<String, Vec<u8>> {
     let mut archive = zip::ZipArchive::new(Cursor::new(bytes)).unwrap();
     (0..archive.len())
         .map(|index| {
@@ -17,7 +17,7 @@ fn entries(bytes: &[u8]) -> std::collections::HashMap<String, Vec<u8>> {
         .collect()
 }
 
-fn xml(files: &std::collections::HashMap<String, Vec<u8>>, name: &str) -> String {
+pub(super) fn xml(files: &std::collections::HashMap<String, Vec<u8>>, name: &str) -> String {
     String::from_utf8(files[name].clone()).unwrap()
 }
 
@@ -69,7 +69,7 @@ fn invalid_documents_and_images_preserve_the_chapter_context() {
         ("{}", "não reconhecido"),
         (
             r#"{"html":"<p>Uma foto<img src='file:///tmp/image.png'></p>"}"#,
-            "imagens",
+            "imagem não está incorporada",
         ),
     ] {
         let mut book = snapshot();
@@ -137,9 +137,8 @@ fn legacy_fallback_matches_the_editor_and_preserves_nested_paragraphs() {
     assert!(content::chapter_html(
         &json!({"html":"<table><tr><td>Dados</td></tr></table>"}).to_string()
     )
-    .unwrap_err()
-    .to_string()
-    .contains("tabelas"));
+    .unwrap()
+    .contains("<td>Dados</td>"));
 }
 
 #[test]
@@ -223,8 +222,10 @@ fn docx_keeps_lists_links_and_superscript_content() {
     book.chapters[0].content_json = json!({"html":"<ul><li>Primeiro</li><li><p>Segundo</p><p>Continuação</p></li></ul><ol><li>Um</li><li>Dois</li></ol><p><a href='https://example.com'>Um <b>link</b></a> x<sup>2</sup> a<sub>i</sub></p><blockquote><p>Citação</p></blockquote>"}).to_string();
     let files = entries(&docx::render_docx(&book).unwrap());
     let document = xml(&files, "word/document.xml");
-    assert_eq!(document.matches("• ").count(), 2);
-    assert!(document.contains(">1. </w:t>") && document.contains(">2. </w:t>"));
+    assert_eq!(document.matches("<w:numPr>").count(), 4);
+    let numbering = xml(&files, "word/numbering.xml");
+    assert!(numbering.contains("w:val=\"bullet\""));
+    assert!(numbering.contains("w:val=\"decimal\""));
     assert!(document.contains("Continuação"));
     assert!(document.contains("<w:hyperlink"));
     assert!(document.contains("w:val=\"superscript\""));

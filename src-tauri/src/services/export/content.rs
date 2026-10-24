@@ -61,7 +61,7 @@ pub fn chapter_html(json: &str) -> Result<String, AppError> {
 
 fn is_blank(html: &str) -> bool {
     let fragment = Html::parse_fragment(html);
-    let scene = Selector::parse("hr, .scene-break").expect("static selector");
+    let scene = Selector::parse("hr, .scene-break, img").expect("static selector");
     fragment.select(&scene).next().is_none()
         && fragment
             .root_element()
@@ -70,23 +70,36 @@ fn is_blank(html: &str) -> bool {
 }
 
 pub fn has_visible_text(html: &str) -> bool {
-    Html::parse_fragment(html)
-        .root_element()
-        .text()
-        .any(|text| {
-            text.chars().any(|character| {
-                !character.is_whitespace()
-                    && !matches!(character, '\u{200b}' | '\u{200c}' | '\u{200d}' | '\u{feff}')
-            })
+    let fragment = Html::parse_fragment(html);
+    if fragment
+        .select(&Selector::parse("img").expect("static selector"))
+        .next()
+        .is_some()
+    {
+        return true;
+    }
+    fragment.root_element().text().any(|text| {
+        text.chars().any(|character| {
+            !character.is_whitespace()
+                && !matches!(character, '\u{200b}' | '\u{200c}' | '\u{200d}' | '\u{feff}')
         })
+    })
 }
 
 pub fn as_xhtml(html: &str) -> String {
     let mut output = html.to_owned();
-    for tag in ["<br", "<hr"] {
+    for tag in ["<br", "<hr", "<img", "<col"] {
         let mut cursor = 0;
         while let Some(start) = output[cursor..].find(tag) {
             let start = cursor + start;
+            if output
+                .as_bytes()
+                .get(start + tag.len())
+                .is_some_and(|next| !next.is_ascii_whitespace() && !matches!(next, b'>' | b'/'))
+            {
+                cursor = start + tag.len();
+                continue;
+            }
             let Some(end) = output[start..].find('>').map(|end| start + end) else {
                 break;
             };
@@ -173,12 +186,7 @@ fn render_node(node: &Node, element: Option<ElementRef<'_>>) -> Result<String, A
         return Ok(String::new());
     }
     if name == "img" {
-        return Err(AppError::Export(
-            "A exportação de imagens dentro dos capítulos ainda não está disponível.".into(),
-        ));
-    }
-    if name == "table" {
-        return Err(AppError::Export("A exportação de tabelas dentro dos capítulos ainda não está disponível. Converta a tabela em texto antes de exportar.".into()));
+        return super::media::html(element);
     }
     if element.value().attr("data-page-break") == Some("true") {
         return Ok(String::new());
@@ -229,10 +237,45 @@ fn render_node(node: &Node, element: Option<ElementRef<'_>>) -> Result<String, A
             | "pre"
             | "code"
             | "a"
+            | "table"
+            | "thead"
+            | "tbody"
+            | "tfoot"
+            | "tr"
+            | "td"
+            | "th"
+            | "caption"
+            | "colgroup"
+            | "col"
     ) {
         return Ok(children);
     }
     let mut attrs = String::new();
+    for attribute in match name {
+        "td" | "th" => &["colspan", "rowspan"][..],
+        "col" | "colgroup" => &["span"][..],
+        "ol" => &["start"][..],
+        "li" => &["value"][..],
+        _ => &[],
+    } {
+        if let Some(value) = element
+            .value()
+            .attr(attribute)
+            .and_then(|value| value.parse::<u32>().ok())
+            .filter(|value| (1..=10000).contains(value))
+        {
+            attrs.push_str(&format!(" {attribute}=\"{value}\""));
+        }
+    }
+    if name == "th" {
+        if let Some(scope) = element
+            .value()
+            .attr("scope")
+            .filter(|scope| matches!(*scope, "row" | "col" | "rowgroup" | "colgroup"))
+        {
+            attrs.push_str(&format!(" scope=\"{scope}\""));
+        }
+    }
     if element
         .value()
         .classes()
@@ -260,7 +303,7 @@ fn render_node(node: &Node, element: Option<ElementRef<'_>>) -> Result<String, A
             attrs.push_str(&format!(" href=\"{}\"", escape_html(href)));
         }
     }
-    if matches!(name, "br" | "hr") {
+    if matches!(name, "br" | "hr" | "col") {
         return Ok(format!("<{name}{attrs}>"));
     }
     Ok(format!("<{name}{attrs}>{children}</{name}>"))

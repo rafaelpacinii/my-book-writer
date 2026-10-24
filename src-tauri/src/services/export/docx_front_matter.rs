@@ -3,11 +3,15 @@ use super::{
     docx_layout::{self, Typography},
     html,
 };
+use crate::error::AppError;
 use crate::repositories::export_repository::BookExportSnapshot;
 use docx_rs::*;
 use scraper::{Html, Selector};
 
-pub fn add(mut doc: Docx, snapshot: &BookExportSnapshot) -> (Docx, Vec<&'static str>) {
+pub fn add(
+    mut doc: Docx,
+    snapshot: &BookExportSnapshot,
+) -> Result<(Docx, Vec<&'static str>), AppError> {
     let source = html::render_front_matter(snapshot);
     let fragment = Html::parse_fragment(&source);
     let pages = Selector::parse(".front-matter-page").expect("static selector");
@@ -65,11 +69,11 @@ pub fn add(mut doc: Docx, snapshot: &BookExportSnapshot) -> (Docx, Vec<&'static 
                     snapshot.book.font_size_pt
                 });
             let typography = Typography {
-                family: super::fonts::docx_family(&snapshot.font.family_name),
                 size,
                 line: css_number(style, "line-height").unwrap_or(1.4),
+                ..Typography::book(snapshot)
             };
-            let mut paragraph = docx_content::paragraph_with_italic(element, &typography, right);
+            let mut paragraph = docx_content::paragraph_with_italic(element, &typography, right)?;
             let group = element.parent().map(|parent| parent.id());
             let mut before = margin(style, false);
             if title_page {
@@ -119,14 +123,14 @@ pub fn add(mut doc: Docx, snapshot: &BookExportSnapshot) -> (Docx, Vec<&'static 
         }
         doc = doc.add_section(section);
     }
-    (doc, alignments)
+    Ok((doc, alignments))
 }
 
 fn add_toc(mut section: Section, snapshot: &BookExportSnapshot) -> Section {
     let typography = Typography {
-        family: super::fonts::docx_family(&snapshot.font.family_name),
         size: 10.0,
         line: 1.4,
+        ..Typography::book(snapshot)
     };
     let instruction = InstrToC::new()
         .add_style_with_level(StyleWithLevel::new("MBWChapterTitle", 1))

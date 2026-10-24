@@ -1,13 +1,34 @@
 use crate::repositories::export_repository::BookExportSnapshot;
 use docx_rs::*;
 
+#[derive(Clone, Copy)]
 pub struct Typography<'a> {
     pub family: &'a str,
     pub size: f64,
     pub line: f64,
+    pub width: f64,
+    pub height: f64,
 }
 
 impl Typography<'_> {
+    pub fn book(snapshot: &BookExportSnapshot) -> Typography<'_> {
+        Typography {
+            family: super::fonts::docx_family(&snapshot.font.family_name),
+            size: snapshot.book.font_size_pt,
+            line: snapshot.book.line_height_ratio,
+            width: (snapshot.format.width_um
+                - snapshot.book.margin_left_um
+                - snapshot.book.margin_right_um) as f64
+                * 72.0
+                / 25400.0,
+            height: (snapshot.format.height_um
+                - snapshot.book.margin_top_um
+                - snapshot.book.margin_bottom_um) as f64
+                * 72.0
+                / 25400.0
+                - snapshot.book.font_size_pt * 4.0,
+        }
+    }
     pub fn run(&self, text: impl Into<String>) -> Run {
         Run::new()
             .add_text(text)
@@ -68,9 +89,9 @@ pub fn section(snapshot: &BookExportSnapshot, running: bool) -> Section {
         .page_margin(page_margin(snapshot));
     if running {
         let small = Typography {
-            family: &snapshot.font.family_name,
             size: 7.0,
             line: 1.0,
+            ..Typography::book(snapshot)
         };
         let header = small
             .paragraph()

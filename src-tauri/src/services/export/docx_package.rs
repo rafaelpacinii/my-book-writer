@@ -14,8 +14,13 @@ fn obfuscate(bytes: &[u8], key: &uuid::Uuid) -> Vec<u8> {
     output
 }
 
-pub fn finish(bytes: &[u8], family: &str, alignments: &[&str]) -> Result<Vec<u8>, AppError> {
-    finish_inner(bytes, family, alignments).map_err(|error| {
+pub fn finish(
+    bytes: &[u8],
+    family: &str,
+    alignments: &[&str],
+    image_alts: &[String],
+) -> Result<Vec<u8>, AppError> {
+    finish_inner(bytes, family, alignments, image_alts).map_err(|error| {
         super::export_error(
             "Não foi possível incorporar a diagramação e as fontes ao DOCX.",
             error,
@@ -27,6 +32,7 @@ fn finish_inner(
     bytes: &[u8],
     family: &str,
     alignments: &[&str],
+    image_alts: &[String],
 ) -> Result<Vec<u8>, Box<dyn std::error::Error>> {
     let mut archive = ZipArchive::new(Cursor::new(bytes))?;
     let mut output = ZipWriter::new(Cursor::new(Vec::new()));
@@ -72,6 +78,9 @@ fn finish_inner(
                 _ => {}
             }
             contents = xml.into_bytes();
+        }
+        if name == "word/document.xml" {
+            contents = docx_xml::image_descriptions(&contents, image_alts)?;
         }
         if name.starts_with("word/") && name.ends_with(".xml") {
             contents = docx_xml::normalize(&contents)?;

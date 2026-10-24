@@ -20,10 +20,10 @@ pub async fn export(
     book_id: &str,
 ) -> Result<Option<DocxExportResult>, AppError> {
     let snapshot = read_snapshot(&state.db_pool, book_id).await?;
-    super::validation::validate(&snapshot, super::validation::ExportFormat::Docx)?;
     let filename = super::output::suggested_filename(&snapshot.book.title, "docx");
     let mut result = tauri::async_runtime::spawn_blocking(
         move || -> Result<Option<DocxExportResult>, AppError> {
+            super::validation::validate(&snapshot, super::validation::ExportFormat::Docx)?;
             let Some(chosen) = app
                 .dialog()
                 .file()
