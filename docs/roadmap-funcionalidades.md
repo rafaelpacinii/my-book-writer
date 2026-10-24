@@ -72,13 +72,20 @@ Cada etapa diária entrega uma fatia funcional completa, validada por testes aut
   - Migration SQLite (`universes`, `book_series` e vínculo em `books` com `universe_id`, `series_id` e numeração automática `series_volume`).
   - Domínio, Repositórios SQLx, Serviços de aplicação (numeração automática `1..N`, reordenação atômica de volumes, herança de universo e limpeza segura em soft-delete) e Comandos Tauri IPC.
   - Tipos TypeScript, cliente IPC/localStorage (`src/lib/api/series.ts` e `src/lib/api/universes.ts`), recursos reativos e testes unitários/integração.
-- [ ] **Dia 2 — Gestão de Séries na Biblioteca (`/library`)**
-  - Criação, edição e exclusão de Séries na Biblioteca.
-  - Agrupamento visual de livros por Série, badge automático de volume (`Vol. 1`, `Vol. 2`...) e reordenação *drag-and-drop* dos livros dentro da série.
-  - Seleção de Série diretamente na criação/configuração do livro.
+- [x] **Dia 2 — Gestão de Séries na Biblioteca (`/library`)** *(Concluído)*
+  - Criação, edição de nome/descrição e exclusão de Séries na Biblioteca, inclusive antes do primeiro livro; excluir uma série preserva seus livros e capítulos.
+  - Biblioteca em estilo Explorer: cards de Universos, Séries e livros avulsos misturados por padrão, com opção persistida de separar por tipo em linhas distintas, tanto em grade quanto em lista.
+  - Cards de coleção usam as três primeiras capas: pilha sequencial para Séries e leque aberto para Universos. Todas as capas ficam contidas na área de imagem; posições sem livro usam preenchimento sólido semitransparente, sem contorno pontilhado. Abrir um card navega pelo conteúdo local, com caminho contextual e histórico do navegador.
+  - Badge automático de volume (`Vol. 1`, `Vol. 2`...) e reordenação persistida dentro da Série por *drag-and-drop* ou botões acessíveis por teclado. Filtros preservam os volumes ocultos; a ordenação geral não altera a sequência da série.
+  - Livros podem pertencer simultaneamente a uma Série e a um Universo. Arrastar um livro para um Universo preserva sua Série; entrar em uma Série sem Universo preserva o Universo direto do livro. Séries podem ser arrastadas para Universos, vinculando também seus livros sem alterar os volumes. Universos não podem ser filhos de Séries ou livros, e Séries não podem ser filhas de outras Séries ou livros.
+  - As alternativas “Mover livro” e “Mover série” oferecem as mesmas ações por teclado. Voltar explicitamente um livro à raiz remove seus vínculos; tirar uma Série do Universo remove também esse vínculo de seus livros, que permanecem na Série e mantêm os volumes. A atualização nativa é atômica para Série e livros.
+  - O caminho dos livros inclui seus agrupadores: `Biblioteca > Universo > Série > Livro`, seguido da seção atual quando aplicável. Os nomes de Universos e Séries são links para suas coleções.
+  - Seleção, troca e remoção de Série diretamente na criação/configuração do livro, com numeração automática e detecção de alterações não salvas.
+  - Arrastar e soltar HTML habilitado no Windows por `dragDropEnabled: false` no Tauri; operações continuam usando as APIs locais do Dia 1.
+  - Testes de agrupamento/reordenação e fluxos Playwright: criação offline, edição, exclusão sem perda de livros, seleção/troca/remoção, filtros, persistência, falhas IPC com nova tentativa e acessibilidade nos temas claro/escuro.
 - [ ] **Dia 3 — Gestão de Universos na Biblioteca (`/library`)**
-  - Criação, edição e exclusão de Universos Literários.
-  - Associação de Séries e Livros a um Universo e filtros rápidos na Biblioteca (*Todos*, *Séries*, *Universos*).
+  - Criação, edição e exclusão de Universos Literários já disponíveis no Explorer, com preservação de livros e séries ao excluir; séries novas podem ser criadas dentro de um Universo.
+  - Associação de Séries existentes a Universos já disponível por arrastar e soltar ou “Mover série”. Permanecem pendentes os filtros rápidos da Biblioteca (*Todos*, *Séries*, *Universos*).
 
 ### Fase 2 — O Códice: Fichas de Personagens e Lugares
 - [ ] **Dia 4 — Motor de Dados do Códice (SQLite + Rust + API)**

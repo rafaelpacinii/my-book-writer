@@ -1,87 +1,45 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { useProfile } from "@/hooks/useProfile";
 import { useBooks } from "@/hooks/useBooks";
+import { useLibrarySeries } from "@/hooks/useLibrarySeries";
+import { useLibraryUniverses } from "@/hooks/useLibraryUniverses";
+import { useLibraryExplorer } from "@/hooks/useLibraryExplorer";
+import { useLibraryMove } from "@/hooks/useLibraryMove";
 import { useCatalog } from "@/hooks/useCatalog";
+import type { LibraryCollection } from "@/types/library";
 
 export function useLibrary() {
   const { profile, isLoading: isProfileLoading, error: profileError, refreshProfile } = useProfile();
-  const { books, isLoading: isBooksLoading, error: booksError, refreshBooks } = useBooks(profile?.id);
+  const { books, isLoading: isBooksLoading, error: booksError, refreshBooks, isRefreshing: isRefreshingBooks } = useBooks(profile?.id);
   const { formats, fonts, isLoading: isCatalogLoading, error: catalogError, refreshCatalog } = useCatalog();
-
-  const [searchQuery, setSearchQuery] = useState("");
-  const [formatFilter, setFormatFilter] = useState("");
-  const [sortOrder, setSortOrder] = useState<"recent" | "title" | "author">("recent");
-  const [view, setView] = useState<"grid" | "list">("grid");
-
-  const formatMap = useMemo(() => {
-    const map = new Map<string, string>();
-    formats.forEach((f) => map.set(f.id, f.name));
-    return map;
-  }, [formats]);
-
-  const fontMap = useMemo(() => {
-    const map = new Map<string, string>();
-    fonts.forEach((f) => map.set(f.id, f.name));
-    return map;
-  }, [fonts]);
-
-  const filteredBooks = useMemo(() => {
-    let list = [...books];
-
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase().trim();
-      list = list.filter(
-        (b) =>
-          b.title.toLowerCase().includes(q) ||
-          b.author_name.toLowerCase().includes(q)
-      );
-    }
-
-    if (formatFilter) {
-      list = list.filter((b) => b.format_id === formatFilter);
-    }
-
-    if (sortOrder === "author") {
-      list.sort((a, b) => a.author_name.localeCompare(b.author_name, "pt-BR"));
-    } else if (sortOrder === "title") {
-      list.sort((a, b) => a.title.localeCompare(b.title, "pt-BR"));
-    } else {
-      list.sort(
-        (a, b) =>
-          new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
-      );
-    }
-
-    return list;
-  }, [books, searchQuery, formatFilter, sortOrder]);
-
-  const isFiltered = Boolean(searchQuery.trim() || formatFilter);
-
-  const handleClearFilters = () => {
-    setSearchQuery("");
-    setFormatFilter("");
-  };
+  const seriesManager = useLibrarySeries(profile?.id);
+  const universeManager = useLibraryUniverses(profile?.id);
+  const explorer = useLibraryExplorer(books, seriesManager.series, universeManager.universes);
+  const move = useLibraryMove(books, seriesManager.series, isRefreshingBooks || seriesManager.busy || universeManager.busy
+    || seriesManager.isRefreshing || universeManager.isRefreshing);
+  const busy = move.busy || seriesManager.busy || universeManager.busy || isRefreshingBooks;
+  const formatMap = useMemo(() => new Map(formats.map((item) => [item.id, item.name])), [formats]);
+  const fontMap = useMemo(() => new Map(fonts.map((item) => [item.id, item.name])), [fonts]);
+  const editCollection = (entry: LibraryCollection) => entry.kind === "series"
+    ? seriesManager.open({ kind: "edit", series: entry.collection })
+    : universeManager.open({ kind: "edit", universe: entry.collection });
+  const deleteCollection = (entry: LibraryCollection) => entry.kind === "series"
+    ? seriesManager.open({ kind: "delete", series: entry.collection })
+    : universeManager.open({ kind: "delete", universe: entry.collection });
 
   return {
-    books,
-    error: profileError || booksError || catalogError,
-    retry: () => { void refreshProfile(); void refreshBooks(); void refreshCatalog(); },
-    filteredBooks,
-    formats,
-    formatMap,
-    fontMap,
-    searchQuery,
-    setSearchQuery,
-    formatFilter,
-    setFormatFilter,
-    sortOrder,
-    setSortOrder,
-    view,
-    setView,
-    isFiltered,
-    handleClearFilters,
-    isLoading: isProfileLoading || isBooksLoading || isCatalogLoading,
+    ...explorer, books, formats, formatMap, fontMap, seriesManager, universeManager, move, busy,
+    editCollection, deleteCollection, isRefreshingBooks,
+    error: profileError || booksError || catalogError
+      || (seriesManager.dialog ? null : seriesManager.error)
+      || (universeManager.dialog ? null : universeManager.error)
+      || (move.movingBook || move.movingSeries ? null : move.error),
+    retry: () => {
+      void refreshProfile(); void refreshBooks(); void refreshCatalog();
+      void seriesManager.refreshSeries(); void universeManager.refreshUniverses(); move.clearError();
+    },
+    isLoading: isProfileLoading || isBooksLoading || isCatalogLoading || seriesManager.isLoading || universeManager.isLoading,
   };
 }

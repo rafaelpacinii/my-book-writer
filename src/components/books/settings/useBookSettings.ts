@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getBookById } from "@/lib/api/books";
 import { loadBookCoverUrl, saveBookCoverImage } from "@/lib/api/images";
+import { useSeries } from "@/hooks/useSeries";
 import { useBooks } from "@/hooks/useBooks";
 import { useCatalog } from "@/hooks/useCatalog";
 import type { Book } from "@/types/book";
@@ -18,6 +19,8 @@ export function useBookSettings(bookId: string) {
   const { formats, fonts, isLoading: isCatalogLoading } = useCatalog();
   const { editBook, removeBook } = useBooks(book?.profile_id);
 
+  const seriesData = useSeries(book?.profile_id);
+  const [seriesId, setSeriesId] = useState("");
   const [title, setTitle] = useState("");
   const [titleError, setTitleError] = useState<string | null>(null);
   const [layoutError, setLayoutError] = useState<string | null>(null);
@@ -44,6 +47,7 @@ export function useBookSettings(bookId: string) {
       if (b) {
         setBook(b);
         setTitle(b.title);
+        setSeriesId(b.series_id ?? "");
         setAuthor(b.author_name);
         setFormatId(b.format_id);
         setFontId(b.font_preset_id);
@@ -75,6 +79,7 @@ export function useBookSettings(bookId: string) {
     return (
       coverUrl !== originalCoverUrl ||
       title !== book.title ||
+      seriesId !== (book.series_id ?? "") ||
       author !== book.author_name ||
       formatId !== book.format_id ||
       fontId !== book.font_preset_id ||
@@ -86,7 +91,7 @@ export function useBookSettings(bookId: string) {
       marginRightMm !== book.margin_right_um / 1000
     );
   }, [
-    book, coverUrl, originalCoverUrl, title, author, formatId, fontId, fontSize, lineHeight,
+    book, coverUrl, originalCoverUrl, title, author, seriesId, formatId, fontId, fontSize, lineHeight,
     marginTopMm, marginBottomMm, marginLeftMm, marginRightMm,
   ]);
   const navigation = useUnsavedNavigation(isDirty, `/books/view?bookId=${encodeURIComponent(bookId)}`);
@@ -122,6 +127,9 @@ export function useBookSettings(bookId: string) {
 
       await editBook(bookId, {
         title: trimmedTitle,
+        ...(seriesId !== (book?.series_id ?? "")
+          ? seriesId ? { series_id: seriesId } : { clear_series: true }
+          : {}),
         author_name: author.trim() || "Autor",
         format_id: formatId,
         font_preset_id: fontId,
@@ -134,8 +142,8 @@ export function useBookSettings(bookId: string) {
         margin_right_um: Math.round(marginRightMm * 1000),
       });
       router.push(`/books/view?bookId=${encodeURIComponent(bookId)}`);
-    } catch {
-      // handled by hook
+    } catch (error) {
+      setLayoutError(error instanceof Error ? error.message : "Não foi possível salvar as alterações. Tente novamente.");
     } finally {
       setIsSubmitting(false);
     }
@@ -158,6 +166,7 @@ export function useBookSettings(bookId: string) {
     book,
     isLoading: isLoadingBook || isCatalogLoading,
     title, setTitle, titleError, layoutError,
+    seriesData, seriesId, setSeriesId,
     author, setAuthor,
     formatId, setFormatId, formats,
     fontId, setFontId, fonts,

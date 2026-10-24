@@ -2,13 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
+import { useBookCrumbs } from "@/hooks/useBookCrumbs";
+import type { Book } from "@/types/book";
+import type { TitleBarCrumb } from "@/types/navigation";
+import { useLibraryCrumbs } from "@/hooks/useLibraryCrumbs";
 import { getBookById } from "@/lib/api/books";
 import { subscribeDataChanges } from "@/lib/data/changes";
 
-export interface TitleBarCrumb {
-  label: string;
-  href?: string;
-}
+export type { TitleBarCrumb } from "@/types/navigation";
 
 const subPages: Record<string, string> = {
   "/books/editor": "Editor",
@@ -22,9 +23,13 @@ const subPages: Record<string, string> = {
 export function useTitleBarCrumbs(): TitleBarCrumb[] {
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const libraryCrumbs = useLibraryCrumbs(pathname === "/library", searchParams.get("seriesId"), searchParams.get("universeId"));
   const bookId = searchParams.get("bookId") ?? "";
   const chapterId = searchParams.get("chapterId") ?? "";
-  const [book, setBook] = useState<{ id: string; title: string } | null>(null);
+  const [book, setBook] = useState<Book | null>(null);
+
+  const currentBook = book?.id === bookId ? book : null;
+  const ancestors = useBookCrumbs(currentBook);
 
   useEffect(() => {
     if (!bookId) return;
@@ -33,7 +38,7 @@ export function useTitleBarCrumbs(): TitleBarCrumb[] {
     const load = () => {
       const request = ++sequence;
       void getBookById(bookId).then((loaded) => {
-        if (active && request === sequence) setBook({ id: bookId, title: loaded?.title ?? "" });
+        if (active && request === sequence) setBook(loaded);
       }).catch((error: unknown) => {
         if (!active || request !== sequence) return;
         setBook(null);
@@ -42,20 +47,20 @@ export function useTitleBarCrumbs(): TitleBarCrumb[] {
     };
     load();
     const unsubscribe = subscribeDataChanges((change) => {
-      if (change === "books" || change === "restore") load();
+      if (change === "books" || change === "series" || change === "universes" || change === "restore") load();
     });
     return () => { active = false; unsubscribe(); };
   }, [bookId]);
 
-  if (pathname === "/library") return [{ label: "Biblioteca" }];
+  if (pathname === "/library") return libraryCrumbs;
   if (pathname === "/books/new") return [{ label: "Biblioteca", href: "/library" }, { label: "Novo livro" }];
   if (pathname.startsWith("/books/")) {
-    const bookLabel = (book?.id === bookId ? book.title.trim() : "") || "Livro";
+    const bookLabel = currentBook?.title.trim() || "Livro";
     const bookHref = bookId ? `/books/view?bookId=${encodeURIComponent(bookId)}` : undefined;
-    if (pathname === "/books/view") return [{ label: "Biblioteca", href: "/library" }, { label: bookLabel }];
+    if (pathname === "/books/view") return [...ancestors, { label: bookLabel }];
     const subLabel = subPages[pathname];
     return [
-      { label: "Biblioteca", href: "/library" },
+      ...ancestors,
       { label: bookLabel, href: bookHref },
       ...(pathname === "/books/versions" && bookId && chapterId ? [{
         label: "Editor",

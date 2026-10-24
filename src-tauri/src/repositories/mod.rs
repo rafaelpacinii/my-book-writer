@@ -9,3 +9,6 @@ pub mod profile_repository;
 pub mod review_repository;
 pub mod series_repository;
 pub mod universe_repository;
+
+#[cfg(test)]
+mod series_universe_tests;

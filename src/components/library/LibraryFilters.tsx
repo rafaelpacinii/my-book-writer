@@ -7,7 +7,7 @@ export function LibraryFilters({ lib }: { lib: ReturnType<typeof useLibrary> }) 
     <div className="mb-5 flex flex-wrap items-center justify-between gap-3 border-b border-border pb-3">
       <label className="relative min-w-40 flex-1 lg:max-w-64">
         <Search className="pointer-events-none absolute top-3.5 left-3 h-3.5 w-3.5 text-muted" />
-        <input type="search" aria-label="Buscar por título ou autor" placeholder="Buscar título ou autor…"
+        <input type="search" aria-label="Buscar por título ou autor" placeholder="Buscar livros, séries, universos…"
           value={lib.searchQuery} onChange={(event) => lib.setSearchQuery(event.target.value)}
           className="h-[42px] w-full rounded-md border border-border bg-transparent pr-3 pl-9 text-[11px] placeholder:text-muted"
         />
@@ -28,6 +28,14 @@ export function LibraryFilters({ lib }: { lib: ReturnType<typeof useLibrary> }) 
           <option value="title">Título A–Z</option>
           <option value="author">Autor A–Z</option>
         </select>
+        {lib.scope.kind !== "series" && (
+          <select aria-label="Agrupar biblioteca" value={lib.grouping}
+            onChange={(event) => lib.setGrouping(event.target.value === "type" ? "type" : "mixed")}
+            className="h-10 max-w-44 rounded bg-surface px-1 text-xs text-muted">
+            <option value="mixed">Todos juntos</option>
+            <option value="type">Separar por tipo</option>
+          </select>
+        )}
         <LibraryViewToggle view={lib.view} onChange={lib.setView} />
       </div>
     </div>

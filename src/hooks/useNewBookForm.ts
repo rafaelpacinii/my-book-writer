@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useProfile } from "@/hooks/useProfile";
 import { useCatalog } from "@/hooks/useCatalog";
+import { useSeries } from "@/hooks/useSeries";
 import { useBooks } from "@/hooks/useBooks";
 import { saveBookCoverImage } from "@/lib/api/images";
 import { validateBookLayout } from "@/utils/bookMeasurements";
@@ -13,6 +14,9 @@ export function useNewBookForm() {
   const { profile, isLoading: isProfileLoading, error: profileError, refreshProfile } = useProfile();
   const { formats, fonts, isLoading: isCatalogLoading, error: catalogError, refreshCatalog } = useCatalog();
   const { addBook, editBook } = useBooks(profile?.id);
+
+  const seriesData = useSeries(profile?.id);
+  const [seriesId, setSeriesId] = useState("");
 
   const pendingBook = useRef<string | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -60,6 +64,8 @@ export function useNewBookForm() {
       const input = {
         profile_id: profile?.id || "local-default-id",
         title: trimmedTitle,
+        series_id: seriesId || null,
+        ...(pendingBook.current && !seriesId ? { clear_series: true } : {}),
         author_name: author.trim() || profile?.display_name || "Autor",
         format_id: formatId || formats[0]?.id || "fmt-br-14x21",
         font_preset_id: fontId || fonts[0]?.id || "font-merriweather",
@@ -92,7 +98,7 @@ export function useNewBookForm() {
     hasData: Boolean(profile && formats.length && fonts.length),
     isLoading: isProfileLoading || isCatalogLoading,
     retry: () => { void refreshProfile(); void refreshCatalog(); },
-    submitError,
+    submitError, seriesData, seriesId, setSeriesId,
     title, setTitle, titleError, layoutError,
     author, setAuthor,
     formatId, setFormatId, formats,

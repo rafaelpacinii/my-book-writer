@@ -1,3 +1,4 @@
+import type { DragEventHandler } from "react";
 import Link from "next/link";
 import type { Book } from "@/types/book";
 import { formatLastEdited } from "@/utils/format";
@@ -9,14 +10,24 @@ interface Props {
   index: number;
   formatName?: string;
   fontName?: string;
+  onMove?: () => void;
+  onDragStart?: DragEventHandler<HTMLElement>;
+  onDragEnd?: DragEventHandler<HTMLElement>;
+  disabled?: boolean;
 }
 
-export function BookCard({ book, index, formatName, fontName }: Props) {
+export function BookCard({ book, index, formatName, fontName, onMove, onDragStart, onDragEnd, disabled }: Props) {
   return (
-    <article className="book-card relative min-w-0">
+    <article className="book-card relative min-w-0" data-book-id={book.id}
+      draggable={Boolean(onDragStart) && !disabled} onDragStart={onDragStart} onDragEnd={onDragEnd}>
       <BookCardCover book={book} index={index} />
-      <BookActions bookId={book.id} title={book.title} />
+      <BookActions bookId={book.id} title={book.title} onMove={onMove} disabled={disabled} />
       <div className="book-info min-w-0 px-px pt-[15px]">
+        {book.series_id && book.series_volume != null && (
+          <span className="mb-2 w-fit rounded bg-primary-soft px-2 py-1 text-xs font-semibold text-foreground">
+            Vol. {book.series_volume}
+          </span>
+        )}
         <h2 className="font-display text-[23px] leading-[1.12]">
           <Link href={`/books/view?bookId=${encodeURIComponent(book.id)}`}
             className="line-clamp-2 wrap-anywhere hover:text-primary after:absolute after:inset-0 after:rounded-md after:content-['']"
