@@ -41,6 +41,9 @@ pub fn render_epub(snapshot: &BookExportSnapshot) -> Result<Vec<u8>, AppError> {
         p { margin: 0 0 1em; text-indent: 0; }
         blockquote { border-left: 3px solid #52664E; padding-left: 1em; margin: 1.25em 0; font-style: italic; color: #64695F; }
         .scene-break { text-align: center; margin: 2em 0; letter-spacing: 0.35em; color: #64695F; font-weight: bold; }
+        img { max-width: 100%; height: auto; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 1em; }
+        th, td { border: 1px solid #64695F; padding: .35em; vertical-align: top; overflow-wrap: anywhere; }
     "#;
 
     builder
@@ -74,8 +77,9 @@ pub fn render_epub(snapshot: &BookExportSnapshot) -> Result<Vec<u8>, AppError> {
             }
         };
         let heading_escaped = escape_html(&heading_label);
-        let content_html =
-            super::content::as_xhtml(&super::validation::chapter_content(chapter, index)?);
+        let content_html = super::validation::chapter_content(chapter, index)?;
+        let content_html = super::epub_media::embed(&mut builder, &content_html, index)?;
+        let content_html = super::content::as_xhtml(&content_html);
         let title_escaped = escape_html(&chapter.title);
         let chapter_num = index + 1;
         let xhtml = format!(
@@ -115,7 +119,7 @@ pub fn render_epub(snapshot: &BookExportSnapshot) -> Result<Vec<u8>, AppError> {
         .generate(&mut output)
         .map_err(|e| super::export_error("Falha ao empacotar arquivo EPUB.", e))?;
 
-    Ok(output)
+    super::epub_package::finish(&output)
 }
 
 pub async fn export(
@@ -124,11 +128,11 @@ pub async fn export(
     book_id: &str,
 ) -> Result<Option<EpubExportResult>, AppError> {
     let snapshot = read_snapshot(&state.db_pool, book_id).await?;
-    super::validation::validate(&snapshot, super::validation::ExportFormat::Epub)?;
     let filename = output::suggested_filename(&snapshot.book.title, "epub");
 
     let mut result = tauri::async_runtime::spawn_blocking(
         move || -> Result<Option<EpubExportResult>, AppError> {
+            super::validation::validate(&snapshot, super::validation::ExportFormat::Epub)?;
             let Some(chosen) = app
                 .dialog()
                 .file()

@@ -98,6 +98,11 @@ pub fn render_book(snapshot: &BookExportSnapshot) -> Result<String, AppError> {
         .editor-content .scene-break {{ text-align: center; margin: 24pt 0; letter-spacing: .35em;
             color: #64695F; font-weight: 700; }}
         a {{ color: inherit; }}
+        .editor-content img {{ max-width: 100%; max-height: {image_height}mm; height: auto; object-fit: contain; break-inside: avoid; }}
+        .editor-content table {{ width: 100%; border-collapse: collapse; table-layout: fixed; margin: 0 0 1.25em; }}
+        .editor-content th, .editor-content td {{ border: .5pt solid #64695F; padding: 4pt; overflow-wrap: anywhere; vertical-align: top; }}
+        .editor-content thead {{ display: table-header-group; }}
+        .editor-content tr {{ break-inside: avoid; }}
         {typography}
     "#,
         width = mm(snapshot.format.width_um),
@@ -110,10 +115,13 @@ pub fn render_book(snapshot: &BookExportSnapshot) -> Result<String, AppError> {
         family = snapshot.font.family_name,
         size = book.font_size_pt,
         line_height = book.line_height_ratio,
+        image_height = mm(snapshot.format.height_um - book.margin_top_um - book.margin_bottom_um)
+            - running_mm * 2.0
+            - book.font_size_pt * book.line_height_ratio * 25.4 / 72.0,
     );
 
     Ok(format!(
-        "<!doctype html><html lang=\"pt-BR\"><head><meta charset=\"utf-8\"><meta http-equiv=\"Content-Security-Policy\" content=\"default-src 'none'; style-src 'unsafe-inline'; font-src data:;\"><meta name=\"author\" content=\"{author}\"><title>{title}</title><style>{css}</style></head><body><div class=\"page-height-gauge\" style=\"position:fixed;top:0;height:100vh;pointer-events:none;visibility:hidden;\"></div>{front_matter_html}{chapters}</body></html>"
+        "<!doctype html><html lang=\"pt-BR\"><head><meta charset=\"utf-8\"><meta http-equiv=\"Content-Security-Policy\" content=\"default-src 'none'; style-src 'unsafe-inline'; font-src data:; img-src data:;\"><meta name=\"author\" content=\"{author}\"><title>{title}</title><style>{css}</style></head><body>{front_matter_html}{chapters}</body></html>"
     ))
 }
 
@@ -125,33 +133,6 @@ pub(super) fn render_front_matter(snapshot: &BookExportSnapshot) -> String {
     let title = escape_html(&book.title);
     let author = escape_html(&book.author_name);
     let mut html = String::new();
-
-    let mut fm_page_count = 0;
-    if fm.include_half_title {
-        fm_page_count += 2;
-    }
-    if fm.include_title_page {
-        fm_page_count += 1;
-        if fm.include_copyright_page {
-            fm_page_count += 1;
-        }
-    }
-    if fm.include_dedication
-        && !fm
-            .dedication_text
-            .as_deref()
-            .unwrap_or("")
-            .trim()
-            .is_empty()
-    {
-        fm_page_count += 2;
-    }
-    if fm.include_epigraph && !fm.epigraph_text.as_deref().unwrap_or("").trim().is_empty() {
-        fm_page_count += 2;
-    }
-    if fm.include_table_of_contents {
-        fm_page_count += 2;
-    }
 
     if fm.include_half_title {
         html.push_str(&format!(
@@ -303,7 +284,6 @@ pub(super) fn render_front_matter(snapshot: &BookExportSnapshot) -> String {
     if fm.include_table_of_contents {
         let mut entries = String::new();
         let mut std_idx = 0;
-        let mut est_page = fm_page_count + 1;
         for (i, chap) in snapshot.chapters.iter().enumerate() {
             let is_std = chap.chapter_type == "standard";
             let label = if is_std {
@@ -317,12 +297,9 @@ pub(super) fn render_front_matter(snapshot: &BookExportSnapshot) -> String {
                 chap.title.clone()
             };
             entries.push_str(&format!(
-                "<div class=\"toc-entry\"><a href=\"#chapter-{i}\"><span class=\"toc-title\">{}</span><span class=\"toc-dots\"></span><span class=\"toc-num\" id=\"toc-page-{i}\">{est_page}</span></a></div>",
+                "<div class=\"toc-entry\"><a href=\"#chapter-{i}\"><span class=\"toc-title\">{}</span><span class=\"toc-dots\"></span><span class=\"toc-num\" id=\"toc-page-{i}\">—</span></a></div>",
                 escape_html(&label)
             ));
-            let char_count = chap.content_json.len();
-            let est_pages = (char_count / 1500).max(1);
-            est_page += est_pages;
         }
         html.push_str(&format!(
             "<section class=\"front-matter-page toc-page\"><h2 class=\"toc-heading\">Sumário</h2><div class=\"toc-list\">{entries}</div></section><section class=\"front-matter-page blank-page\"></section>"

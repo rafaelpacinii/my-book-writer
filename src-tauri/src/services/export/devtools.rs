@@ -98,7 +98,6 @@ impl DevTools {
     }
 
     pub fn render(&mut self, html: &str) -> Result<Vec<u8>, AppError> {
-        use base64::{engine::general_purpose::STANDARD, Engine};
         self.open_page()?;
         self.call("Network.enable", json!({}))?;
         self.call(
@@ -112,37 +111,54 @@ impl DevTools {
             json!({"frameId": tree["frameTree"]["frame"]["id"], "html": html}),
         )?;
         let readiness = self.call("Runtime.evaluate", json!({
-            "expression": "document.fonts.ready.then(() => { const faces = [...document.fonts]; if (!faces.length || faces.some(font => font.status === 'error')) throw new Error('Font loading failed'); return true; })",
+            "expression": "Promise.all([document.fonts.ready, ...Array.from(document.images, image => image.decode())]).then(() => { const faces = [...document.fonts]; if (!faces.length || faces.some(font => font.status === 'error')) throw new Error('Font loading failed'); return true; })",
             "awaitPromise": true, "returnByValue": true,
         }))?;
         if readiness.get("exceptionDetails").is_some() || readiness["result"]["value"] != true {
             return Err(AppError::Export(
-                "Não foi possível carregar as fontes do livro.".into(),
+                "Não foi possível carregar as fontes ou imagens do livro.".into(),
             ));
         }
-        let pagination = self.call(
-            "Runtime.evaluate",
-            json!({
-                "expression": r#"(() => {
-                    const fmCount = document.querySelectorAll('.front-matter-page').length;
-                    const gauge = document.querySelector('.page-height-gauge');
-                    const pageH = gauge && gauge.offsetHeight > 50 ? gauge.offsetHeight : 800;
-                    let cur = fmCount + 1;
-                    document.querySelectorAll('.chapter').forEach((el, idx) => {
-                        const span = document.getElementById('toc-page-' + idx);
-                        if (span) span.textContent = cur;
-                        const h = el.offsetHeight;
-                        cur += Math.max(1, Math.ceil(h / pageH));
-                    });
-                })()"#,
-                "returnByValue": true,
-            }),
-        )?;
-        if pagination.get("exceptionDetails").is_some() {
-            return Err(AppError::Export(
-                "Não foi possível atualizar o sumário do PDF. Tente novamente.".into(),
-            ));
+        let count = self.call("Runtime.evaluate", json!({
+            "expression": "document.querySelectorAll('.toc-entry').length", "returnByValue": true,
+        }))?;
+        let count = count["result"]["value"].as_u64().ok_or_else(|| {
+            AppError::Export("Não foi possível ler as entradas do sumário.".into())
+        })? as usize;
+        let mut bytes = self.print_pdf()?;
+        if count == 0 {
+            return Ok(bytes);
         }
+        for _ in 0..6 {
+            let pages = super::pdf_toc::chapter_pages(&bytes, count)?;
+            let expression = format!("(() => {{ const pages = {}; let changed = false; pages.forEach((page, index) => {{ const node = document.getElementById('toc-page-' + index); if (!node) throw new Error('Missing TOC entry'); if (node.textContent !== String(page)) {{ node.textContent = String(page); changed = true; }} }}); return changed; }})()", serde_json::to_string(&pages).map_err(|error| super::export_error("Não foi possível atualizar o sumário.", error))?);
+            let result = self.call(
+                "Runtime.evaluate",
+                json!({"expression": expression, "returnByValue": true}),
+            )?;
+            if result.get("exceptionDetails").is_some() {
+                return Err(AppError::Export(
+                    "Não foi possível atualizar o sumário do PDF.".into(),
+                ));
+            }
+            match result["result"]["value"].as_bool() {
+                Some(false) => return Ok(bytes),
+                Some(true) => bytes = self.print_pdf()?,
+                None => {
+                    return Err(AppError::Export(
+                        "Resposta inválida ao atualizar o sumário.".into(),
+                    ))
+                }
+            }
+        }
+        Err(AppError::Export(
+            "A paginação do sumário não estabilizou. Revise as páginas iniciais e tente novamente."
+                .into(),
+        ))
+    }
+
+    fn print_pdf(&mut self) -> Result<Vec<u8>, AppError> {
+        use base64::{engine::general_purpose::STANDARD, Engine};
         let result = self.call(
             "Page.printToPDF",
             json!({

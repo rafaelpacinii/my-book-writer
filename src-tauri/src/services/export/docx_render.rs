@@ -1,5 +1,5 @@
 use super::{
-    docx_content, docx_front_matter,
+    docx_front_matter,
     docx_layout::{self, Typography},
     docx_package,
     validation::{self, ExportFormat},
@@ -9,15 +9,11 @@ use docx_rs::*;
 
 pub fn render(snapshot: &BookExportSnapshot) -> Result<Vec<u8>, AppError> {
     validation::validate(snapshot, ExportFormat::Docx)?;
-    let typography = Typography {
-        family: super::fonts::docx_family(&snapshot.font.family_name),
-        size: snapshot.book.font_size_pt,
-        line: snapshot.book.line_height_ratio,
-    };
+    let typography = Typography::book(snapshot);
     let running = Typography {
-        family: typography.family,
         size: 7.0,
         line: 1.0,
+        ..typography
     };
     let doc = Docx::new()
         .page_size(
@@ -64,16 +60,19 @@ pub fn render(snapshot: &BookExportSnapshot) -> Result<Vec<u8>, AppError> {
                 ),
             ),
         );
-    let (mut doc, alignments) = docx_front_matter::add(doc, snapshot);
+    let (mut doc, alignments) = docx_front_matter::add(doc, snapshot)?;
+    let mut lists = super::docx_lists::Lists::default();
+    let mut image_alts = Vec::new();
+    let image_selector = scraper::Selector::parse("img").expect("static selector");
     let mut number = 0;
     for (index, chapter) in snapshot.chapters.iter().enumerate() {
         let standard = chapter.chapter_type == "standard";
         if standard {
             number += 1;
             let label = Typography {
-                family: typography.family,
                 size: 7.5,
                 line: 1.4,
+                ..typography
             };
             doc = doc.add_paragraph(
                 label
@@ -92,9 +91,9 @@ pub fn render(snapshot: &BookExportSnapshot) -> Result<Vec<u8>, AppError> {
             );
         }
         let title = Typography {
-            family: typography.family,
             size: 15.0,
             line: 1.4,
+            ..typography
         };
         let heading = title
             .paragraph()
@@ -114,10 +113,28 @@ pub fn render(snapshot: &BookExportSnapshot) -> Result<Vec<u8>, AppError> {
             .add_bookmark_end(index);
         doc = doc.add_paragraph(heading);
         let content = validation::chapter_content(chapter, index)?;
-        for paragraph in docx_content::paragraphs(&content, &typography) {
-            doc = doc.add_paragraph(paragraph);
+        image_alts.extend(
+            scraper::Html::parse_fragment(&content)
+                .select(&image_selector)
+                .map(|image| image.value().attr("alt").unwrap_or("").to_string()),
+        );
+        let blocks =
+            super::docx_blocks::render(&content, &typography, &mut lists).map_err(|error| {
+                AppError::Export(format!(
+                    "O capítulo {} “{}”: {}",
+                    index + 1,
+                    chapter.title,
+                    super::frontend_error(error)
+                ))
+            })?;
+        for block in blocks {
+            doc = match block {
+                super::docx_blocks::Block::Paragraph(paragraph) => doc.add_paragraph(*paragraph),
+                super::docx_blocks::Block::Table(table) => doc.add_table(*table),
+            };
         }
     }
+    doc = lists.apply(doc);
     let mut buffer = std::io::Cursor::new(Vec::new());
     doc.build()
         .pack(&mut buffer)
@@ -126,5 +143,6 @@ pub fn render(snapshot: &BookExportSnapshot) -> Result<Vec<u8>, AppError> {
         &buffer.into_inner(),
         &snapshot.font.family_name,
         &alignments,
+        &image_alts,
     )
 }

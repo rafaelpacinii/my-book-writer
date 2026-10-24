@@ -48,7 +48,14 @@ pub async fn info(
         .and_then(|root| chromium::executable(&root))
         .map(|_| ());
     let unavailable_reason = readiness.err().map(|error| error.to_string());
-    let issues = super::validation::issues(&snapshot);
+    let (snapshot, issues) = tauri::async_runtime::spawn_blocking(move || {
+        let issues = super::validation::issues(&snapshot);
+        (snapshot, issues)
+    })
+    .await
+    .map_err(|error| {
+        super::export_error("Não foi possível verificar o conteúdo do livro.", error)
+    })?;
     Ok(PdfExportInfo {
         title: snapshot.book.title,
         author: snapshot.book.author_name,
@@ -69,10 +76,10 @@ pub async fn export(
 ) -> Result<Option<PdfExportResult>, AppError> {
     let snapshot = read_snapshot(&state.db_pool, book_id).await?;
     let binary = chromium::executable(&resource_dir(&app)?)?;
-    super::validation::validate(&snapshot, super::validation::ExportFormat::Pdf)?;
     let filename = output::suggested_filename(&snapshot.book.title, "pdf");
     let mut result = tauri::async_runtime::spawn_blocking(
         move || -> Result<Option<PdfExportResult>, AppError> {
+            super::validation::validate(&snapshot, super::validation::ExportFormat::Pdf)?;
             let Some(chosen) = app
                 .dialog()
                 .file()
