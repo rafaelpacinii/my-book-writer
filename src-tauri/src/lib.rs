@@ -46,6 +46,21 @@ pub fn run() {
             commands::export_commands::export_book_pdf,
             commands::export_commands::export_book_epub,
             commands::export_commands::export_book_docx,
+            // Universos Literários
+            commands::universe_commands::create_universe,
+            commands::universe_commands::list_universes,
+            commands::universe_commands::get_universe_by_id,
+            commands::universe_commands::update_universe,
+            commands::universe_commands::reorder_universes,
+            commands::universe_commands::delete_universe,
+            // Séries de Livros
+            commands::series_commands::create_series,
+            commands::series_commands::list_series,
+            commands::series_commands::get_series_by_id,
+            commands::series_commands::update_series,
+            commands::series_commands::reorder_series,
+            commands::series_commands::reorder_series_books,
+            commands::series_commands::delete_series,
             // Elementos Pré-textuais (Front Matter)
             commands::front_matter_commands::get_book_front_matter,
             commands::front_matter_commands::save_book_front_matter,

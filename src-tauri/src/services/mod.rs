@@ -9,3 +9,5 @@ pub mod image_asset_service;
 pub mod profile_service;
 mod review_anchor;
 pub mod review_service;
+pub mod series_service;
+pub mod universe_service;

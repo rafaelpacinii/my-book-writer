@@ -1,16 +1,18 @@
 import { publishDataChange } from "@/lib/data/changes";
 import { invoke } from "@tauri-apps/api/core";
 import type { Book, CreateBookInput, UpdateBookInput } from "@/types/book";
+import type { BookSeries } from "@/types/series";
 
 function isTauriEnvironment(): boolean {
   return typeof window !== "undefined" && Boolean((window as unknown as { __TAURI_INTERNALS__?: unknown }).__TAURI_INTERNALS__);
 }
 
-const STORAGE_KEY = "my_book_writer_books";
+export const BOOKS_STORAGE_KEY = "my_book_writer_books";
+export const SERIES_STORAGE_KEY = "my_book_writer_series";
 
-function getStoredBooks(): Book[] {
+export function getStoredBooks(): Book[] {
   if (typeof window === "undefined") return [];
-  const stored = localStorage.getItem(STORAGE_KEY);
+  const stored = localStorage.getItem(BOOKS_STORAGE_KEY);
   if (!stored) return [];
   try {
     return JSON.parse(stored) as Book[];
@@ -19,19 +21,60 @@ function getStoredBooks(): Book[] {
   }
 }
 
-function saveStoredBooks(books: Book[]): void {
+export function saveStoredBooks(books: Book[]): void {
   if (typeof window !== "undefined") {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(books));
+    localStorage.setItem(BOOKS_STORAGE_KEY, JSON.stringify(books));
   }
 }
 
+function getSeriesUniverseId(seriesId: string): string | null {
+  if (typeof window === "undefined") return null;
+  const stored = localStorage.getItem(SERIES_STORAGE_KEY);
+  if (!stored) return null;
+  try {
+    const list = JSON.parse(stored) as BookSeries[];
+    return list.find((s) => s.id === seriesId && !s.deleted_at)?.universe_id ?? null;
+  } catch {
+    return null;
+  }
+}
+
+export function compactStoredSeriesVolumes(books: Book[], seriesId: string): void {
+  const inSeries = books
+    .filter((b) => b.series_id === seriesId && !b.deleted_at)
+    .sort((a, b) => (a.series_volume ?? 999999) - (b.series_volume ?? 999999) || a.position - b.position);
+
+  inSeries.forEach((book, idx) => {
+    book.series_volume = idx + 1;
+  });
+}
+
+function nextStoredSeriesVolume(books: Book[], seriesId: string): number {
+  const max = books
+    .filter((b) => b.series_id === seriesId && !b.deleted_at)
+    .reduce((acc, b) => Math.max(acc, b.series_volume ?? 0), 0);
+  return max + 1;
+}
+
+let browserBookCounter = 0;
+
 async function persistCreateBook(input: CreateBookInput): Promise<Book> {
   if (!isTauriEnvironment()) {
+    const list = getStoredBooks();
+    const seriesId = input.series_id?.trim() || null;
+    const explicitUniverseId = input.universe_id?.trim() || null;
+    const universeId = explicitUniverseId ?? (seriesId ? getSeriesUniverseId(seriesId) : null);
+    const seriesVolume = seriesId ? nextStoredSeriesVolume(list, seriesId) : null;
+    browserBookCounter += 1;
+
     const newBook: Book = {
-      id: `book-${Date.now()}`,
+      id: `book-${Date.now()}-${browserBookCounter}`,
       profile_id: input.profile_id,
       format_id: input.format_id,
       font_preset_id: input.font_preset_id,
+      universe_id: universeId,
+      series_id: seriesId,
+      series_volume: seriesVolume,
       title: input.title,
       author_name: input.author_name,
       card_image_asset_id: null,
@@ -46,7 +89,6 @@ async function persistCreateBook(input: CreateBookInput): Promise<Book> {
       updated_at: new Date().toISOString(),
       deleted_at: null,
     };
-    const list = getStoredBooks();
     saveStoredBooks([newBook, ...list]);
     return newBook;
   }
@@ -73,6 +115,31 @@ async function persistUpdateBook(id: string, input: UpdateBookInput): Promise<Bo
     const idx = list.findIndex((b) => b.id === id);
     if (idx === -1) throw new Error("Livro não encontrado");
     const current = list[idx];
+    const oldSeriesId = current.series_id ?? null;
+
+    let nextSeriesId = current.series_id ?? null;
+    let nextSeriesVolume = current.series_volume ?? null;
+
+    if (input.clear_series) {
+      nextSeriesId = null;
+      nextSeriesVolume = null;
+    } else if (input.series_id !== undefined && input.series_id !== null) {
+      const trimmedSeries = input.series_id.trim();
+      if (trimmedSeries && trimmedSeries !== oldSeriesId) {
+        nextSeriesId = trimmedSeries;
+        nextSeriesVolume = nextStoredSeriesVolume(list, trimmedSeries);
+      }
+    }
+
+    let nextUniverseId = current.universe_id ?? null;
+    if (input.clear_universe) {
+      nextUniverseId = null;
+    } else if (input.universe_id !== undefined && input.universe_id !== null) {
+      nextUniverseId = input.universe_id.trim() || null;
+    } else if (nextSeriesId && nextSeriesId !== oldSeriesId) {
+      nextUniverseId = getSeriesUniverseId(nextSeriesId) ?? nextUniverseId;
+    }
+
     const updated: Book = {
       ...current,
       title: input.title ?? current.title,
@@ -80,6 +147,9 @@ async function persistUpdateBook(id: string, input: UpdateBookInput): Promise<Bo
       format_id: input.format_id ?? current.format_id,
       font_preset_id: input.font_preset_id ?? current.font_preset_id,
       card_image_asset_id: input.card_image_asset_id !== undefined ? input.card_image_asset_id : current.card_image_asset_id,
+      universe_id: nextUniverseId,
+      series_id: nextSeriesId,
+      series_volume: nextSeriesVolume,
       font_size_pt: input.font_size_pt ?? current.font_size_pt,
       line_height_ratio: input.line_height_ratio ?? current.line_height_ratio,
       margin_top_um: input.margin_top_um ?? current.margin_top_um,
@@ -89,6 +159,9 @@ async function persistUpdateBook(id: string, input: UpdateBookInput): Promise<Bo
       updated_at: new Date().toISOString(),
     };
     list[idx] = updated;
+    if (oldSeriesId && oldSeriesId !== nextSeriesId) {
+      compactStoredSeriesVolumes(list, oldSeriesId);
+    }
     saveStoredBooks(list);
     return updated;
   }
@@ -97,7 +170,12 @@ async function persistUpdateBook(id: string, input: UpdateBookInput): Promise<Bo
 
 async function persistDeleteBook(id: string): Promise<void> {
   if (!isTauriEnvironment()) {
-    const list = getStoredBooks().filter((b) => b.id !== id);
+    const current = getStoredBooks();
+    const target = current.find((b) => b.id === id);
+    const list = current.filter((b) => b.id !== id);
+    if (target?.series_id) {
+      compactStoredSeriesVolumes(list, target.series_id);
+    }
     saveStoredBooks(list);
     return;
   }

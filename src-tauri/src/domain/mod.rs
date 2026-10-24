@@ -7,3 +7,5 @@ pub mod front_matter;
 pub mod image_asset;
 pub mod profile;
 pub mod review;
+pub mod series;
+pub mod universe;
