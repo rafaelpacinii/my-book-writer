@@ -171,6 +171,8 @@ fn snapshot_contains_full_content_in_order_and_excludes_deleted_chapters() {
                 "019213bc-0000-7000-8000-000000000001",
                 "fmt-br-14x21",
                 "font-merriweather",
+                None,
+                None,
                 "Livro",
                 "Autora",
                 None,

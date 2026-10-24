@@ -8,3 +8,5 @@ pub mod front_matter_commands;
 pub mod image_asset_commands;
 pub mod profile_commands;
 pub mod review_commands;
+pub mod series_commands;
+pub mod universe_commands;

@@ -11,6 +11,7 @@ Este diretório reúne as diretrizes de produto, arquitetura de software, catál
 | Documento | Descrição | Público Principal |
 | :--- | :--- | :--- |
 | [**Guia de Implementação da Interface**](guia-implementacao-ui.md) | Direção de produto, filosofia visual de geometria editorial, tokens de cores, tipografia e detalhamento de cada tela do aplicativo. | Designers, Desenvolvedores Frontend, Avaliadores |
+| [**Roadmap de Funcionalidades & Códice**](roadmap-funcionalidades.md) | Plano estratégico e cronograma diário para Universos, Séries, Códice (Personagens e Lugares) e Dossiê Narrativo. | Produto, Desenvolvedores |
 | [**Protótipo Editorial & Catálogo Visual**](prototipo-ui/README.md) | Especificação das 44 telas e estados do protótipo navegável, exportação vetorial (SVG) e imagens em alta resolução (PNG). | Recrutadores, Avaliadores de UI/UX, Desenvolvedores |
 | [**Critérios de Qualidade de UI & Checklist**](ui-quality.md) | Checklist de aceitação visual, acessibilidade, suporte a temas claro/escuro, escala de tela e processo de validação nativa. | Engenheiros de QA, Desenvolvedores |
 | [**Regras de Desenvolvimento do Projeto**](../AGENTS.md) | Padrões de código, fluxo Gitflow, convenções de commits e diretrizes para agentes de inteligência artificial. | Contribuidores, Desenvolvedores, Avaliadores de Código |

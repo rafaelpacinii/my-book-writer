@@ -4,3 +4,5 @@ export * from "./books";
 export * from "./chapters";
 export * from "./images";
 export * from "./reviews";
+export * from "./series";
+export * from "./universes";

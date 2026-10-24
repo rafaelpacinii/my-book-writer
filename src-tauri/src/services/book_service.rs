@@ -29,6 +29,17 @@ impl<'a> BookService<'a> {
             ));
         }
 
+        let universe_id = input
+            .universe_id
+            .as_deref()
+            .map(str::trim)
+            .filter(|s| !s.is_empty());
+        let series_id = input
+            .series_id
+            .as_deref()
+            .map(str::trim)
+            .filter(|s| !s.is_empty());
+
         // Instancia o repositório para interagir com o SQLite
         let repo = BookRepository::new(self.pool);
 
@@ -52,6 +63,8 @@ impl<'a> BookService<'a> {
                 &input.profile_id,
                 &input.format_id,
                 &input.font_preset_id,
+                universe_id,
+                series_id,
                 title,
                 author_name,
                 input.synopsis.as_deref(),

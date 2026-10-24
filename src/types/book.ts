@@ -6,6 +6,9 @@ export interface Book {
   profile_id: string;
   format_id: string;
   font_preset_id: string;
+  universe_id?: string | null;
+  series_id?: string | null;
+  series_volume?: number | null;
   title: string;
   author_name: string;
   card_image_asset_id: string | null;
@@ -28,6 +31,8 @@ export interface CreateBookInput {
   profile_id: string;
   format_id: string;
   font_preset_id: string;
+  universe_id?: string | null;
+  series_id?: string | null;
   title: string;
   author_name: string;
   synopsis?: string | null;
@@ -48,6 +53,10 @@ export interface UpdateBookInput {
   format_id?: string | null;
   font_preset_id?: string | null;
   card_image_asset_id?: string | null;
+  universe_id?: string | null;
+  clear_universe?: boolean;
+  series_id?: string | null;
+  clear_series?: boolean;
   font_size_pt?: number | null;
   line_height_ratio?: number | null;
   margin_top_um?: number | null;

@@ -7,3 +7,5 @@ pub mod front_matter_repository;
 pub mod image_asset_repository;
 pub mod profile_repository;
 pub mod review_repository;
+pub mod series_repository;
+pub mod universe_repository;
