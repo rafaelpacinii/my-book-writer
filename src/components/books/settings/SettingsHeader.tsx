@@ -1,8 +1,7 @@
 import { BookSectionHeader } from "@/components/books/shared/BookSectionHeader";
 
-export function SettingsHeader({ bookId, bookTitle }: { bookId: string; bookTitle: string }) {
+export function SettingsHeader() {
   return (
-    <BookSectionHeader bookId={bookId} bookTitle={bookTitle} current="Configurações"
-      title="Configurações do livro" description="Ajuste os detalhes e a apresentação da sua obra." />
+    <BookSectionHeader title="Configurações do livro" description="Ajuste os detalhes e a apresentação da sua obra." />
   );
 }

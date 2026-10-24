@@ -14,8 +14,7 @@ export function Main({ bookId }: { bookId: string }) {
   if (!state.isLoading && !state.book && !state.error) return <DetailNotFound />;
   return (
     <BookSectionPage>
-      <BookSectionHeader bookId={bookId} bookTitle={state.book?.title} current="Páginas iniciais"
-        title="Páginas iniciais" description="Organize as páginas que apresentam sua obra antes do primeiro capítulo." />
+      <BookSectionHeader title="Páginas iniciais" description="Organize as páginas que apresentam sua obra antes do primeiro capítulo." />
       {state.isLoading ? <Skeleton className="h-96 w-full rounded-xl" /> : !state.form || !state.book ? (
         <ErrorState message={state.error || "Não foi possível carregar as páginas iniciais."} onRetry={state.retry} />
       ) : <FrontMatterForm state={state} />}

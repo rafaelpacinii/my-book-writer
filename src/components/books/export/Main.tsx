@@ -13,7 +13,7 @@ export function Main({ bookId }: { bookId: string }) {
   const state = useBookExport(bookId);
   return (
     <BookSectionPage>
-      <ExportHeader bookId={bookId} bookTitle={state.info?.title} />
+      <ExportHeader />
       {state.isLoading && <p role="status" className="text-muted">Carregando o livro…</p>}
       {state.info && (
         <BookSectionColumns>

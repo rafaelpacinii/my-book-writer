@@ -10,7 +10,7 @@ export function EditorTopBars({ state, bookId }: { state: MainEditorState; bookI
   if (ed.isFocusMode) return null;
 
   return (
-    <EditorHeader bookId={bookId} bookTitle={ed.book?.title}>
+    <EditorHeader>
       <EditorToolbar
         onFormat={ed.handleFormat} onUndo={ed.handleUndo} onRedo={ed.handleRedo}
         isBold={ed.isBold} isItalic={ed.isItalic} isUnderline={ed.isUnderline}

@@ -30,9 +30,6 @@ export function Main({ bookId, chapterId, initialVersionId }: MainProps) {
   return (
     <div className="flex h-full min-h-0 flex-col overflow-hidden bg-background text-foreground">
       <VersionsHeader
-        bookId={bookId}
-        chapterId={chapterId}
-        bookTitle={state.bookTitle}
         chapterTitle={state.chapterTitle}
         isLoading={state.isLoading || Boolean(state.error)}
         onRefresh={state.reload}

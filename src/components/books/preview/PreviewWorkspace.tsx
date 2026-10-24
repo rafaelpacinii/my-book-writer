@@ -32,7 +32,7 @@ export function PreviewWorkspace({ bookId, data, editorChapterId }: { bookId: st
 
   return (
     <div className="flex h-full min-h-0 flex-col overflow-hidden bg-background text-foreground">
-      <PreviewHeader bookId={bookId} title={book?.title ?? ""}>
+      <PreviewHeader>
         <PreviewToolbar bookId={bookId} chapterId={editorChapterId} page={pages.page} totalPages={pages.total} onPageChange={pages.goToPage} />
       </PreviewHeader>
       <div className="flex flex-1 min-h-0 overflow-hidden">

@@ -9,8 +9,8 @@ export interface WindowRuntime {
   emitWindowResize: () => void;
 }
 
-export async function mockDesktopWindow(page: Page) {
-  await mockUI(page);
+export async function mockDesktopWindow(page: Page, options: Parameters<typeof mockUI>[1] = {}) {
+  await mockUI(page, options);
   await page.addInitScript(() => {
     const runtime = window as unknown as WindowRuntime & {
       isTauri: boolean;

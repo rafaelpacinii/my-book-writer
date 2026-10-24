@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import { BookBreadcrumbs } from "@/components/shared/BookBreadcrumbs";
 import { Badge } from "@/components/ui/Badge";
 import type { Book } from "@/types/book";
 import { BookDetailActions } from "./BookDetailActions";
@@ -14,9 +13,7 @@ interface Props {
 
 export function BookDetailHeader({ book, formatName, fontName }: Props) {
   return (
-    <div className="flex flex-col gap-4 mb-8 select-none">
-      <BookBreadcrumbs bookId={book.id} bookTitle={book.title} />
-
+    <div className="mb-8 select-none">
       <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
         <div>
           <p className="text-xs font-bold text-primary tracking-wider uppercase mb-1">
