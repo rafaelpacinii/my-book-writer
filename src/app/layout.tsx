@@ -5,6 +5,7 @@ import "@/components/shared/branding.css";
 import { preferenceBootstrap } from "@/lib/preferences/bootstrap";
 import { PreferenceProvider } from "@/components/shared/PreferenceProvider";
 import { AppDataProvider } from "@/components/shared/AppDataProvider";
+import { AppTitleBar } from "@/components/shared/AppTitleBar";
 
 export const metadata: Metadata = {
   title: "My Book Writer",
@@ -37,7 +38,8 @@ export default function RootLayout({
       </head>
       <body className="min-h-screen bg-background text-foreground antialiased font-sans">
         <PreferenceProvider>
-          <AppDataProvider>{children}</AppDataProvider>
+          <AppTitleBar />
+          <div className="application-content"><AppDataProvider>{children}</AppDataProvider></div>
         </PreferenceProvider>
       </body>
     </html>

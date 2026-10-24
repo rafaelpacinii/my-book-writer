@@ -13,7 +13,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const isStudio = /^\/books\/(editor|preview|versions)$/.test(usePathname());
 
   return (
-    <div className="workspace-shell flex h-dvh overflow-hidden bg-background text-foreground">
+    <div className="workspace-shell flex overflow-hidden bg-background text-foreground">
       <a href="#main-content" className="sr-only z-50 rounded bg-surface p-3 focus:not-sr-only focus:fixed">
         Ir para o conteúdo
       </a>

@@ -1,6 +1,7 @@
 /** Runs in <head> during parsing; contains no user-provided script content. */
 export const preferenceBootstrap = `(() => {
   const root = document.documentElement;
+  root.dataset.desktop = String(Boolean(window.isTauri) && typeof window.__TAURI_INTERNALS__?.metadata?.currentWindow?.label === "string");
   let theme = "system";
   let collapsed = false;
   try {

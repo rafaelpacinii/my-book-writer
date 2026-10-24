@@ -12,7 +12,8 @@ for (const theme of ["light", "dark"]) {
     const sidebar = page.getByRole("complementary", { name: "Menu principal" });
     await expect(page.locator(".workspace-header")).toHaveCount(0);
     await expect(sidebar).toHaveCSS("width", "240px");
-    const brand = await sidebar.getByRole("link", { name: "My Book Writer — início" }).boundingBox();
+    const brand = await page.getByRole("link", { name: "My Book Writer — início" }).boundingBox();
+    await expect(sidebar.locator("[data-brand]")).toHaveCount(0);
     const themeToggle = await sidebar.getByRole("button", { name: "Alternar tema" }).boundingBox();
     const profile = await sidebar.getByRole("button", { name: "Abrir configurações do perfil" }).boundingBox();
     expect(brand!.y).toBeLessThan(themeToggle!.y);
