@@ -6,6 +6,8 @@ import { BrandAsset } from "@/components/shared/BrandAsset";
 import { WindowControls } from "@/components/shared/WindowControls";
 import { TitleBarNav } from "@/components/shared/TitleBarNav";
 import { useDesktopWindow } from "@/hooks/useDesktopWindow";
+import { TitleBarSidebarToggle } from "@/components/shared/TitleBarSidebarToggle";
+import { TitleBarHistory } from "@/components/shared/TitleBarHistory";
 
 export function AppTitleBar() {
   const controls = useDesktopWindow();
@@ -17,6 +19,8 @@ export function AppTitleBar() {
             <BrandAsset variant="micro" />
           </span>
           <span className="titlebar-title">My Book Writer</span>
+          <TitleBarSidebarToggle />
+          <TitleBarHistory />
           <Suspense fallback={null}>
             <TitleBarNav />
           </Suspense>

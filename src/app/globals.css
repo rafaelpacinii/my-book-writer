@@ -375,8 +375,8 @@ select option {
 
 /* The head script sets this before the static sidebar is painted. */
 [data-sidebar-collapsed="true"] [data-app-sidebar] {
-  width: 56px;
-  padding: 12px 8px 16px;
+  width: var(--app-titlebar-height);
+  padding: 12px 6px 16px;
 }
 
 [data-sidebar-collapsed="true"] [data-sidebar-expanded] { display: none; }
@@ -393,14 +393,16 @@ select option {
 }
 
 @media (max-width: 699px) {
-  [data-sidebar-collapsed="true"] [data-app-sidebar] { width: 240px; padding: 16px 16px 20px; }
+  [data-sidebar-collapsed="true"] [data-app-sidebar] { width: var(--app-sidebar-width); padding: 16px 16px 20px; }
   [data-sidebar-collapsed="true"] [data-sidebar-expanded] { display: revert; }
   [data-sidebar-collapsed="true"] [data-sidebar-item] {
     width: auto;
+    max-width: none;
     height: auto;
     min-height: 44px;
     padding-inline: 13px;
     justify-content: flex-start;
+    gap: 12px;
     margin-inline: 0;
   }
 }

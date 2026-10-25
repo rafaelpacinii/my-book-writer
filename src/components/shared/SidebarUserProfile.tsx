@@ -19,7 +19,7 @@ export function SidebarUserProfile({ onOpen }: { onOpen: () => void }) {
         onMouseEnter={tooltip.show} onMouseLeave={tooltip.hide} onFocus={tooltip.show} onBlur={tooltip.hide}
         className="sidebar-profile-button flex w-full items-center gap-3 rounded-lg py-1 text-left hover:bg-surface-hover"
       >
-        <span className="sidebar-profile-avatar flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border bg-primary-soft text-xs text-primary">
+        <span className="sidebar-profile-avatar flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary-soft text-xs text-primary">
           {isLoading ? <span className="skeleton-pulse h-4 w-4 rounded" /> : getInitials(profile?.display_name)}
         </span>
         <span data-sidebar-expanded className="min-w-0 flex-1">

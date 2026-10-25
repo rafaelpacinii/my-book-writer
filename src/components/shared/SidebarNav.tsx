@@ -32,7 +32,7 @@ export function SidebarNav({ onNavigate }: { onNavigate: () => void }) {
           </div>
         </div>
       </div>
-      <div className="sidebar-preferences mt-5 shrink-0 border-t border-border pt-4">
+      <div className="sidebar-preferences mt-5 shrink-0 pt-4">
         <p className="sidebar-section-label">
           <span data-sidebar-expanded>PREFERÊNCIAS</span>
           <span data-sidebar-compact aria-hidden="true">AJUSTES</span>

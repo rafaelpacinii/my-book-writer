@@ -1,5 +1,7 @@
 :root {
-  --app-titlebar-height: 32px;
+  --app-titlebar-height: 48px;
+  --app-sidebar-width: 216px;
+  --app-chrome: var(--surface);
   --app-viewport-height: calc(100dvh - var(--app-titlebar-height));
 }
 
@@ -10,8 +12,7 @@
   display: flex;
   align-items: stretch;
   height: var(--app-titlebar-height);
-  border-bottom: 1px solid var(--border);
-  background: var(--surface);
+  background: var(--app-chrome);
   color: var(--foreground);
   user-select: none;
 }
@@ -28,7 +29,7 @@
   min-width: 0;
   align-items: center;
   gap: 8px;
-  padding-inline: 10px 12px;
+  padding-inline: 16px 12px;
   font-size: 12px;
 }
 .titlebar-title {
@@ -38,14 +39,20 @@
   white-space: nowrap;
   pointer-events: none;
 }
-.titlebar-separator {
-  color: var(--border);
-  opacity: 0.8;
-  font-weight: 300;
-  user-select: none;
-  pointer-events: none;
-  margin-inline: 2px;
+.titlebar-history { display: flex; flex-shrink: 0; gap: 2px; }
+.titlebar-action {
+  display: flex;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  color: var(--muted);
 }
+.titlebar-action:hover:not(:disabled) { background: var(--surface-hover); color: var(--foreground); }
+.titlebar-action:disabled { opacity: .35; }
+.titlebar-sidebar-mobile { display: none; }
 .titlebar-nav {
   display: flex;
   align-items: center;
@@ -101,8 +108,15 @@
   white-space: nowrap;
   pointer-events: none;
 }
-@media (max-width: 540px) {
-  .titlebar-title, .titlebar-separator { display: none; }
+@media (max-width: 699px) {
+  .titlebar-title, .titlebar-sidebar-desktop { display: none; }
+  .titlebar-sidebar-mobile { display: flex; }
+  .titlebar-drag-region { gap: 4px; padding-inline: 10px 6px; }
+  .titlebar-crumbs, .titlebar-crumb-item { gap: 3px; }
+}
+@media (max-width: 420px) {
+  .titlebar-action { width: 28px; }
+  .app-titlebar .window-controls button { width: 30px; }
 }
 .window-controls { display: none; flex-shrink: 0; }
 [data-desktop="true"] .window-controls { display: flex; }

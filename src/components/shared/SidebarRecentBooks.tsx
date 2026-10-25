@@ -11,7 +11,7 @@ export function SidebarRecentBooks({ onNavigate }: { onNavigate: () => void }) {
 
   if (!recent.length) return null;
   return (
-    <section aria-label="Livros recentes" className="sidebar-recent mt-1 mb-2 ml-[23px] border-l border-border pl-3">
+    <section aria-label="Livros recentes" className="sidebar-recent mt-1 mb-2 ml-[23px] pl-3">
       <h2 className="sr-only">Livros recentes</h2>
       <ul className="space-y-0.5">
         {recent.map((book) => (

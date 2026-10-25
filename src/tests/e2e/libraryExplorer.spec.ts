@@ -46,9 +46,13 @@ test("mixed explorer cards navigate universes, nested series and books with brow
   await expect(page.locator("main").getByRole("article")).toContainText("Origem");
   const path = page.getByRole("navigation", { name: "Caminho contextual" });
   await expect(path).toContainText("Terras do Norte");
-  await page.goBack();
+  await page.getByRole("button", { name: "Voltar", exact: true }).click();
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(world.name);
-  await page.goBack();
+  await page.getByRole("button", { name: "Avançar", exact: true }).click();
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText(nested.name);
+  await page.getByRole("button", { name: "Voltar", exact: true }).click();
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText(world.name);
+  await page.getByRole("button", { name: "Voltar", exact: true }).click();
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Biblioteca");
 });
 

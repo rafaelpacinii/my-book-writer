@@ -4,7 +4,7 @@ import { useCallback, useEffect, useId, useState, type FocusEvent, type MouseEve
 import { useSidebarCollapse } from "@/hooks/useSidebarCollapse";
 import type { TooltipPosition } from "@/components/shared/SidebarTooltip";
 
-export function useSidebarTooltip(options?: { always?: boolean }) {
+export function useSidebarTooltip(options?: { always?: boolean; placement?: "right" | "bottom" }) {
   const { isCollapsed } = useSidebarCollapse();
   const id = useId();
   const [position, setPosition] = useState<TooltipPosition | null>(null);
@@ -12,7 +12,9 @@ export function useSidebarTooltip(options?: { always?: boolean }) {
   const show = (event: MouseEvent<HTMLElement> | FocusEvent<HTMLElement>) => {
     if ((!options?.always && !isCollapsed) || !matchMedia("(min-width: 700px)").matches) return;
     const bounds = event.currentTarget.getBoundingClientRect();
-    setPosition({ left: bounds.right + 14, top: bounds.top + bounds.height / 2, placement: "right" });
+    setPosition(options?.placement === "bottom"
+      ? { left: bounds.left + bounds.width / 2, top: bounds.bottom + 8, placement: "bottom" }
+      : { left: bounds.right + 14, top: bounds.top + bounds.height / 2, placement: "right" });
   };
 
   useEffect(() => {

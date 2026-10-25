@@ -16,7 +16,7 @@ export function SidebarThemeToggle() {
         aria-label="Alternar tema"
         aria-describedby={tooltip.position ? tooltip.id : undefined}
         onMouseEnter={tooltip.show} onMouseLeave={tooltip.hide} onFocus={tooltip.show} onBlur={tooltip.hide}
-        className="sidebar-theme-toggle flex h-10 w-full items-center justify-center gap-2 rounded-full border border-border bg-background px-3 text-xs text-muted hover:bg-surface-hover hover:text-foreground"
+        className="sidebar-theme-toggle flex h-10 w-full items-center justify-center gap-2 rounded-lg px-3 text-xs text-muted hover:bg-surface-hover hover:text-foreground"
       >
         {resolvedTheme === "dark" ? <Sun className="h-4 w-4 shrink-0" /> : <Moon className="h-4 w-4 shrink-0" />}
         <span data-sidebar-expanded>{label}</span>

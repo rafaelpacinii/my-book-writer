@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect } from "react";
+import { HISTORY_NAVIGATION_EVENT } from "@/lib/navigation/requests";
 
 /** Intercept normal in-app link activation while preserving new-tab and download behavior. */
-export function useInternalLinkNavigation(enabled: boolean, navigate: (href: string) => void) {
+export function useInternalLinkNavigation(enabled: boolean, navigate: (href: string, proceed?: () => void) => void) {
   useEffect(() => {
     if (!enabled) return;
     const onClick = (event: MouseEvent) => {
@@ -18,6 +19,15 @@ export function useInternalLinkNavigation(enabled: boolean, navigate: (href: str
       navigate(url.pathname + url.search + url.hash);
     };
     document.addEventListener("click", onClick, true);
-    return () => document.removeEventListener("click", onClick, true);
+    const onHistory = (event: Event) => {
+      if (!(event instanceof CustomEvent) || typeof event.detail !== "function") return;
+      event.preventDefault();
+      navigate(location.pathname + location.search, event.detail);
+    };
+    window.addEventListener(HISTORY_NAVIGATION_EVENT, onHistory);
+    return () => {
+      document.removeEventListener("click", onClick, true);
+      window.removeEventListener(HISTORY_NAVIGATION_EVENT, onHistory);
+    };
   }, [enabled, navigate]);
 }
