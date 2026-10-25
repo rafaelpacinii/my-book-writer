@@ -99,8 +99,11 @@ Cada etapa diária entrega uma fatia funcional completa, validada por testes aut
   - CRUD de Personagens, Lugares e Conceitos, estrutura ordenada de categorias/campos e modelos personalizados sem copiar conteúdos das fichas.
   - Escopo por Livro/Universo e perfil, com promoção transacional das fichas ao vincular Livro ou Série a um Universo; contextos excluídos permanecem consultáveis como arquivos.
   - API TypeScript tipada, hooks/cache e prévia web local. Contratos e limites descritos em [Motor de Dados do Códice](codex-data.md). Galeria, telas e editor seguem nos próximos dias.
-- [ ] **Dia 5 — Hub do Códice (`/codex`) & Criação com Presets**
+- [x] **Dia 5 — Hub do Códice (`/codex`) & Criação com Presets**
   - Entrada **Códice** na navegação lateral, listagem em cards com abas (*Personagens*, *Lugares*, *Conceitos*), filtro por Universo/Livro e modal de criação rápida.
+  - Busca sem distinção de acentos, contadores por tipo, escopo e aba na URL com histórico e recarga; links por Livro resolvem o Universo compartilhado quando aplicável.
+  - Criação por presets/modelos com validação, prevenção de envio duplicado, recuperação de falhas e resumo das categorias da ficha após criar ou abrir um card.
+  - Contextos arquivados para consulta, estados de carregamento/vazio/erro, controles acessíveis por teclado e validação Chromium/Firefox nos dois temas. Detalhes em [Hub do Códice](codex-hub.md).
 - [ ] **Dia 6 — Ficha Visual (`/codex/sheet` — Coluna Esquerda & Galeria Múltipla)**
   - Layout inspirado no *Arc Raiders RPG Sheet*: galeria com múltiplas imagens vinculadas à ficha, seletor de foto principal, status, papel na história e tags.
 - [ ] **Dia 7 — Abas Customizáveis, Campos Dinâmicos e Modelos de Ficha**
