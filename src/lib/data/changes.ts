@@ -1,4 +1,4 @@
-export type DataChange = "books" | "covers" | "profile" | "restore" | "series" | "universes";
+export type DataChange = "books" | "covers" | "profile" | "restore" | "series" | "universes" | "codex";
 const listeners = new Set<(change: DataChange) => void>();
 
 export function publishDataChange(change: DataChange) {

@@ -61,6 +61,18 @@ pub fn run() {
             commands::series_commands::reorder_series,
             commands::series_commands::reorder_series_books,
             commands::series_commands::delete_series,
+            // Códice local
+            commands::codex::scopes::resolve_codex_scope,
+            commands::codex::scopes::list_codex_contexts,
+            commands::codex::entities::list_codex_entities,
+            commands::codex::entities::get_codex_sheet,
+            commands::codex::entities::create_codex_entity,
+            commands::codex::entities::update_codex_entity,
+            commands::codex::entities::delete_codex_entity,
+            commands::codex::entities::save_codex_structure,
+            commands::codex::templates::list_codex_templates,
+            commands::codex::templates::save_codex_template,
+            commands::codex::templates::delete_codex_template,
             // Elementos Pré-textuais (Front Matter)
             commands::front_matter_commands::get_book_front_matter,
             commands::front_matter_commands::save_book_front_matter,

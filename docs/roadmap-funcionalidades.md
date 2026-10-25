@@ -93,9 +93,12 @@ Cada etapa diária entrega uma fatia funcional completa, validada por testes aut
   - Regressões de edição, exclusão de Universo preenchido, criação contextual, falha IPC com nova tentativa, filtros combinados e acessibilidade dos controles nos dois temas.
 
 ### Fase 2 — O Códice: Fichas de Personagens e Lugares
-- [ ] **Dia 4 — Motor de Dados do Códice (SQLite + Rust + API)**
+- [x] **Dia 4 — Motor de Dados do Códice (SQLite + Rust + API)**
   - Migration para `codex_entities`, `codex_entity_images`, `codex_categories`, `codex_fields` e `codex_templates`.
   - Presets iniciais automáticos para *Personagem* e *Lugar*, repositórios SQLx, serviços e comandos Tauri.
+  - CRUD de Personagens, Lugares e Conceitos, estrutura ordenada de categorias/campos e modelos personalizados sem copiar conteúdos das fichas.
+  - Escopo por Livro/Universo e perfil, com promoção transacional das fichas ao vincular Livro ou Série a um Universo; contextos excluídos permanecem consultáveis como arquivos.
+  - API TypeScript tipada, hooks/cache e prévia web local. Contratos e limites descritos em [Motor de Dados do Códice](codex-data.md). Galeria, telas e editor seguem nos próximos dias.
 - [ ] **Dia 5 — Hub do Códice (`/codex`) & Criação com Presets**
   - Entrada **Códice** na navegação lateral, listagem em cards com abas (*Personagens*, *Lugares*, *Conceitos*), filtro por Universo/Livro e modal de criação rápida.
 - [ ] **Dia 6 — Ficha Visual (`/codex/sheet` — Coluna Esquerda & Galeria Múltipla)**
