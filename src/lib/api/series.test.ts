@@ -2,7 +2,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createBook, getBookById, listBooks, updateBook } from "./books";
 import { createSeries, deleteSeries, listSeries, reorderSeriesBooks, updateSeries } from "./series";
 import { subscribeDataChanges } from "@/lib/data/changes";
-import { createUniverse, deleteUniverse, listUniverses } from "./universes";
+import { createUniverse, deleteUniverse, listUniverses, updateUniverse } from "./universes";
+import { createChapter, getChapterById } from "./chapters";
 
 describe("universes and series persistence and volume auto-numbering", () => {
   const data = new Map<string, string>();
@@ -153,6 +154,27 @@ describe("universes and series persistence and volume auto-numbering", () => {
     expect(await listUniverses(profileId)).toHaveLength(0);
     const afterUniverseDelete = (await listBooks(profileId))[0];
     expect(afterUniverseDelete.universe_id).toBeNull();
+  });
+
+  it("edits universes and deletes a populated universe without deleting its series, books or chapters", async () => {
+    const world = await createUniverse({ profile_id: profileId, name: "Aurora", description: "Mundo inicial" });
+    await expect(updateUniverse(world.id, { name: " " })).rejects.toThrow("O nome do universo não pode ser vazio");
+    await updateUniverse(world.id, { name: " Aurora revisada ", description: "" });
+    expect((await listUniverses(profileId))[0]).toMatchObject({ name: "Aurora revisada", description: null });
+    const saga = await createSeries({ profile_id: profileId, name: "Saga", universe_id: world.id });
+    const input = { profile_id: profileId, format_id: "fmt-br-14x21", font_preset_id: "font-merriweather", author_name: "Autor" };
+    const volume = await createBook({ ...input, title: "Volume", series_id: saga.id });
+    const direct = await createBook({ ...input, title: "Avulso no universo", universe_id: world.id });
+    const outside = await createBook({ ...input, title: "Fora do universo" });
+    const chapter = await createChapter({ book_id: volume.id, title: "Capítulo preservado", content_json: "Texto preservado" });
+    await deleteUniverse(world.id);
+    expect(await listUniverses(profileId)).toHaveLength(0);
+    expect((await listSeries(profileId))[0]).toMatchObject({ id: saga.id, universe_id: null });
+    expect(await getBookById(volume.id)).toMatchObject({ series_id: saga.id, series_volume: 1, universe_id: null });
+    expect(await getBookById(direct.id)).toMatchObject({ series_id: null, universe_id: null });
+    expect(await getBookById(outside.id)).toEqual(outside);
+    expect(await listBooks(profileId)).toHaveLength(3);
+    expect(await getChapterById(chapter.id)).toEqual(chapter);
   });
 });
 

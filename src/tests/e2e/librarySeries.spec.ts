@@ -5,6 +5,7 @@ import type { BookSeries } from "@/types/series";
 import { book } from "@/tests/fixtures/book";
 import { test, expect } from "@/tests/e2e/fixtures";
 import { mockUI } from "@/tests/e2e/uiMock";
+import { createLibraryItem } from "@/tests/e2e/libraryActions";
 
 const saga: BookSeries = {
   id: "saga", profile_id: book.profile_id, universe_id: null, name: "Saga do Norte",
@@ -37,10 +38,10 @@ async function collectionAction(page: Page, name: string, action: "Editar" | "Ex
 test("series can be created offline before the first book, edited and deleted", async ({ page, context }) => {
   await seed(page, [], []);
   await page.goto("/library");
-  const trigger = page.getByRole("button", { name: "Nova série", exact: true });
+  const trigger = page.getByRole("button", { name: "Criar na biblioteca", exact: true });
   await expect(trigger).toBeEnabled();
   await context.setOffline(true);
-  await trigger.click();
+  await createLibraryItem(page, "série");
   const dialog = page.getByRole("dialog");
   await dialog.getByLabel("Nome da série").fill("   ");
   await dialog.getByRole("button", { name: "Salvar série" }).click();

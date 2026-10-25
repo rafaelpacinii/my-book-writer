@@ -23,7 +23,7 @@ for (const theme of ["light", "dark"]) {
     const recent = page.getByRole("region", { name: "Livros recentes", exact: true });
     await expect(recent.getByRole("link")).toHaveCount(3);
     await expect(sidebar.getByRole("link", { name: "Novo livro", exact: true })).toHaveCount(0);
-    await expect(page.locator("main").getByRole("link", { name: "Novo livro", exact: true })).toBeVisible();
+    await expect(page.locator("main").getByRole("button", { name: "Criar na biblioteca", exact: true })).toBeVisible();
     for (const name of ["Início", "Biblioteca", "Configurações"]) {
       await expect(page.getByRole("navigation", { name: "Navegação principal" }).getByRole("link", { name, exact: true })).toBeInViewport({ ratio: 1 });
     }

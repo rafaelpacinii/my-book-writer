@@ -1,5 +1,6 @@
 "use client";
 
+import { Suspense } from "react";
 import { PageContent } from "@/components/shared/PageContent";
 import { ErrorState } from "@/components/shared/ErrorState";
 import { LoadingRegion } from "@/components/ui/LoadingRegion";
@@ -9,6 +10,12 @@ import { NewBookSkeleton } from "@/components/books/new/NewBookSkeleton";
 import { useNewBookForm } from "@/hooks/useNewBookForm";
 
 export function Main() {
+  return <Suspense fallback={<PageContent><NewBookHeader /><NewBookSkeleton /></PageContent>}>
+    <NewBookContent />
+  </Suspense>;
+}
+
+function NewBookContent() {
   const form = useNewBookForm();
   return (
     <PageContent>

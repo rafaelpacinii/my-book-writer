@@ -9,6 +9,7 @@ export type LibraryEntry = LibraryCollection | { kind: "book"; book: Book };
 export type LibraryScope = { kind: "root" } | { kind: "missing" } | LibraryCollection;
 export type LibrarySort = "recent" | "title" | "author";
 export type LibraryGrouping = "mixed" | "type";
+export type LibraryTypeFilter = "all" | "book" | "series" | "universe";
 export interface LibraryFilters {
   searchQuery: string;
   formatFilter: string;
