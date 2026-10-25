@@ -33,8 +33,13 @@ export function useLibraryUniverses(profileId?: string) {
     if (dialog?.kind !== "delete") return;
     await run(() => data.removeUniverse(dialog.universe.id), "Universo excluído. As séries e os livros foram preservados.");
   }
+  const updateUniverse = (id: string, name: string, description: string) => {
+    const trimmed = name.trim();
+    if (!trimmed) return Promise.resolve(false);
+    return run(() => data.editUniverse(id, { name: trimmed, description: description.trim() }), "Universo salvo.");
+  };
   return {
-    ...data, dialog, busy, actionError, announcement, save, remove,
+    ...data, dialog, busy, actionError, announcement, save, remove, updateUniverse,
     open: (next: Dialog) => { setActionError(null); setDialog(next); },
     close: () => { if (!locked.current) setDialog(null); },
   };

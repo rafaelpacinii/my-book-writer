@@ -11,11 +11,23 @@ export function LibraryCreateMenu({ lib }: { lib: ReturnType<typeof useLibrary> 
   if (scope.kind === "series") params.set("seriesId", scope.collection.id);
   if (scope.kind === "universe") params.set("universeId", scope.collection.id);
   const bookHref = `/books/new${params.size ? `?${params}` : ""}`;
+  const canCreateSeries = scope.kind !== "series";
+  const canCreateUniverse = scope.kind === "root";
+
   const create = (kind: "series" | "universe") => {
     menu.close();
-    if (kind === "universe") lib.universeManager.open({ kind: "create" });
-    else lib.seriesManager.open({ kind: "create", universeId: scope.kind === "universe" ? scope.collection.id : undefined });
+    if (kind === "universe") {
+      if (!canCreateUniverse) return;
+      lib.universeManager.open({ kind: "create" });
+    } else {
+      if (!canCreateSeries) return;
+      lib.seriesManager.open({
+        kind: "create",
+        universeId: scope.kind === "universe" ? scope.collection.id : undefined,
+      });
+    }
   };
+
   return (
     <>
       <button ref={menu.triggerRef} type="button" aria-label="Criar na biblioteca" aria-expanded={menu.isOpen}
@@ -29,14 +41,18 @@ export function LibraryCreateMenu({ lib }: { lib: ReturnType<typeof useLibrary> 
           <BookOpen aria-hidden="true" size={20} />
           <span><strong>Livro</strong><small>Comece uma nova história</small></span>
         </Link>
-        <button type="button" aria-label="Criar série" onClick={() => create("series")}>
-          <Layers aria-hidden="true" size={18} />
-          <span><strong>Série</strong><small>{scope.kind === "universe" ? "Neste universo" : "Na Biblioteca"}</small></span>
-        </button>
-        <button type="button" aria-label="Criar universo" onClick={() => create("universe")}>
-          <Orbit aria-hidden="true" size={18} />
-          <span><strong>Universo</strong><small>Um mundo compartilhado na Biblioteca</small></span>
-        </button>
+        {canCreateSeries && (
+          <button type="button" aria-label="Criar série" onClick={() => create("series")}>
+            <Layers aria-hidden="true" size={18} />
+            <span><strong>Série</strong><small>{scope.kind === "universe" ? "Neste universo" : "Na Biblioteca"}</small></span>
+          </button>
+        )}
+        {canCreateUniverse && (
+          <button type="button" aria-label="Criar universo" onClick={() => create("universe")}>
+            <Orbit aria-hidden="true" size={18} />
+            <span><strong>Universo</strong><small>Um mundo compartilhado na Biblioteca</small></span>
+          </button>
+        )}
       </div>
     </>
   );

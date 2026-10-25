@@ -46,8 +46,14 @@ export function useLibrarySeries(profileId?: string) {
     if (ok) setDialog(null);
   }
 
+  const updateSeries = (id: string, name: string, description: string) => {
+    const trimmed = name.trim();
+    if (!trimmed) return Promise.resolve(false);
+    return run(() => data.editSeries(id, { name: trimmed, description: description.trim() }), "Série salva.");
+  };
+
   return {
-    ...data, dialog, busy, actionError, announcement, save, remove,
+    ...data, dialog, busy, actionError, announcement, save, remove, updateSeries,
     open: (next: SeriesDialog) => { setActionError(null); setDialog(next); },
     close: () => { if (!locked.current) setDialog(null); },
     reorder: (id: string, ids: string[]) => run(
