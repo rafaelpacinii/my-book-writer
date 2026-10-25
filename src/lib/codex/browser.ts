@@ -7,7 +7,7 @@ import { codexKinds, label, optionalText, tags, writable } from "@/lib/codex/val
 import { invalid, missing } from "@/lib/codex/errors";
 import { uuidV7 } from "@/utils/uuidV7";
 
-function transaction<T>(action: (store: CodexStore) => T): T {
+export function transaction<T>(action: (store: CodexStore) => T): T {
   const store = readCodexStore();
   const before = JSON.stringify(store);
   normalizeScopes(store);

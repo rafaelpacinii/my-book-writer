@@ -1,4 +1,5 @@
 mod entities;
+mod gallery;
 mod migration;
 mod scopes;
 mod structure;

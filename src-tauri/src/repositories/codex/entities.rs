@@ -10,7 +10,7 @@ impl CodexRepository {
         kind: Option<CodexKind>,
     ) -> Result<Vec<CodexEntity>, AppError> {
         Ok(sqlx::query_as(
-            "SELECT * FROM codex_entities WHERE profile_id=? AND book_id IS ? AND universe_id IS ?
+            "SELECT *, (SELECT id FROM codex_entity_images i WHERE i.entity_id=codex_entities.id AND i.is_primary=1 AND i.deleted_at IS NULL) AS primary_image_id FROM codex_entities WHERE profile_id=? AND book_id IS ? AND universe_id IS ?
             AND deleted_at IS NULL AND (? IS NULL OR kind=?) ORDER BY position, name, id",
         )
         .bind(&scope.profile_id)
@@ -26,7 +26,7 @@ impl CodexRepository {
         scope: &CodexScope,
         id: &str,
     ) -> Result<CodexEntity, AppError> {
-        sqlx::query_as("SELECT * FROM codex_entities WHERE id=? AND profile_id=? AND book_id IS ? AND universe_id IS ? AND deleted_at IS NULL")
+        sqlx::query_as("SELECT *, (SELECT id FROM codex_entity_images i WHERE i.entity_id=codex_entities.id AND i.is_primary=1 AND i.deleted_at IS NULL) AS primary_image_id FROM codex_entities WHERE id=? AND profile_id=? AND book_id IS ? AND universe_id IS ? AND deleted_at IS NULL")
             .bind(id).bind(&scope.profile_id).bind(&scope.book_id).bind(&scope.universe_id)
             .fetch_optional(conn).await?.ok_or_else(|| AppError::NotFound("Ficha não encontrada neste Códice".into()))
     }

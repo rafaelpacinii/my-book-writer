@@ -8,7 +8,6 @@ import { CodexFilters } from "@/components/codex/CodexFilters";
 import { CodexContent } from "@/components/codex/CodexContent";
 import { CodexSkeleton } from "@/components/codex/CodexSkeleton";
 import { CodexCreateDialog } from "@/components/codex/CodexCreateDialog";
-import { CodexPreview } from "@/components/codex/CodexPreview";
 import { useCodexHub } from "@/hooks/useCodexHub";
 import { contextKey } from "@/utils/codexHub";
 
@@ -31,10 +30,7 @@ export function Main() {
         <CodexCreateDialog key={selectionKey} scope={hub.scope} kind={hub.kind} contextName={hub.context?.name ?? ""}
           onClose={() => hub.setCreating(false)} onCreated={hub.created} />
       )}
-      {hub.selected && hub.scope && (
-        <CodexPreview key={`${selectionKey}:${hub.selected}`} scope={hub.scope} id={hub.selected}
-          onClose={() => hub.setSelected(null)} />
-      )}
+
     </PageContent>
   );
 }

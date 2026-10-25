@@ -1,4 +1,5 @@
 pub mod entities;
+pub mod gallery;
 pub mod scopes;
 pub mod templates;
 

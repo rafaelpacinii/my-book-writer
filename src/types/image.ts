@@ -3,7 +3,7 @@
  */
 export interface ImageAsset {
   id: string;
-  book_id: string;
+  book_id: string | null;
   original_filename: string;
   storage_key: string;
   mime_type: string;

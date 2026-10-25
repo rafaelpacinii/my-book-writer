@@ -46,6 +46,8 @@ Salvar um modelo copia categorias, tipos, rótulos e configurações. Valores re
 | `createCodexEntity` / `updateCodexEntity` / `deleteCodexEntity` | `create_codex_entity` / `update_codex_entity` / `delete_codex_entity` |
 | `saveCodexStructure` | `save_codex_structure` |
 | `listCodexTemplates` / `saveCodexTemplate` / `deleteCodexTemplate` | `list_codex_templates` / `save_codex_template` / `delete_codex_template` |
+| `importCodexImage` / `readCodexImage` | `import_codex_image` / `read_codex_image` |
+| `updateCodexImage` / `deleteCodexImage` | `update_codex_image` / `delete_codex_image` |
 
 Tipos e DTOs estão em `src/types/codex.ts`. `useCodex`, `useCodexSheet`, `useCodexTemplates` e `useCodexContexts` disponibilizam carregamento, erros, atualização e operações. Os caches separam perfil/escopo/tipo/ID e invalidam após mudanças no Códice, livros, séries, universos, perfil e restauração. Mudanças de hierarquia ou restauração descartam dados antigos enquanto recarregam.
 
@@ -55,6 +57,6 @@ Erros expõem `{ code, message }`, com códigos `validation`, `not_found` ou `st
 
 Sem Tauri, a API usa uma única chave localStorage (`my_book_writer_codex_v1`) para gravar o agregado atomicamente. Escritas sem espaço e dados inválidos geram erro sem sobrescrever o conteúdo anterior. Na prévia, a promoção de escopo é normalizada no próximo acesso ao Códice; no desktop ela ocorre imediatamente na transação SQLite. A prévia mantém nomes de contextos para consultar fichas mesmo após a remoção dos agrupadores locais.
 
-A galeria possui tabela, restrições e leitura no agregado, mas importação, associação e gerenciamento de imagens ficam para o Dia 6. A interface de categorias/modelos fica para o Dia 7. Os backups nativos já copiam o SQLite completo e incluem estas tabelas; a restauração executa as migrations antes de reabrir o banco.
+A [galeria do Dia 6](codex-sheet.md) acrescenta importação local, legenda, principal e exclusão lógica, com ativos pertencentes à ficha mesmo em Universos sem livros. A interface de categorias/modelos fica para o Dia 7. Os backups nativos já copiam o SQLite completo e incluem estas tabelas; a restauração executa as migrations antes de reabrir o banco. Os arquivos físicos das imagens continuam na pasta de armazenamento gerenciado.
 
 Os testes cobrem upgrade do banco anterior, CRUD, presets, modelos sem conteúdo pessoal, escopos compartilhados/isolados, arquivamento, IDs e ordenação, valores inválidos, falhas transacionais, persistência web e contrato IPC.

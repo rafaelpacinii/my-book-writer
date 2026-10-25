@@ -7,6 +7,12 @@ export const codexLabels: Record<CodexKind, { singular: string; plural: string }
   lore: { singular: "Conceito", plural: "Conceitos" },
 };
 export const contextKey = (context: Pick<CodexContext, "id" | "kind">) => `${context.kind}:${context.id}`;
+export function codexSheetHref(scope: CodexScopeInput, entityId: string): string {
+  const params = new URLSearchParams({ entityId });
+  if (scope.book_id) params.set("bookId", scope.book_id);
+  else params.set("universeId", scope.universe_id!);
+  return `/codex/sheet?${params}`;
+}
 export function contextScope(profile: string, context: Pick<CodexContext, "id" | "kind">): CodexScopeInput {
   return context.kind === "book" ? { profile_id: profile, book_id: context.id }
     : { profile_id: profile, universe_id: context.id };

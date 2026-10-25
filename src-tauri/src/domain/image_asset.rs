@@ -5,7 +5,7 @@ use sqlx::FromRow;
 #[derive(Debug, Clone, Serialize, Deserialize, FromRow)]
 pub struct ImageAsset {
     pub id: String,
-    pub book_id: String,
+    pub book_id: Option<String>,
     pub original_filename: String,
     pub storage_key: String,
     pub mime_type: String,
