@@ -4,6 +4,7 @@ pub mod catalog_service;
 pub mod chapter_service;
 mod chapter_version_policy;
 pub mod chapter_version_service;
+pub mod codex;
 pub mod export;
 pub mod image_asset_service;
 pub mod profile_service;

@@ -1,0 +1,195 @@
+[
+  {
+    "kind": "character",
+    "name": "Personagem",
+    "preset_key": "character-v1",
+    "categories": [
+      {
+        "name": "Dados gerais",
+        "fields": [
+          {
+            "label": "Nome de nascimento",
+            "field_type": "short_text",
+            "value": "",
+            "config": {}
+          },
+          {
+            "label": "Idade",
+            "field_type": "short_text",
+            "value": "",
+            "config": {}
+          },
+          {
+            "label": "Ocupação",
+            "field_type": "short_text",
+            "value": "",
+            "config": {}
+          },
+          {
+            "label": "Biografia",
+            "field_type": "long_text",
+            "value": "",
+            "config": {}
+          }
+        ]
+      },
+      {
+        "name": "Características físicas",
+        "fields": [
+          {
+            "label": "Aparência",
+            "field_type": "long_text",
+            "value": "",
+            "config": {}
+          },
+          {
+            "label": "Traços marcantes",
+            "field_type": "tags",
+            "value": [],
+            "config": {}
+          }
+        ]
+      },
+      {
+        "name": "Psicologia",
+        "fields": [
+          {
+            "label": "Motivações",
+            "field_type": "long_text",
+            "value": "",
+            "config": {}
+          },
+          {
+            "label": "Virtudes",
+            "field_type": "tags",
+            "value": [],
+            "config": {}
+          },
+          {
+            "label": "Defeitos",
+            "field_type": "tags",
+            "value": [],
+            "config": {}
+          },
+          {
+            "label": "Liderança",
+            "field_type": "scale",
+            "value": 0,
+            "config": {}
+          }
+        ]
+      },
+      {
+        "name": "Relações",
+        "fields": [
+          {
+            "label": "Vínculos",
+            "field_type": "reference",
+            "value": [],
+            "config": {}
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "location",
+    "name": "Lugar",
+    "preset_key": "location-v1",
+    "categories": [
+      {
+        "name": "Dados gerais",
+        "fields": [
+          {
+            "label": "Tipo de lugar",
+            "field_type": "short_text",
+            "value": "",
+            "config": {}
+          },
+          {
+            "label": "Descrição",
+            "field_type": "long_text",
+            "value": "",
+            "config": {}
+          }
+        ]
+      },
+      {
+        "name": "Geografia",
+        "fields": [
+          {
+            "label": "Clima",
+            "field_type": "short_text",
+            "value": "",
+            "config": {}
+          },
+          {
+            "label": "Atmosfera sensorial",
+            "field_type": "long_text",
+            "value": "",
+            "config": {}
+          },
+          {
+            "label": "Recursos",
+            "field_type": "tags",
+            "value": [],
+            "config": {}
+          }
+        ]
+      },
+      {
+        "name": "Sociedade",
+        "fields": [
+          {
+            "label": "População",
+            "field_type": "short_text",
+            "value": "",
+            "config": {}
+          },
+          {
+            "label": "Governo",
+            "field_type": "short_text",
+            "value": "",
+            "config": {}
+          },
+          {
+            "label": "Idiomas",
+            "field_type": "tags",
+            "value": [],
+            "config": {}
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "lore",
+    "name": "Conceito ou item",
+    "preset_key": "lore-v1",
+    "categories": [
+      {
+        "name": "Dados gerais",
+        "fields": [
+          {
+            "label": "Descrição",
+            "field_type": "long_text",
+            "value": "",
+            "config": {}
+          },
+          {
+            "label": "Características",
+            "field_type": "tags",
+            "value": [],
+            "config": {}
+          },
+          {
+            "label": "Vínculos",
+            "field_type": "reference",
+            "value": [],
+            "config": {}
+          }
+        ]
+      }
+    ]
+  }
+]

@@ -34,7 +34,9 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
-    ".next/cache/ui-e2e/types/**/*.ts"
+    ".next/cache/ui-e2e/types/**/*.ts",
+    "node_modules/.cache/mbw-day3-turbo/types/**/*.ts",
+    "node_modules/.cache/mbw-day3-turbo/dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules"
