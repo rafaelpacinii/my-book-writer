@@ -129,7 +129,9 @@ test("archived universes retain readable sheets and disable creation", async ({ 
   await expect(page.getByText("Códice arquivado. Suas fichas continuam disponíveis para consulta.")).toBeVisible();
   await expect(page.getByRole("button", { name: "Nova ficha", exact: true })).toBeDisabled();
   await page.getByRole("link", { name: "Ver ficha de Memória de Aurora" }).click();
+  await page.getByRole("tab", { name: "Psicologia", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Psicologia", exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Salvar campos", exact: true })).toHaveCount(0);
 });
 
 for (const theme of ["light", "dark"]) {

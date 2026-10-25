@@ -26,7 +26,12 @@ test("book settings, front matter and export share the same content width, heade
     await expect(page.getByRole("navigation", { name: "Navegação principal" })).toBeVisible();
     await expect(page.getByRole("navigation", { name: "Caminho contextual" }).getByRole("link", { name: book.title, exact: true })).toBeVisible();
   }
-  expect(geometry[0].width).toBe(1390);
+  const available = await page.locator("main").evaluate((element) => {
+    const style = getComputedStyle(element);
+    return element.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
+  });
+  expect(geometry[0].width).toBe(available);
+  expect(geometry[0].width).toBeGreaterThan(1390);
   expect(geometry[1]).toEqual(geometry[0]);
   expect(geometry[2]).toEqual(geometry[0]);
 });

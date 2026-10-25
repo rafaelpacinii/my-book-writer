@@ -31,4 +31,5 @@ nsis*/
 docs/guia-implementacao-ui.md
 docs/prototipo-ui/
 src/prototype/
-/docs/
+/docs/*
+!/docs/frontend-design.md

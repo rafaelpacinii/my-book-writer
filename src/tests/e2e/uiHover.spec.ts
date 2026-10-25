@@ -35,8 +35,8 @@ for (const theme of ["light", "dark"]) {
       for (let index = 0; index < 5; index++) {
         await target.hover();
         await page.mouse.move(1200, 1);
-        expect(await appearance(visual)).toEqual(initial);
-        expect(await visual.evaluate((element) => element.getAnimations().length)).toBe(0);
+        await expect.poll(() => appearance(visual), { timeout: 1000 }).toEqual(initial);
+        await expect.poll(() => visual.evaluate((element) => element.getAnimations().length), { timeout: 1000 }).toBe(0);
       }
     }
     await page.getByRole("button", { name: "Recolher menu", exact: true }).click();

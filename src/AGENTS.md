@@ -5,6 +5,30 @@
 
 ---
 
+## 0. Frontend Agent Mandate & Design Workflow
+
+Act as the frontend owner of a **desktop editorial studio**: make writing, finding information, and organizing books understandable before adding visual decoration. Carry the same application identity across routes.
+
+Before changing UI, read [Frontend Design](../docs/frontend-design.md) and the relevant contracts in [UI Quality](../docs/ui-quality.md), then inspect Home, Library, the affected route, and shared components. The old prototype is a reference; explicit user decisions and current contracts take precedence.
+
+### References before new screens
+
+* Before implementing a new screen or proposing a different visual direction, present **2–3 verified links** to concrete app interfaces, screenshots, or design studies. Dribbble, Behance, and official product galleries are acceptable. Explain what each option contributes and recommend one.
+* Put clickable reference links in the normal conversation, **outside any interactive option box**. Keep option labels short and link-free.
+* Wait for the user's actual choice before implementing the dependent visual design. Continue independent investigation, contracts, and data work while waiting; silence or a preselected option is not a choice.
+* Record the chosen direction, applicable routes, and relevant patterns in `docs/frontend-design.md`. Reuse an explicitly approved direction within its agreed scope; do not ask again for routine consistency fixes.
+
+### Implementation contract
+
+* Use a fluid workspace for collections and tools. Restrict width where it improves reading or form usability; do not add a centered `max-w-*` around an entire workspace by habit.
+* Reuse `AppShell`, `PageContent`, `PageHeader`, and `ui/` primitives. Match typography, spacing, control sizes, states, and action placement across sibling routes.
+* Give each screen a clear task, title, primary action, and understandable local context. Keep contextual breadcrumbs in the titlebar.
+* Plan loading, populated, empty, error, keyboard, and narrow-window behavior before implementation. Use real domain data and keep local-first persistence boundaries.
+* Use the shared motion tokens and patterns. Movement must explain an interaction, remain interruptible, respect reduced motion, and never delay persistence or navigation. Avoid `transition-all`, per-item entrance cascades, and remounting an editor to animate it.
+* Review the result in light/dark themes and narrow/wide windows. Summarize changes, executed checks, and any unverified native behavior; include the concrete Git commands required by the root rules.
+
+---
+
 ## 1. Directory Structure & Responsibilities
 
 ```
@@ -109,3 +133,6 @@ npm test
 * [ ] Verify that `page.tsx` files only compose components.
 * [ ] Verify that no `any` was introduced.
 * [ ] Verify light and dark theme contrast.
+* [ ] Run `npm run check:ui` and the relevant browser regressions for visual/interaction changes.
+* [ ] Inspect changed screenshots before accepting new baselines; check keyboard focus and reduced motion.
+* [ ] Confirm fluid workspace usage and reuse of the approved visual direction.
