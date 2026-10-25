@@ -2,6 +2,18 @@
 
 Contrato de UX/UI para o agente e para quem desenvolve o frontend. Leia junto de [src/AGENTS.md](../src/AGENTS.md) e dos [critérios de qualidade](ui-quality.md). Decisões explícitas do usuário prevalecem; protótipos antigos não substituem os contratos atuais.
 
+## Ajuste aprovado da Biblioteca — 25/10/2026
+
+Opção A, explorador suave, com referência na [lateral do Eagle 4](https://en.eagle.cool/blog/post/eagle4). Preservar as cores e a tipografia editorial da aplicação. A navegação usa seleção discreta, ícones leves e níveis progressivos de 18 px para Universo → Série → Livro, com espaço fixo para setas em todos os níveis. Mostrar também livros diretos do Universo, séries independentes e livros avulsos conforme os vínculos reais.
+
+A lateral local mede 360 px, com árvore e filtros separados por uma divisória sutil e rolagem própria. O seletor de tipo fica em uma única linha no topo, no lugar do antigo link “Todo o acervo”; busca, formato, ordenação, agrupamento e limpeza continuam na lateral. O topo do catálogo contém “Seu acervo (x itens)” e grade/lista; a contagem reflete o escopo e os filtros, sem incluir o card de criação. Em janelas estreitas, “Navegação e filtros” abre esses controles acima do catálogo. Não apresentar “Coleções” como uma configuração disponível. Títulos dos grupos, Filtros e labels dos seletores usam 12 px, negrito e foreground.
+
+Biblioteca, Universo e Série compartilham a composição de PageHeader, sem botões de criação ou de alternância do painel de detalhes no cabeçalho local. Universo e Série preservam edição direta de nome e descrição; a descrição inicia com uma linha e pode ser expandida pelo usuário. A seleção de capa abre os detalhes, cujo botão de fechar permanece dentro do próprio painel.
+
+A criação usa um card do mesmo tamanho dos demais, sempre na primeira posição, em grade, lista, agrupamento, busca ou estado vazio. Seu popover mantém as opções válidas no contexto. A lateral oferece atalhos de criação com ícones, conforme a referência de explorador do VS Code fornecida pelo usuário; Livro herda o escopo, Série recebe o Universo atual (ou o da Série selecionada), e Universo é criado na raiz.
+
+A árvore também permite mover por arraste: livros e séries são origens; séries e universos são destinos válidos conforme o domínio. Soltar um livro diretamente sobre um Universo retira o vínculo da Série; sobre uma Série independente, retira o Universo anterior; sobre “Livros avulsos”, remove ambos. O grupo permanece disponível mesmo vazio. Os cards e os diálogos de mover conservam o fluxo existente de associação, e a persistência continua no backend/API local com publicação de invalidação. Erros mantêm a origem, permitem nova tentativa e não descartam capítulos.
+
 ## Processo antes de uma tela nova
 
 1. Identificar a tarefa do escritor, a rota de entrada, os dados reais disponíveis e a ação principal. Consultar o roadmap e o código existente.
@@ -34,6 +46,17 @@ As alternativas abaixo formam o registro de referências apresentado para essa e
 | C · Estúdio de produção | [Scrivener — organização do manuscrito e pesquisa](https://www.literatureandlatte.com/scrivener/overview) | Densidade de ferramentas, múltiplos painéis e acesso ao material de apoio. |
 
 Observar as imagens das interfaces dos aplicativos, não a estrutura comercial de suas páginas. As referências orientam decisões; não são modelos para reprodução literal.
+
+## Composição aprovada para Biblioteca e Códice
+
+Em 25/10/2026, o usuário escolheu o **explorador com detalhes para a Biblioteca**, inspirado no [Eagle](https://en.eagle.cool/), e a **lista com ficha ao lado para o Códice**, inspirada no [Bear](https://bear.app/). Essas composições evoluem a direção editorial acolhedora já aprovada.
+
+- **Biblioteca:** navegação local por Universos e Séries, acervo em grade/lista e painel de detalhes recolhível. Selecionar a capa consulta o livro sem sair do acervo; o título e “Abrir livro” são ações explícitas de abertura. Os filtros e as ações de mover/reordenar continuam disponíveis. A hierarquia usa links e seções recolhíveis com nomes acessíveis.
+- **Códice:** contexto, categorias, busca e lista compacta à esquerda; a ficha selecionada ocupa a área principal. O layout compartilhado mantém a lista montada durante a seleção, preservando busca e rolagem. A URL continua identificando contexto e entidade, inclusive em recarga e histórico. Links, troca de contexto e abas passam pela mesma proteção de rascunhos.
+- **Painéis:** cabeçalhos compactos, rolagem independente e superfícies locais distintas da navegação global. O corpo de uma ficha se adapta à largura do seu painel, não apenas à largura total da janela.
+- **Janelas estreitas:** as coleções da Biblioteca podem ser recolhidas e os detalhes passam para uma área inferior rolável. No Códice, “Ver fichas” alterna entre a lista e a ficha sem desmontar o rascunho.
+
+A identidade compartilhada permanece nos tokens, fontes, controles, estados e comportamento. A composição varia com a tarefa; a Biblioteca explora o acervo e o Códice desenvolve uma entidade por vez.
 
 ## O espaço pertence à tarefa
 

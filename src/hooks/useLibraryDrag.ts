@@ -9,15 +9,18 @@ export function useLibraryDrag(
   disabled: boolean,
 ) {
   const source = useRef<LibraryDragSource | null>(null);
+  const [dragging, setDragging] = useState<LibraryDragSource | null>(null);
   const [overId, setOverId] = useState<string | null>(null);
-  const end = () => { source.current = null; setOverId(null); };
+  const end = () => { source.current = null; setDragging(null); setOverId(null); };
   return {
-    overId, end,
+    dragging, overId, end,
     start: (event: DragEvent, id: string, kind: LibraryDragSource["kind"] = "book") => {
       if (disabled) { event.preventDefault(); return; }
-      source.current = { kind, id };
+      const next = { kind, id };
+      source.current = next;
+      setDragging(next);
       event.dataTransfer.effectAllowed = "move";
-      event.dataTransfer.setData("application/x-mbw-library-item", JSON.stringify(source.current));
+      event.dataTransfer.setData("application/x-mbw-library-item", JSON.stringify(next));
       event.dataTransfer.setData("text/plain", id);
     },
     over: (event: DragEvent, target: LibraryMoveTarget) => {

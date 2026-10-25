@@ -61,7 +61,7 @@ export function useLibraryMove(books: Book[], series: BookSeries[], disabled: bo
     else void move(source.id, target);
   }, disabled || busy);
   return {
-    ...drag, busy, movingBook, movingSeries, error, announcement, move, moveSeries, close,
+    ...drag, busy, movingBook, movingSeries, error, announcement, move, moveSeries, canMove, close,
     clearError: () => setError(null),
     open: (book: Book) => { setError(null); setMovingSeries(null); setMovingBook(book); },
     openSeries: (item: BookSeries) => { setError(null); setMovingBook(null); setMovingSeries(item); },

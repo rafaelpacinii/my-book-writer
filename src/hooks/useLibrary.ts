@@ -8,6 +8,7 @@ import { useLibraryUniverses } from "@/hooks/useLibraryUniverses";
 import { useLibraryExplorer } from "@/hooks/useLibraryExplorer";
 import { useLibraryMove } from "@/hooks/useLibraryMove";
 import { useCatalog } from "@/hooks/useCatalog";
+import { useLibraryInspector } from "@/hooks/useLibraryInspector";
 import type { LibraryCollection } from "@/types/library";
 
 export function useLibrary() {
@@ -17,6 +18,7 @@ export function useLibrary() {
   const seriesManager = useLibrarySeries(profile?.id);
   const universeManager = useLibraryUniverses(profile?.id);
   const explorer = useLibraryExplorer(books, seriesManager.series, universeManager.universes);
+  const inspector = useLibraryInspector(explorer.scope, explorer.entries);
   const move = useLibraryMove(books, seriesManager.series, isRefreshingBooks || seriesManager.busy || universeManager.busy
     || seriesManager.isRefreshing || universeManager.isRefreshing);
   const busy = move.busy || seriesManager.busy || universeManager.busy || isRefreshingBooks;
@@ -34,7 +36,7 @@ export function useLibrary() {
       : universeManager.updateUniverse(entry.collection.id, name, description);
 
   return {
-    ...explorer, books, formats, formatMap, fontMap, seriesManager, universeManager, move, busy,
+    ...explorer, books, formats, formatMap, fontMap, seriesManager, universeManager, move, busy, inspector,
     editCollection, deleteCollection, updateCollection, isRefreshingBooks,
     error: profileError || booksError || catalogError
       || (seriesManager.dialog ? null : seriesManager.error)

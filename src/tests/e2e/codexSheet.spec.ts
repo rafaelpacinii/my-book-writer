@@ -9,7 +9,7 @@ async function openSheet(page: Page) {
   await page.getByRole("button", { name: "Nova ficha", exact: true }).click();
   await page.getByRole("dialog").getByLabel("Nome da ficha").fill("Ayla");
   await page.getByRole("dialog").getByRole("button", { name: "Criar ficha", exact: true }).click();
-  await expect(page.getByRole("heading", { level: 1, name: "Ayla", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 2, name: "Ayla", exact: true })).toBeVisible();
   await expect(page).toHaveURL(/\/codex\/sheet\?/);
 }
 const gallery = (page: Page) => page.getByRole("region", { name: "Galeria da ficha" });

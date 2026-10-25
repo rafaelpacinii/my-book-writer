@@ -9,7 +9,7 @@ import { AppSidebar } from "@/components/shared/AppSidebar";
 export function AppShell({ children }: { children: ReactNode }) {
   const mainRef = useWorkspaceScroll();
   const menu = useWorkspaceNavigation();
-  const isStudio = /^\/books\/(editor|preview|versions)$/.test(usePathname());
+  const isStudio = /^\/(books\/(editor|preview|versions)|library|codex(\/sheet)?)$/.test(usePathname());
 
   return (
     <div className="workspace-shell flex overflow-hidden text-foreground">

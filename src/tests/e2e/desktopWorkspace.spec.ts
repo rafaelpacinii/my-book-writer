@@ -1,25 +1,5 @@
-import type { Page } from "@playwright/test";
 import { test, expect } from "@/tests/e2e/fixtures";
-import { seedUniverses, world } from "@/tests/e2e/universeFixtures";
-import type { CodexEntity } from "@/types/codex";
-import type { CodexStore } from "@/lib/codex/storage";
-
-async function seedDesktop(page: Page) {
-  await seedUniverses(page);
-  const entities: CodexEntity[] = Array.from({ length: 18 }, (_, index) => ({
-    id: `desktop-person-${index}`, profile_id: world.profile_id, book_id: null, universe_id: world.id,
-    kind: "character", name: `Personagem de Aurora ${index + 1}`, summary: "Uma história a desenvolver.",
-    role: "Viajante", status: "Em jornada", archetype: null, tags_json: "[]", position: index,
-    created_at: world.created_at, updated_at: world.updated_at, deleted_at: null,
-  }));
-  const store: CodexStore = { version: 1, entities, categories: [], fields: [], images: [],
-    templates: [], contexts: [], assets: [] };
-  await page.addInitScript((store) => {
-    if (!localStorage.getItem("my_book_writer_codex_v1")) {
-      localStorage.setItem("my_book_writer_codex_v1", JSON.stringify(store));
-    }
-  }, store);
-}
+import { seedDesktop } from "@/tests/e2e/panelWorkspaceFixtures";
 
 for (const theme of ["light", "dark"]) {
   for (const width of [800, 1440, 2560]) {
@@ -31,8 +11,7 @@ for (const theme of ["light", "dark"]) {
       await page.goto("/home");
       for (const expanded of [false, true]) {
         if (expanded) await page.getByRole("button", { name: "Expandir menu", exact: true }).click();
-        const headings = [];
-        const grids: number[][] = [];
+        const fonts: string[] = [];
         for (const route of ["/home", "/library", "/codex?universeId=world"]) {
           await page.goto(route);
           await expect(page.locator('[aria-busy="true"]')).toHaveCount(0);
@@ -51,14 +30,10 @@ for (const theme of ["light", "dark"]) {
           expect(bounds.left).toBeCloseTo(bounds.expectedLeft, 0);
           expect(bounds.overflow).toBe(false);
           if (width === 2560) expect(bounds.width).toBeGreaterThan(1390);
-          headings.push(await page.getByRole("heading", { level: 1 }).evaluate((heading) => {
-            const style = getComputedStyle(heading);
-            return { font: style.fontFamily, size: style.fontSize, weight: style.fontWeight,
-              lineHeight: style.lineHeight, left: heading.getBoundingClientRect().left };
-          }));
-          if (route !== "/home") {
-            const grid = page.locator(route === "/library" ? ".book-grid" : ".workspace-grid").first();
-            grids.push(await grid.evaluate((element) => getComputedStyle(element).gridTemplateColumns.split(" ").map(parseFloat)));
+          fonts.push(await page.getByRole("heading", { level: 1 }).evaluate((heading) => getComputedStyle(heading).fontFamily));
+          if (route === "/library") {
+            await expect(page.getByRole("navigation", { name: "Navegação da biblioteca" })).toBeVisible();
+            expect(await page.locator("[data-library-catalog]").evaluate((element) => element.scrollWidth <= element.clientWidth)).toBe(true);
           }
           if (route.startsWith("/codex")) {
             await expect(page.getByRole("article")).toHaveCount(18);
@@ -71,10 +46,8 @@ for (const theme of ["light", "dark"]) {
             }
           }
         }
-        expect(headings[1]).toEqual(headings[0]);
-        expect(headings[2]).toEqual(headings[0]);
-        expect(grids[1]).toHaveLength(grids[0].length);
-        grids[1].forEach((column, index) => expect(column).toBeCloseTo(grids[0][index], 1));
+        expect(fonts[1]).toEqual(fonts[0]);
+        expect(fonts[2]).toEqual(fonts[0]);
       }
     });
   }

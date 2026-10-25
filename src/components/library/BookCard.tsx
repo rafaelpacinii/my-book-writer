@@ -4,6 +4,7 @@ import type { Book } from "@/types/book";
 import { formatLastEdited } from "@/utils/format";
 import { BookCardCover } from "@/components/library/BookCardCover";
 import { BookActions } from "@/components/library/BookActions";
+import { BookSelectionButton } from "@/components/library/BookSelectionButton";
 
 interface Props {
   book: Book;
@@ -14,12 +15,15 @@ interface Props {
   onDragStart?: DragEventHandler<HTMLElement>;
   onDragEnd?: DragEventHandler<HTMLElement>;
   disabled?: boolean;
+  onInspect?: (element: HTMLButtonElement) => void;
+  selected?: boolean;
 }
 
-export function BookCard({ book, index, formatName, fontName, onMove, onDragStart, onDragEnd, disabled }: Props) {
+export function BookCard({ book, index, formatName, fontName, onMove, onDragStart, onDragEnd, disabled, onInspect, selected = false }: Props) {
   return (
-    <article className="book-card relative min-w-0" data-book-id={book.id}
+    <article className="book-card relative min-w-0" data-book-id={book.id} data-selected={selected}
       draggable={Boolean(onDragStart) && !disabled} onDragStart={onDragStart} onDragEnd={onDragEnd}>
+      {onInspect && <BookSelectionButton title={book.title} selected={selected} onInspect={onInspect} />}
       <BookCardCover book={book} index={index} />
       <BookActions bookId={book.id} title={book.title} onMove={onMove} disabled={disabled} />
       <div className="book-info min-w-0 px-px pt-[15px]">
@@ -30,7 +34,7 @@ export function BookCard({ book, index, formatName, fontName, onMove, onDragStar
         )}
         <h2 className="font-display text-[23px] leading-[1.12]">
           <Link href={`/books/view?bookId=${encodeURIComponent(book.id)}`}
-            className="line-clamp-2 wrap-anywhere hover:text-primary after:absolute after:inset-0 after:rounded-md after:content-['']"
+            className={`line-clamp-2 wrap-anywhere hover:text-primary ${onInspect ? "relative z-20" : "after:absolute after:inset-0 after:rounded-md after:content-['']"}`}
           >
             {book.title}
           </Link>

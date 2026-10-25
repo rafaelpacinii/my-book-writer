@@ -7,7 +7,7 @@ import { book } from "@/tests/fixtures/book";
 import { mockDesktopWindow } from "@/tests/e2e/windowMock";
 import { mockUI } from "@/tests/e2e/uiMock";
 import { test, expect } from "@/tests/e2e/fixtures";
-import { createLibraryItem } from "@/tests/e2e/libraryActions";
+import { createLibraryItem, dragLibraryItem } from "@/tests/e2e/libraryActions";
 
 const world: Universe = {
   id: "world", name: "Terras do Norte", profile_id: book.profile_id, description: "Um mundo compartilhado",
@@ -59,15 +59,17 @@ test("mixed explorer cards navigate universes, nested series and books with brow
 
 test("grouping separates collection types into rows and persists alongside list view", async ({ page }) => {
   await seed(page);
+  await page.addInitScript(() => {
+    if (!localStorage.getItem("mbw_library_display")) {
+      localStorage.setItem("mbw_library_display", JSON.stringify({ grouping: "type", view: "grid" }));
+    }
+  });
   await page.goto("/library");
-  await expect(page.getByLabel("Agrupar biblioteca")).toHaveValue("mixed");
-  await page.getByLabel("Agrupar biblioteca").selectOption("type");
   for (const label of ["Universos", "Séries", "Livros avulsos"]) {
     await expect(page.getByRole("region", { name: label, exact: true }).getByRole("article")).toHaveCount(1);
   }
   await page.getByRole("button", { name: "Visualizar em lista" }).click();
   await page.reload();
-  await expect(page.getByLabel("Agrupar biblioteca")).toHaveValue("type");
   await expect(page.getByRole("button", { name: "Visualizar em lista" })).toHaveAttribute("aria-pressed", "true");
   await expect(page.locator(".book-list article")).toHaveCount(3);
 });
@@ -109,7 +111,7 @@ test("dragging a standalone book onto a series appends a persisted automatic vol
   await page.goto("/library");
   await expect(page.locator('[data-book-id="free"]')).toBeVisible();
   await context.setOffline(true);
-  await page.locator('[data-book-id="free"]').dragTo(page.locator('[data-collection-id="saga"]'));
+  await dragLibraryItem(page, page.locator('[data-book-id="free"]'), page.locator('[data-collection-id="saga"]'));
   await expect(page.locator('[data-book-id="free"]')).toHaveCount(0);
   await expect(page.locator('[data-collection-id="saga"]')).toContainText("4 livros");
   expect((await saved(page)).find((item) => item.id === free.id)).toMatchObject({ series_id: saga.id, series_volume: 4 });
@@ -239,7 +241,7 @@ test("failed native book moves retain the source and can be retried from the dia
 test("dragging a series into a universe preserves all volumes and produces the complete book path", async ({ page }) => {
   await seed(page);
   await page.goto("/library");
-  await page.locator('[data-collection-id="saga"]').dragTo(page.locator('[data-collection-id="world"]'));
+  await dragLibraryItem(page, page.locator('[data-collection-id="saga"]'), page.locator('[data-collection-id="world"]'));
   await expect(page.locator('[data-collection-id="saga"]')).toHaveCount(0);
   expect((await saved(page)).filter((item) => item.series_id === saga.id).map((item) => [item.series_volume, item.universe_id]))
     .toEqual([[1, world.id], [2, world.id], [3, world.id]]);

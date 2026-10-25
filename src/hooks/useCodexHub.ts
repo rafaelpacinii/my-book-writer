@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useContext, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { SheetNavigationContext } from "@/lib/codex/editing";
 import { useProfile } from "@/hooks/useProfile";
 import { useCodex, useCodexContexts } from "@/hooks/useCodex";
 import { useResource } from "@/hooks/useResource";
@@ -11,7 +12,9 @@ import type { CodexKind, CodexScopeInput } from "@/types/codex";
 
 export function useCodexHub() {
   const router = useRouter();
+  const navigate = useContext(SheetNavigationContext) ?? router.push;
   const params = useSearchParams();
+  const selectedId = usePathname() === "/codex/sheet" ? params.get("entityId") : null;
   const profile = useProfile();
   const contexts = useCodexContexts(profile.profile?.id);
   const bookId = params.get("bookId");
@@ -22,12 +25,14 @@ export function useCodexHub() {
       : universeId !== null ? { profile_id: profile.profile.id, universe_id: universeId } : null;
   const resolved = useResource(requested ? codexScopeResource(requested) : emptyCodexScope);
   const resolvedScope = requested ? resolved.data : null;
-  const context = requested ? contexts.contexts.find((item) => item.kind === (resolvedScope?.universe_id ? "universe" : "book")
-    && item.id === (resolvedScope?.universe_id ?? resolvedScope?.book_id))
+  const target = resolvedScope ?? requested;
+  const context = requested ? contexts.contexts.find((item) => item.kind === (target?.universe_id ? "universe" : "book")
+    && item.id === (target?.universe_id ?? target?.book_id))
     : contexts.contexts.find((item) => !item.is_archived) ?? contexts.contexts[0];
   const scope = context && profile.profile ? contextScope(profile.profile.id, context) : null;
   const data = useCodex(scope);
-  const kind = codexKinds.find((item) => item === params.get("kind")) ?? "character";
+  const kind = data.entities.find((item) => item.id === selectedId)?.kind
+    ?? codexKinds.find((item) => item === params.get("kind")) ?? "character";
   const [search, setSearch] = useState("");
   const dialogKey = `${profile.profile?.id}:${context ? contextKey(context) : "none"}:${kind}`;
   const [creationKey, setCreationKey] = useState<string | null>(null);
@@ -35,21 +40,21 @@ export function useCodexHub() {
   const [announcement, setAnnouncement] = useState("");
   const chooseContext = (value: string) => {
     const next = contexts.contexts.find((item) => contextKey(item) === value);
-    if (next) router.push(codexHref(next, kind));
+    if (next) navigate(codexHref(next, kind));
   };
   const chooseKind = (next: CodexKind) => {
-    if (context) router.push(codexHref(context, next));
+    if (context && next !== kind) navigate(codexHref(context, next));
   };
   const error = profile.error ?? contexts.error ?? (invalidScope ? "Escolha apenas um Livro ou Universo para o Códice." : null)
     ?? (requested ? resolved.error : null) ?? data.error;
   return { ...data, contexts: contexts.contexts, context, scope, kind, search, setSearch, chooseContext, chooseKind,
     creating: creationKey === dialogKey, setCreating,
-    announcement,
+    announcement, selectedId,
     visible: filterCodex(data.entities, kind, search), error,
     isLoading: profile.isLoading || contexts.isLoading || Boolean(requested && resolved.isLoading) || data.isLoading,
     canCreate: Boolean(scope && !context?.is_archived && !error),
     retry: () => { void profile.refreshProfile(); void contexts.refresh(); void resolved.refresh(); void data.refresh(); },
-    created: (id: string, name: string) => { setCreating(false); setAnnouncement(`Ficha ${name} criada.`); if (scope) router.push(codexSheetHref(scope, id)); },
+    created: (id: string, name: string) => { setCreating(false); setAnnouncement(`Ficha ${name} criada.`); if (scope) navigate(codexSheetHref(scope, id, kind)); },
   };
 }
 export type CodexHub = ReturnType<typeof useCodexHub>;

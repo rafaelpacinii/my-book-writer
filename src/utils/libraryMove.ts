@@ -8,9 +8,14 @@ export function libraryMoveInput(book: Book, target: LibraryMoveTarget): UpdateB
     return {
       series_id: target.collection.id,
       ...(target.collection.universe_id ? { universe_id: target.collection.universe_id } : {}),
+      ...(target.direct && !target.collection.universe_id ? { clear_universe: true } : {}),
     };
   }
   if (target.kind === "universe") {
+    if (target.direct) {
+      if (book.universe_id === target.collection.id && !book.series_id) return null;
+      return { universe_id: target.collection.id, clear_series: true };
+    }
     if (book.universe_id === target.collection.id) return null;
     return { universe_id: target.collection.id };
   }

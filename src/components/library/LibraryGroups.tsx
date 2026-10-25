@@ -8,7 +8,8 @@ const categories = [
 ] as const;
 
 export function LibraryGroups({ lib }: { lib: ReturnType<typeof useLibrary> }) {
-  if (lib.grouping === "mixed") return <LibraryEntryGrid entries={lib.entries} lib={lib} />;
+  if (lib.grouping === "mixed") return <LibraryEntryGrid entries={lib.entries} lib={lib} includeCreate />;
+  const first = categories.find(({ kind }) => lib.entries.some((entry) => entry.kind === kind));
   return (
     <div className="flex flex-col gap-8">
       {categories.map(({ kind, label }) => {
@@ -17,7 +18,7 @@ export function LibraryGroups({ lib }: { lib: ReturnType<typeof useLibrary> }) {
         return (
           <section key={kind} aria-label={label}>
             <h3 className="mb-4 font-display text-2xl">{label}</h3>
-            <LibraryEntryGrid entries={entries} lib={lib} />
+            <LibraryEntryGrid entries={entries} lib={lib} includeCreate={kind === first?.kind} />
           </section>
         );
       })}

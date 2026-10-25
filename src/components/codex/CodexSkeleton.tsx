@@ -1,15 +1,14 @@
 import { Skeleton } from "@/components/ui/Skeleton";
-import { WorkspaceGrid } from "@/components/shared/WorkspaceGrid";
 
 export function CodexSkeleton() {
   return (
-    <WorkspaceGrid>
+    <div className="flex flex-col gap-3 p-4">
       {[0, 1, 2, 3].map((key) => (
-        <div key={key} className="workspace-card overflow-hidden">
-          <Skeleton className="aspect-[4/3] rounded-none" />
-          <div className="space-y-3 px-5 pt-[18px] pb-4"><Skeleton className="h-7 w-2/3" /><Skeleton className="h-4 w-full" /></div>
+        <div key={key} className="flex items-center gap-3 py-2">
+          <Skeleton className="h-14 w-11 shrink-0" />
+          <div className="flex-1 space-y-2"><Skeleton className="h-4 w-2/3" /><Skeleton className="h-3 w-full" /></div>
         </div>
       ))}
-    </WorkspaceGrid>
+    </div>
   );
 }

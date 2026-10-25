@@ -1,9 +1,7 @@
-import { BookOpen, Search, Sparkles } from "lucide-react";
+import { BookOpen, Search, Sparkles, UserRound } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { LinkButton } from "@/components/ui/LinkButton";
-import { CodexCard } from "@/components/codex/CodexCard";
 import { CodexEmpty } from "@/components/codex/CodexEmpty";
-import { WorkspaceGrid } from "@/components/shared/WorkspaceGrid";
 import { codexLabels } from "@/utils/codexHub";
 import type { CodexHub } from "@/hooks/useCodexHub";
 
@@ -24,11 +22,7 @@ export function CodexContent({ hub }: { hub: CodexHub }) {
     </CodexEmpty>
   );
   return (
-    <section aria-label={`Fichas de ${codexLabels[hub.kind].plural.toLocaleLowerCase("pt-BR")}`}>
-      <p className="mb-4 text-xs text-muted" role="status">{hub.visible.length} {hub.visible.length === 1 ? "ficha" : "fichas"}</p>
-      <WorkspaceGrid>
-        {hub.visible.map((entity) => <CodexCard key={entity.id} entity={entity} scope={scope} />)}
-      </WorkspaceGrid>
-    </section>
+    <CodexEmpty icon={UserRound} title="Escolha uma ficha"
+      description="Selecione um nome na lista para consultar e desenvolver sua ficha aqui, sem perder o lugar no seu mundo." />
   );
 }
