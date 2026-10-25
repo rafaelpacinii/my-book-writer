@@ -97,4 +97,3 @@ impl<'a> UniverseService<'a> {
         repo.soft_delete(id).await
     }
 }
-

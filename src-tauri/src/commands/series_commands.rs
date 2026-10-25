@@ -91,4 +91,3 @@ pub async fn delete_series(state: State<'_, AppState>, id: String) -> Result<(),
     let service = SeriesService::new(&state.db_pool);
     service.delete_series(&id).await.map_err(|e| e.to_string())
 }
-

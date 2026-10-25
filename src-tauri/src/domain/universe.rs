@@ -28,4 +28,3 @@ pub struct UpdateUniverseInput {
     pub name: Option<String>,
     pub description: Option<String>,
 }
-
