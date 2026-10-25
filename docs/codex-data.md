@@ -1,6 +1,6 @@
 # Motor de dados do Códice
 
-O Dia 4 prepara a persistência e os contratos usados pelo hub do Dia 5. Ainda não acrescenta telas ou entrada na navegação. As operações desktop seguem `API TypeScript → comando Tauri → serviço → repositório SQLx → SQLite`; nenhuma consulta SQL acontece no frontend.
+O Dia 4 prepara a persistência e os contratos usados pelo [hub do Dia 5](codex-hub.md). As operações desktop seguem `API TypeScript → comando Tauri → serviço → repositório SQLx → SQLite`; nenhuma consulta SQL acontece no frontend.
 
 ## Esquema e identidade
 

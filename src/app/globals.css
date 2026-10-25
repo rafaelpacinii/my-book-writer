@@ -1,13 +1,6 @@
 @import "tailwindcss" source("../");
 @source not "../prototype";
 @source not "../tests";
-@import "../lib/editor/bookTypography.css";
-@import "../components/shared/workspace.css";
-@import "../components/shared/sidebar.css";
-@import "../components/shared/book-object.css";
-@import "../components/library/explorer.css";
-@import "../components/shared/interactions.css";
-@import "../components/shared/titlebar.css";
 
 @font-face {
   font-family: 'Inter';

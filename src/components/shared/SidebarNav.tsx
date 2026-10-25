@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDown, Home, Library, Settings } from "lucide-react";
+import { BookOpen, ChevronDown, Home, Library, Settings } from "lucide-react";
 import { useSidebarNavigation } from "@/hooks/useSidebarNavigation";
 import { SidebarNavLink } from "@/components/shared/SidebarNavLink";
 import { SidebarRecentBooks } from "@/components/shared/SidebarRecentBooks";
@@ -30,6 +30,7 @@ export function SidebarNav({ onNavigate }: { onNavigate: () => void }) {
           <div id={menu.collectionId} data-sidebar-expanded hidden={!menu.isCollectionOpen}>
             <SidebarRecentBooks onNavigate={onNavigate} />
           </div>
+          <SidebarNavLink label="Códice" href="/codex" icon={BookOpen} onNavigate={onNavigate} />
         </div>
       </div>
       <div className="sidebar-preferences mt-5 shrink-0 pt-4">

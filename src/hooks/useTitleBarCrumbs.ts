@@ -53,6 +53,7 @@ export function useTitleBarCrumbs(): TitleBarCrumb[] {
   }, [bookId]);
 
   if (pathname === "/library") return libraryCrumbs;
+  if (pathname === "/codex") return [{ label: "Códice" }];
   if (pathname === "/books/new") return [{ label: "Biblioteca", href: "/library" }, { label: "Novo livro" }];
   if (pathname.startsWith("/books/")) {
     const bookLabel = currentBook?.title.trim() || "Livro";

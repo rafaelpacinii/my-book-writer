@@ -1,13 +1,15 @@
-import { getCodexSheet, listCodexEntities, listCodexTemplates, listCodexContexts } from "@/lib/api/codex";
+import { getCodexSheet, listCodexEntities, listCodexTemplates, listCodexContexts, resolveCodexScope } from "@/lib/api/codex";
 import { createResource } from "@/lib/data/resource";
 import type { DataChange } from "@/lib/data/changes";
-import type { CodexContext, CodexEntity, CodexKind, CodexScopeInput, CodexSheet, CodexTemplate } from "@/types/codex";
+import type { CodexContext, CodexEntity, CodexKind, CodexScope, CodexScopeInput, CodexSheet, CodexTemplate } from "@/types/codex";
 
 type Resource<T> = ReturnType<typeof createResource<T>>;
 const entities = new Map<string, Resource<CodexEntity[]>>();
 const sheets = new Map<string, Resource<CodexSheet | null>>();
 const templates = new Map<string, Resource<CodexTemplate[]>>();
 const contexts = new Map<string, Resource<CodexContext[]>>();
+const scopes = new Map<string, Resource<CodexScope | null>>();
+export const emptyCodexScope = createResource<CodexScope | null>(async () => null);
 export const emptyCodexEntities = createResource<CodexEntity[]>(async () => []);
 export const emptyCodexSheet = createResource<CodexSheet | null>(async () => null);
 export const emptyCodexTemplates = createResource<CodexTemplate[]>(async () => []);
@@ -31,9 +33,11 @@ export const codexSheetResource = (scope: CodexScopeInput, id: string) =>
 export const codexTemplatesResource = (profileId: string, kind?: CodexKind) =>
   cached(templates, JSON.stringify([profileId, kind ?? null]), () => listCodexTemplates(profileId, kind));
 export const codexContextsResource = (profileId: string) => cached(contexts, profileId, () => listCodexContexts(profileId));
+export const codexScopeResource = (scope: CodexScopeInput) =>
+  cached(scopes, JSON.stringify(key(scope)), () => resolveCodexScope(scope));
 
 export function invalidateCodexResources(change: DataChange) {
   if (!["codex", "books", "series", "universes", "restore", "profile"].includes(change)) return;
   const clear = change !== "codex";
-  for (const cache of [entities, sheets, templates, contexts]) for (const resource of [...cache.values()]) resource.invalidate(clear);
+  for (const cache of [entities, sheets, templates, contexts, scopes]) for (const resource of [...cache.values()]) resource.invalidate(clear);
 }

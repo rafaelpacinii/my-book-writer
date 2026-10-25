@@ -1,6 +1,13 @@
 import type { Metadata, Viewport } from "next";
 import "@/lib/branding/tokens.css";
 import "./globals.css";
+import "@/lib/editor/bookTypography.css";
+import "@/components/shared/workspace.css";
+import "@/components/shared/sidebar.css";
+import "@/components/shared/book-object.css";
+import "@/components/library/explorer.css";
+import "@/components/shared/interactions.css";
+import "@/components/shared/titlebar.css";
 import "@/components/ui/select.css";
 import "@/components/library/controls.css";
 import "@/components/shared/branding.css";
