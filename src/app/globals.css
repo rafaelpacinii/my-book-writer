@@ -189,6 +189,7 @@
 :root {
   color-scheme: light;
   --background: #F4F3EF;
+  --app-chrome: #E4E5DE;
   --surface: var(--mbw-paper);
   --surface-hover: #ECEAE4;
   --surface-elevated: #E5E3DC;
@@ -215,6 +216,7 @@
 [data-theme="dark"] {
   color-scheme: dark;
   --background: var(--mbw-night);
+  --app-chrome: #10120F;
   --surface: #212320;
   --surface-hover: #2C3029;
   --surface-elevated: #353A31;

@@ -14,6 +14,7 @@ for (const theme of ["light", "dark"]) {
     const sidebar = page.locator("[data-app-sidebar]");
     const color = await bar.evaluate((element) => getComputedStyle(element).backgroundColor);
     await expect(sidebar).toHaveCSS("background-color", color);
+    await expect(page.locator(".workspace-content")).not.toHaveCSS("background-color", color);
     await expect(bar).toHaveCSS("border-bottom-width", "0px");
     await expect(sidebar).toHaveCSS("border-right-width", "0px");
     await expect(sidebar.locator(".sidebar-footer, .sidebar-preferences")).toHaveCount(2);
@@ -50,6 +51,17 @@ for (const theme of ["light", "dark"]) {
     }
     expect((await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa"]).analyze()).violations).toEqual([]);
     await page.screenshot({ path: test.info().outputPath(`workspace-chrome-${theme}-320.png`) });
+    await page.setViewportSize({ width: 1440, height: 1000 });
+    await page.goto(`/books/editor${query}&chapterId=${chapter.id}`);
+    const chapters = page.getByRole("complementary").filter({ hasText: "Capítulos" });
+    await expect(chapters).toBeVisible();
+    await expect(chapters).not.toHaveCSS("background-color", color);
+    await expect(sidebar).toHaveCSS("background-color", color);
+    await bar.getByRole("button", { name: "Expandir menu", exact: true }).click();
+    await expect(sidebar).toHaveCSS("background-color", color);
+    await expect(chapters).not.toHaveCSS("background-color", color);
+    expect((await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa"]).analyze()).violations).toEqual([]);
+    await page.screenshot({ path: `/tmp/my-book-writer-chrome-editor-${theme}.png` });
   });
 }
 
