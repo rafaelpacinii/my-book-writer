@@ -1,8 +1,8 @@
 /* Editorial workspace from the supplied design. Manuscript typography stays separate. */
 .workspace-main { padding: 37px 42px 24px; }
-.workspace-studio > .workspace-menu-trigger { margin: 8px 16px; }
-.workspace-shell:has([data-editor-focus="true"]) > .workspace-navigation,
-.workspace-shell:has([data-editor-focus="true"]) .workspace-menu-trigger { display: none; }
+.workspace-shell { background: var(--app-chrome); }
+.workspace-content { border-top-left-radius: 16px; background: var(--background); overflow: hidden; }
+.workspace-shell:has([data-editor-focus="true"]) > .workspace-navigation { display: none; }
 .editorial-eyebrow { font: 10px var(--font-mono); letter-spacing: .13em; text-transform: uppercase; color: var(--muted); }
 .editorial-heading { font-family: var(--font-display); font-size: clamp(40px, 3.6vw, 58px); font-weight: 400; line-height: 1.05; letter-spacing: -.025em; overflow-wrap: anywhere; }
 .resume-card { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(180px, .8fr); gap: 24px; min-height: 235px; padding: 28px 32px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
@@ -36,7 +36,7 @@
 @media (max-width: 699px) {
   .workspace-navigation { position: fixed; inset: var(--app-titlebar-height) auto 0 0; z-index: 50; visibility: hidden; }
   .workspace-navigation[data-open="true"] { visibility: visible; }
-  .workspace-sidebar { box-shadow: 12px 0 40px #0004; }
+  .workspace-sidebar { box-shadow: 12px 0 40px color-mix(in srgb, var(--foreground) 20%, transparent); }
   .workspace-main { padding: 28px 20px 24px; }
   .resume-card { grid-template-columns: minmax(0, 1fr) 110px; gap: 10px; padding: 23px 20px; }
   .resume-visual .book-object { width: 82px; }

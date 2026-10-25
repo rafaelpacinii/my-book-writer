@@ -9,32 +9,29 @@ export function TitleBarNav() {
   if (crumbs.length === 0) return null;
 
   return (
-    <>
-      <span className="titlebar-separator" aria-hidden="true">|</span>
-      <nav aria-label="Caminho contextual" className="titlebar-nav">
-        <ol className="titlebar-crumbs">
-          {crumbs.map((crumb, index) => {
-            const isLast = index === crumbs.length - 1;
-            return (
-              <li key={`${index}-${crumb.label}`} className="titlebar-crumb-item">
-                {index > 0 && (
-                  <ChevronRight size={11} className="titlebar-chevron" aria-hidden="true" />
-                )}
-                {crumb.href && !isLast ? (
-                  <Link href={crumb.href} className="titlebar-link">
-                    {crumb.label}
-                  </Link>
-                ) : (
-                  <span className="titlebar-current" aria-current={isLast ? "page" : undefined}>
-                    {crumb.label}
-                  </span>
-                )}
-              </li>
-            );
-          })}
-        </ol>
-      </nav>
-    </>
+    <nav aria-label="Caminho contextual" className="titlebar-nav">
+      <ol className="titlebar-crumbs">
+        {crumbs.map((crumb, index) => {
+          const isLast = index === crumbs.length - 1;
+          return (
+            <li key={`${index}-${crumb.label}`} className="titlebar-crumb-item">
+              {index > 0 && (
+                <ChevronRight size={11} className="titlebar-chevron" aria-hidden="true" />
+              )}
+              {crumb.href && !isLast ? (
+                <Link href={crumb.href} className="titlebar-link">
+                  {crumb.label}
+                </Link>
+              ) : (
+                <span className="titlebar-current" aria-current={isLast ? "page" : undefined}>
+                  {crumb.label}
+                </span>
+              )}
+            </li>
+          );
+        })}
+      </ol>
+    </nav>
   );
 }
 

@@ -11,7 +11,9 @@ for (const theme of ["light", "dark"]) {
     await page.goto("/library");
     const sidebar = page.getByRole("complementary", { name: "Menu principal" });
     await expect(page.locator(".workspace-header")).toHaveCount(0);
-    await expect(sidebar).toHaveCSS("width", "240px");
+    await expect(sidebar).toHaveCSS("width", "48px");
+    await page.getByRole("button", { name: "Expandir menu", exact: true }).click();
+    await expect(sidebar).toHaveCSS("width", "216px");
     const brand = await page.locator("[data-titlebar-brand]").boundingBox();
     await expect(sidebar.locator("[data-brand]")).toHaveCount(0);
     const themeToggle = await sidebar.getByRole("button", { name: "Alternar tema" }).boundingBox();
@@ -30,7 +32,7 @@ for (const theme of ["light", "dark"]) {
     await page.getByRole("button", { name: "Mostrar livros recentes" }).click();
     await expect(recent).toBeVisible();
     await page.getByRole("button", { name: "Recolher menu", exact: true }).click();
-    await expect(page.locator("[data-app-sidebar]")).toHaveCSS("width", "56px");
+    await expect(page.locator("[data-app-sidebar]")).toHaveCSS("width", "48px");
     await expect(sidebar.getByRole("button", { name: "Alternar tema" })).toBeInViewport({ ratio: 1 });
     await expect(sidebar.getByRole("button", { name: "Abrir configurações do perfil" })).toBeInViewport({ ratio: 1 });
     const library = page.getByRole("navigation", { name: "Navegação principal" }).getByRole("link", { name: "Biblioteca", exact: true });
@@ -59,7 +61,7 @@ for (const theme of ["light", "dark"]) {
     expect(result.violations).toEqual([]);
     await page.reload();
     await expect(page.getByRole("button", { name: "Expandir menu" })).toBeVisible();
-    await expect(page.locator("[data-app-sidebar]")).toHaveCSS("width", "56px");
+    await expect(page.locator("[data-app-sidebar]")).toHaveCSS("width", "48px");
   });
 }
 

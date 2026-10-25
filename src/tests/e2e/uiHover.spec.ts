@@ -19,6 +19,7 @@ for (const theme of ["light", "dark"]) {
     await page.goto("/library");
     await expect(page.locator('[aria-busy="true"]')).toHaveCount(0);
     await page.evaluate(() => document.fonts.ready);
+    await page.getByRole("button", { name: "Expandir menu", exact: true }).click();
     const targets = [
       page.getByRole("navigation", { name: "Navegação principal" }).getByRole("link", { name: "Configurações", exact: true }),
       page.getByRole("button", { name: "Alternar tema" }),

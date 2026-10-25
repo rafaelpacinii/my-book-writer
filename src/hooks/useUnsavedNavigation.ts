@@ -6,10 +6,10 @@ import { useInternalLinkNavigation } from "@/hooks/useInternalLinkNavigation";
 
 export function useUnsavedNavigation(isDirty: boolean, fallbackHref: string) {
   const router = useRouter();
-  const [destination, setDestination] = useState<string | null>(null);
-  const requestNavigation = useCallback((href: string) => {
-    if (isDirty) setDestination(href);
-    else router.push(href);
+  const [destination, setDestination] = useState<{ proceed: () => void } | null>(null);
+  const requestNavigation = useCallback((href: string, proceed = () => router.push(href)) => {
+    if (isDirty) setDestination({ proceed });
+    else proceed();
   }, [isDirty, router]);
   useInternalLinkNavigation(isDirty, requestNavigation);
 
@@ -18,9 +18,9 @@ export function useUnsavedNavigation(isDirty: boolean, fallbackHref: string) {
     close: () => setDestination(null),
     cancel: () => requestNavigation(fallbackHref),
     confirm: () => {
-      const href = destination || fallbackHref;
+      const proceed = destination?.proceed ?? (() => router.push(fallbackHref));
       setDestination(null);
-      router.push(href);
+      proceed();
     },
   };
 }

@@ -3,10 +3,10 @@
 import { useLayoutEffect, useSyncExternalStore } from "react";
 
 const STORAGE_KEY = "mbw_sidebar_collapsed";
-let collapsed = false;
+let collapsed = true;
 const listeners = new Set<() => void>();
 const getSnapshot = () => collapsed;
-const getServerSnapshot = () => false;
+const getServerSnapshot = () => true;
 
 function publish(value: boolean) {
   collapsed = value;
@@ -15,7 +15,7 @@ function publish(value: boolean) {
 }
 
 function initialize() {
-  try { publish(localStorage.getItem(STORAGE_KEY) === "true"); }
+  try { publish(localStorage.getItem(STORAGE_KEY) !== "false"); }
   catch (error) { console.warn("Não foi possível ler a preferência do menu.", error); }
 }
 

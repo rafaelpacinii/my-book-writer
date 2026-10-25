@@ -16,11 +16,9 @@ for (const theme of ["light", "dark"]) {
       await expect(brand.locator(theme === "dark" ? ".brand-light" : ".brand-dark")).toBeHidden();
     } finally { release(); }
     await page.waitForLoadState("load");
-    const header = page.locator("[data-sidebar-header]");
-    await expect(header.locator("[data-brand]")).toHaveCount(0);
-    expect((await header.boundingBox())!.height).toBeLessThan(48);
-    await page.getByRole("button", { name: "Recolher menu", exact: true }).click();
-    await expect(page.locator("[data-app-sidebar]")).toHaveCSS("width", "56px");
+    await expect(page.locator("[data-sidebar-header]")).toHaveCount(0);
+    await expect(page.locator("[data-app-titlebar]").getByRole("button", { name: "Expandir menu", exact: true })).toBeVisible();
+    await expect(page.locator("[data-app-sidebar]")).toHaveCSS("width", "48px");
     const titlebarBrand = page.locator("[data-titlebar-brand]");
     await expect(titlebarBrand.getByRole("img", { name: "My Book Writer", exact: true })).toBeInViewport({ ratio: 1 });
     await expect(page.getByRole("link", { name: "My Book Writer — início" })).toHaveCount(0);

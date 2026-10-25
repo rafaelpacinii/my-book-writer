@@ -34,6 +34,7 @@ test("@ui profile dialog is prefilled, keeps keyboard focus and updates without 
   await dialog.getByRole("button", { name: "Salvar alterações" }).click();
   await expect(dialog).toHaveCount(0);
   await expect(trigger).toBeFocused();
+  await page.getByRole("button", { name: "Expandir menu", exact: true }).click();
   await expect(page.getByText("Ana Escritora", { exact: true })).toBeVisible();
   expect(await page.evaluate(() => (window as unknown as { uiCalls: Record<string, number> }).uiCalls.list_books)).toBe(1);
 });
