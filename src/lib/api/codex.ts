@@ -6,14 +6,15 @@ import type { CodexCategoryInput, CodexContext, CodexEntity, CodexKind, CodexSco
   CodexSheet, CodexTemplate, CreateCodexEntityInput, UpdateCodexEntityInput } from "@/types/codex";
 export { CodexError } from "@/lib/codex/errors";
 
-async function call<T>(command: string, args: Record<string, unknown>, fallback: () => T, mutate = false): Promise<T> {
+export async function callCodex<T>(command: string, args: Record<string, unknown>, fallback: () => T | Promise<T>, mutate = false): Promise<T> {
   try {
     const native = typeof window !== "undefined" && Boolean((window as unknown as { __TAURI_INTERNALS__?: unknown }).__TAURI_INTERNALS__);
-    const result = native ? await invoke<T>(command, args) : fallback();
+    const result = native ? await invoke<T>(command, args) : await fallback();
     if (mutate) publishDataChange("codex");
     return result;
   } catch (error) { throw codexError(error); }
 }
+const call = callCodex;
 export const resolveCodexScope = (scope: CodexScopeInput) =>
   call<CodexScope>("resolve_codex_scope", { scope }, () => browser.browserResolveScope(scope));
 export const listCodexContexts = (profileId: string) =>

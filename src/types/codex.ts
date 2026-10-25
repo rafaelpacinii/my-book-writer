@@ -3,6 +3,7 @@ export type CodexFieldType = "short_text" | "long_text" | "tags" | "scale" | "re
 export type CodexJSON = string | number | boolean | null | CodexJSON[] | { [key: string]: CodexJSON };
 
 export interface CodexEntity {
+  primary_image_id?: string | null;
   id: string;
   profile_id: string;
   book_id: string | null;
@@ -90,3 +91,6 @@ export interface CreateCodexEntityInput { scope: CodexScopeInput; kind: CodexKin
 export interface UpdateCodexEntityInput {
   name?: string; summary?: string; role?: string; status?: string; archetype?: string; tags?: string[];
 }
+export interface ImportCodexImageInput { original_filename: string; data_url: string }
+export interface UpdateCodexImageInput { caption: string; is_primary: boolean }
+export interface CodexStoredAsset { id: string; entity_id: string; data_url: string; sha256: string; width: number; height: number }

@@ -6,7 +6,8 @@ import { codexLabels } from "@/utils/codexHub";
 import type { CodexHub } from "@/hooks/useCodexHub";
 
 export function CodexContent({ hub }: { hub: CodexHub }) {
-  if (!hub.context) return (
+  const scope = hub.scope;
+  if (!hub.context || !scope) return (
     <section className="rounded-xl border border-border bg-surface p-10 text-center">
       <BookOpen aria-hidden="true" className="mx-auto mb-4 text-primary" size={36} />
       <h2 className="text-xl font-bold text-foreground">Seu mundo começa com uma história</h2>
@@ -32,7 +33,7 @@ export function CodexContent({ hub }: { hub: CodexHub }) {
     <section aria-label={`Fichas de ${codexLabels[hub.kind].plural.toLocaleLowerCase("pt-BR")}`}>
       <p className="mb-4 text-xs text-muted" role="status">{hub.visible.length} {hub.visible.length === 1 ? "ficha" : "fichas"}</p>
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {hub.visible.map((entity) => <CodexCard key={entity.id} entity={entity} onOpen={() => hub.setSelected(entity.id)} />)}
+        {hub.visible.map((entity) => <CodexCard key={entity.id} entity={entity} scope={scope} />)}
       </div>
     </section>
   );

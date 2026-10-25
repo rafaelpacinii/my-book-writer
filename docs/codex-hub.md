@@ -18,9 +18,9 @@ As abas suportam setas esquerda/direita, Home e End, com foco móvel e painel as
 
 O modal mantém valores quando uma operação falha, impede envios simultâneos e permanece aberto durante a gravação. Escape, cancelamento, foco inicial, contenção de Tab e restauração de foco seguem o componente Modal existente.
 
-Após criar, a listagem é atualizada e abre um resumo com nome, tipo, metadados disponíveis e categorias/campos do modelo. O mesmo resumo pode ser aberto pelo card. Contextos arquivados não permitem criar fichas, mas continuam permitindo consultar as existentes.
+Após criar, a listagem é atualizada e abre a [ficha visual](codex-sheet.md) em `/codex/sheet`, com identidade, galeria e categorias/campos do modelo. A mesma ficha pode ser aberta pelo card, que exibe sua imagem principal quando disponível. Contextos arquivados não permitem criar fichas, mas continuam permitindo consultar as existentes.
 
-O resumo é a consulta disponível neste dia. A ficha visual e a galeria serão implementadas no Dia 6; a edição de categorias/campos e modelos, no Dia 7.
+A ficha visual e a galeria estão disponíveis desde o Dia 6. A edição de categorias/campos e modelos permanece prevista no Dia 7.
 
 ## Implementação e validação
 

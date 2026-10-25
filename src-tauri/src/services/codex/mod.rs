@@ -1,4 +1,6 @@
 mod entities;
+mod gallery;
+mod image_data;
 mod presets;
 mod structure;
 mod templates;

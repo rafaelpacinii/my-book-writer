@@ -6,7 +6,7 @@ import { useProfile } from "@/hooks/useProfile";
 import { useCodex, useCodexContexts } from "@/hooks/useCodex";
 import { useResource } from "@/hooks/useResource";
 import { codexScopeResource, emptyCodexScope } from "@/lib/data/codexResources";
-import { codexHref, codexKinds, contextKey, contextScope, filterCodex } from "@/utils/codexHub";
+import { codexHref, codexSheetHref, codexKinds, contextKey, contextScope, filterCodex } from "@/utils/codexHub";
 import type { CodexKind, CodexScopeInput } from "@/types/codex";
 
 export function useCodexHub() {
@@ -31,9 +31,7 @@ export function useCodexHub() {
   const [search, setSearch] = useState("");
   const dialogKey = `${profile.profile?.id}:${context ? contextKey(context) : "none"}:${kind}`;
   const [creationKey, setCreationKey] = useState<string | null>(null);
-  const [selection, setSelection] = useState<{ key: string; id: string } | null>(null);
   const setCreating = (open: boolean) => setCreationKey(open ? dialogKey : null);
-  const setSelected = (id: string | null) => setSelection(id ? { key: dialogKey, id } : null);
   const [announcement, setAnnouncement] = useState("");
   const chooseContext = (value: string) => {
     const next = contexts.contexts.find((item) => contextKey(item) === value);
@@ -46,12 +44,12 @@ export function useCodexHub() {
     ?? (requested ? resolved.error : null) ?? data.error;
   return { ...data, contexts: contexts.contexts, context, scope, kind, search, setSearch, chooseContext, chooseKind,
     creating: creationKey === dialogKey, setCreating,
-    selected: selection?.key === dialogKey ? selection.id : null, setSelected, announcement,
+    announcement,
     visible: filterCodex(data.entities, kind, search), error,
     isLoading: profile.isLoading || contexts.isLoading || Boolean(requested && resolved.isLoading) || data.isLoading,
     canCreate: Boolean(scope && !context?.is_archived && !error),
     retry: () => { void profile.refreshProfile(); void contexts.refresh(); void resolved.refresh(); void data.refresh(); },
-    created: (id: string, name: string) => { setCreating(false); setSelected(id); setAnnouncement(`Ficha ${name} criada.`); },
+    created: (id: string, name: string) => { setCreating(false); setAnnouncement(`Ficha ${name} criada.`); if (scope) router.push(codexSheetHref(scope, id)); },
   };
 }
 export type CodexHub = ReturnType<typeof useCodexHub>;

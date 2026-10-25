@@ -7,7 +7,8 @@ fn existing_database_upgrades_without_changing_books_or_chapters() {
         let directory = tempfile::tempdir().unwrap();
         for migration in std::fs::read_dir("migrations").unwrap() {
             let migration = migration.unwrap();
-            if migration.file_name() != "20261025010000_create_codex.sql" {
+            if migration.file_name().to_string_lossy().as_ref() < "20261025010000_create_codex.sql"
+            {
                 std::fs::copy(
                     migration.path(),
                     directory.path().join(migration.file_name()),

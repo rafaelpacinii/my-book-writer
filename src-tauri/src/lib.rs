@@ -62,6 +62,10 @@ pub fn run() {
             commands::series_commands::reorder_series_books,
             commands::series_commands::delete_series,
             // Códice local
+            commands::codex::gallery::import_codex_image,
+            commands::codex::gallery::read_codex_image,
+            commands::codex::gallery::update_codex_image,
+            commands::codex::gallery::delete_codex_image,
             commands::codex::scopes::resolve_codex_scope,
             commands::codex::scopes::list_codex_contexts,
             commands::codex::entities::list_codex_entities,

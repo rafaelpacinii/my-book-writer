@@ -3,6 +3,8 @@ use sqlx::FromRow;
 
 #[derive(Debug, Clone, Serialize, Deserialize, FromRow)]
 pub struct CodexEntity {
+    #[sqlx(default)]
+    pub primary_image_id: Option<String>,
     pub id: String,
     pub profile_id: String,
     pub book_id: Option<String>,

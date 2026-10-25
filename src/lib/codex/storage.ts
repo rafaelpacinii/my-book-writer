@@ -1,10 +1,11 @@
-import type { CodexEntity, CodexCategory, CodexField, CodexImage, CodexTemplate } from "@/types/codex";
+import type { CodexEntity, CodexCategory, CodexField, CodexImage, CodexTemplate, CodexStoredAsset } from "@/types/codex";
 import { CodexError } from "@/lib/codex/errors";
 import { codexFieldTypes, codexKinds } from "@/lib/codex/validation";
 
 export const CODEX_STORAGE_KEY = "my_book_writer_codex_v1";
 export interface StoredContext { id: string; profile_id: string; name: string; kind: "book" | "universe" }
 export interface CodexStore {
+  assets: CodexStoredAsset[];
   version: 1; entities: CodexEntity[]; categories: CodexCategory[]; fields: CodexField[];
   images: CodexImage[]; templates: CodexTemplate[]; contexts: StoredContext[];
 }
@@ -21,6 +22,7 @@ function json(value: unknown, accepts: (parsed: unknown) => boolean): boolean {
 const position = (value: unknown) => Number.isSafeInteger(value) && Number(value) >= 0;
 function valid(value: unknown): value is CodexStore {
   if (!object(value) || value.version !== 1
+    || (value.assets !== undefined && !rows(value.assets, ["id", "entity_id", "data_url", "sha256"]))
     || !rows(value.entities, ["id", "profile_id", "name", "kind", "tags_json", "created_at", "updated_at"])
     || !rows(value.categories, ["id", "entity_id", "name", "created_at", "updated_at"])
     || !rows(value.fields, ["id", "category_id", "label", "field_type", "value_json", "config_json", "created_at", "updated_at"])
@@ -45,7 +47,7 @@ export function readCodexStore(): CodexStore {
     const value: unknown = JSON.parse(localStorage.getItem(CODEX_STORAGE_KEY)
       ?? '{"version":1,"entities":[],"categories":[],"fields":[],"images":[],"templates":[],"contexts":[]}');
     if (!valid(value)) throw new Error("Invalid codex store");
-    return value;
+    return { ...value, assets: value.assets ?? [] };
   } catch { throw new CodexError("storage", "Não foi possível ler o Códice local. Seus dados foram preservados."); }
 }
 export function writeCodexStore(store: CodexStore) {

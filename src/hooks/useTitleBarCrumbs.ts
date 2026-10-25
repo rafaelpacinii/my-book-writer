@@ -8,6 +8,8 @@ import type { TitleBarCrumb } from "@/types/navigation";
 import { useLibraryCrumbs } from "@/hooks/useLibraryCrumbs";
 import { getBookById } from "@/lib/api/books";
 import { subscribeDataChanges } from "@/lib/data/changes";
+import { useCodexSheetPage } from "@/hooks/useCodexSheetPage";
+import { codexHref } from "@/utils/codexHub";
 
 export type { TitleBarCrumb } from "@/types/navigation";
 
@@ -23,6 +25,7 @@ const subPages: Record<string, string> = {
 export function useTitleBarCrumbs(): TitleBarCrumb[] {
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const codex = useCodexSheetPage(pathname === "/codex/sheet");
   const libraryCrumbs = useLibraryCrumbs(pathname === "/library", searchParams.get("seriesId"), searchParams.get("universeId"));
   const bookId = searchParams.get("bookId") ?? "";
   const chapterId = searchParams.get("chapterId") ?? "";
@@ -54,6 +57,11 @@ export function useTitleBarCrumbs(): TitleBarCrumb[] {
 
   if (pathname === "/library") return libraryCrumbs;
   if (pathname === "/codex") return [{ label: "Códice" }];
+  if (pathname === "/codex/sheet") return [
+    { label: "Códice", href: "/codex" },
+    { label: codex.context?.name ?? "Contexto", href: codex.context ? codexHref(codex.context, codex.sheet?.entity.kind ?? "character") : undefined },
+    { label: codex.sheet?.entity.name ?? "Ficha" },
+  ];
   if (pathname === "/books/new") return [{ label: "Biblioteca", href: "/library" }, { label: "Novo livro" }];
   if (pathname.startsWith("/books/")) {
     const bookLabel = currentBook?.title.trim() || "Livro";
