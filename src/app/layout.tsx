@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import "@/lib/branding/tokens.css";
 import "./globals.css";
+import "@/components/ui/select.css";
+import "@/components/library/controls.css";
 import "@/components/shared/branding.css";
 import { preferenceBootstrap } from "@/lib/preferences/bootstrap";
 import { PreferenceProvider } from "@/components/shared/PreferenceProvider";
