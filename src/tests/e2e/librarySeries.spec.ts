@@ -139,11 +139,10 @@ for (const theme of ["light", "dark"]) {
     await expect(page.getByRole("button", { name: "Arrastar Alfa" })).toBeVisible();
     expect((await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa"]).analyze()).violations).toEqual([]);
     expect(await page.locator("main").evaluate((main) => main.scrollWidth <= main.clientWidth)).toBe(true);
-    const trigger = page.getByRole("button", { name: "Editar", exact: true });
-    await trigger.click();
-    expect((await new AxeBuilder({ page }).include('[role="dialog"]').withTags(["wcag2a", "wcag2aa"]).analyze()).violations).toEqual([]);
-    await page.keyboard.press("Escape");
-    await expect(trigger).toBeFocused();
+    await expect(page.getByRole("button", { name: "Editar", exact: true })).toHaveCount(0);
+    await expect(page.getByRole("link", { name: "Voltar", exact: true })).toHaveCount(0);
+    await expect(page.getByLabel("Nome da série", { exact: true })).toBeVisible();
+    await expect(page.getByLabel("Descrição da série", { exact: true })).toBeVisible();
   });
 }
 

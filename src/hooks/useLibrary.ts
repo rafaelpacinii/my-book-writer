@@ -28,10 +28,14 @@ export function useLibrary() {
   const deleteCollection = (entry: LibraryCollection) => entry.kind === "series"
     ? seriesManager.open({ kind: "delete", series: entry.collection })
     : universeManager.open({ kind: "delete", universe: entry.collection });
+  const updateCollection = (entry: LibraryCollection, name: string, description: string) =>
+    entry.kind === "series"
+      ? seriesManager.updateSeries(entry.collection.id, name, description)
+      : universeManager.updateUniverse(entry.collection.id, name, description);
 
   return {
     ...explorer, books, formats, formatMap, fontMap, seriesManager, universeManager, move, busy,
-    editCollection, deleteCollection, isRefreshingBooks,
+    editCollection, deleteCollection, updateCollection, isRefreshingBooks,
     error: profileError || booksError || catalogError
       || (seriesManager.dialog ? null : seriesManager.error)
       || (universeManager.dialog ? null : universeManager.error)
