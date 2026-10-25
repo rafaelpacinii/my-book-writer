@@ -112,8 +112,8 @@ Cada etapa diária entrega uma fatia funcional completa, validada por testes aut
   * Importação local com SHA-256, miniaturas navegáveis, legenda, principal no card do hub e remoção com confirmação; imagens também funcionam em Universos sem livros.
   * Edição de identidade com status/papel personalizados, arquétipo, resumo e tags; proteção de alterações não salvas e consulta de contextos arquivados.
   * Migração preservando capas existentes, transações e limpeza após falha; estados de erro com nova tentativa e validação Chromium/Firefox em ambos os temas. Detalhes em [Ficha visual e galeria](codex-sheet.md).
-* [ ] **Dia 7 — Abas Customizáveis, Campos Dinâmicos e Modelos de Ficha**
-  * Coluna direita da ficha: gerenciamento de abas (categorias), adição/remoção/edição de campos (texto, escala/barra estilo RPG, tags, vínculo entre fichas) e salvamento de Modelos (*Templates*).
+* [x] **Dia 7 — Abas Customizáveis, Campos Dinâmicos e Modelos de Ficha** *(Concluído)*
+  * Coluna direita da ficha: gerenciamento de abas (categorias), adição/remoção/edição de campos (texto, escala/barra estilo RPG, tags, vínculo entre fichas) e salvamento de Modelos (*Templates*). Detalhes em [Abas customizáveis e campos dinâmicos](codex-tabs.md).
 
 ### Fase 3 — Dossiê Narrativo com Histórico de Versões
 

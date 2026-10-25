@@ -32,4 +32,3 @@ pub struct UpdateSeriesInput {
     pub universe_id: Option<String>,
     pub clear_universe: Option<bool>,
 }
-

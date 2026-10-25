@@ -79,4 +79,3 @@ pub async fn delete_universe(state: State<'_, AppState>, id: String) -> Result<(
         .await
         .map_err(|e| e.to_string())
 }
-

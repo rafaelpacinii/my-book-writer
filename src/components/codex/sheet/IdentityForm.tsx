@@ -1,13 +1,12 @@
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
-import { DiscardChangesModal } from "@/components/books/settings/DiscardChangesModal";
 import { useCodexIdentity } from "@/hooks/useCodexIdentity";
 import type { CodexEntity, CodexScopeInput } from "@/types/codex";
 
-export function IdentityForm({ scope, entity, archived, backHref }: {
-  scope: CodexScopeInput; entity: CodexEntity; archived: boolean; backHref: string;
+export function IdentityForm({ scope, entity, archived }: {
+  scope: CodexScopeInput; entity: CodexEntity; archived: boolean;
 }) {
-  const form = useCodexIdentity(scope, entity, backHref);
+  const form = useCodexIdentity(scope, entity);
   return (
     <section className="rounded-xl border border-border bg-surface p-5" aria-label="Identidade da ficha">
       <h2 className="mb-5 text-sm font-bold uppercase tracking-wider text-foreground">Identidade</h2>
@@ -34,7 +33,6 @@ export function IdentityForm({ scope, entity, archived, backHref }: {
         {!archived && <Button type="submit" isLoading={form.busy} disabled={!form.dirty} loadingLabel="Salvando identidade…">Salvar identidade</Button>}
         <p role="status" className="text-xs text-muted">{form.saved ? "Identidade salva." : form.dirty ? "Alterações não salvas." : ""}</p>
       </form>
-      <DiscardChangesModal isOpen={form.navigation.isOpen} onClose={form.navigation.close} onDiscard={form.navigation.confirm} />
     </section>
   );
 }
