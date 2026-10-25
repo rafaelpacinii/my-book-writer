@@ -4,6 +4,8 @@ import { BookCard } from "@/components/library/BookCard";
 import { useSeriesBookOrder } from "@/hooks/useSeriesBookOrder";
 import type { LibraryMove } from "@/hooks/useLibraryMove";
 import type { Book } from "@/types/book";
+import type { ReactNode } from "react";
+import styles from "@/components/library/libraryWorkspace.module.css";
 
 interface Props {
   books: Book[];
@@ -14,26 +16,32 @@ interface Props {
   disabled: boolean;
   move: LibraryMove;
   onReorder: (ids: string[]) => void;
+  onInspect: (book: Book, element: HTMLButtonElement) => void;
+  selectedId?: string;
+  creation?: ReactNode;
 }
 
-export function SeriesBookGrid({ books, allBooks, formatMap, fontMap, view, disabled, onReorder, move }: Props) {
+export function SeriesBookGrid({ books, allBooks, formatMap, fontMap, view, disabled, onReorder, move, onInspect, selectedId, creation }: Props) {
   const order = useSeriesBookOrder(allBooks, onReorder, disabled);
   return (
-    <div className={view === "grid" ? "book-grid" : "book-list"} aria-busy={disabled}>
+    <div className={`${view === "grid" ? "book-grid" : "book-list"} ${styles.seriesGrid}`} aria-busy={disabled}>
+      {creation}
       {books.map((book, index) => {
         const position = allBooks.findIndex((item) => item.id === book.id);
         return (
           <div key={book.id} data-series-book={book.id}
-            className={`min-w-0 rounded-lg ${order.overId === book.id ? "outline-2 outline-primary" : ""}`}
+            className={`flex min-w-0 flex-col rounded-lg [&>article]:flex-1 ${order.overId === book.id ? "outline-2 outline-primary" : ""}`}
             onDragOver={(event) => order.over(event, book.id)}
             onDrop={(event) => order.drop(event, book.id)}>
             <BookCard book={book} index={index}
               formatName={formatMap.get(book.format_id)} fontName={fontMap.get(book.font_preset_id)}
               onMove={() => move.open(book)} disabled={disabled}
+              selected={book.id === selectedId} onInspect={(element) => onInspect(book, element)}
               onDragStart={(event) => move.start(event, book.id)} onDragEnd={move.end} />
             <div className="flex items-center justify-end gap-1 py-2" aria-label={`Ordem de ${book.title}`}>
               <Button type="button" variant="ghost" draggable={!disabled} disabled={disabled}
-                onDragStart={(event) => order.start(event, book.id)} onDragEnd={order.end}
+                onDragStart={(event) => { order.start(event, book.id); move.start(event, book.id); }}
+                onDragEnd={() => { order.end(); move.end(); }}
                 aria-label={`Arrastar ${book.title}`} className="cursor-grab !px-2">
                 <GripVertical aria-hidden="true" className="h-4 w-4" />
               </Button>

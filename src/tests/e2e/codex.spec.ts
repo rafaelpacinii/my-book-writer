@@ -9,9 +9,9 @@ async function create(page: Page, name: string) {
   const dialog = page.getByRole("dialog");
   await dialog.getByLabel("Nome da ficha").fill(name);
   await dialog.getByRole("button", { name: "Criar ficha", exact: true }).click();
-  await expect(page.getByRole("heading", { level: 1, name, exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 2, name, exact: true })).toBeVisible();
   await page.getByRole("link", { name: "Voltar ao Códice" }).click();
-  await expect(page.getByRole("article").getByRole("heading", { name, exact: true })).toBeVisible();
+  await expect(page.getByRole("link", { name: `Ver ficha de ${name}`, exact: true })).toBeVisible();
 }
 
 test("creates all three kinds with presets, persists them and isolates books from a shared universe", async ({ page }) => {
@@ -39,8 +39,8 @@ test("creates all three kinds with presets, persists them and isolates books fro
   await create(page, "Pessoa do livro avulso");
   await page.goto("/codex?bookId=v1");
   await expect(page.getByLabel("Universo ou livro")).toHaveValue("universe:world");
-  await expect(page.getByRole("heading", { name: "Heroína de Aurora" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Pessoa do livro avulso" })).toHaveCount(0);
+  await expect(page.getByRole("link", { name: "Ver ficha de Heroína de Aurora" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Ver ficha de Pessoa do livro avulso" })).toHaveCount(0);
   const stored = await page.evaluate(() => JSON.parse(localStorage.getItem("my_book_writer_codex_v1")!));
   expect(stored.entities).toHaveLength(4);
   expect(stored.fields.length).toBeGreaterThan(10);
@@ -89,7 +89,7 @@ test("retries IPC failures, preserves form values and prevents duplicate submiss
   await expect(dialog.getByText("Não foi possível criar esta ficha. Tente novamente.")).toBeVisible();
   await expect(dialog.getByLabel("Nome da ficha")).toHaveValue("Pessoa persistente");
   await dialog.getByRole("button", { name: "Criar ficha", exact: true }).click();
-  await expect(page.getByRole("heading", { level: 1, name: "Pessoa persistente", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 2, name: "Pessoa persistente", exact: true })).toBeVisible();
   await page.getByRole("link", { name: "Voltar ao Códice" }).click();
   await expect(page.getByRole("article")).toHaveCount(1);
   const count = await page.evaluate(() => (window as unknown as { codexCalls: Record<string, number> }).codexCalls.create_codex_entity);

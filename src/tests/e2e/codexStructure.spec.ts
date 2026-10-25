@@ -9,7 +9,7 @@ async function openSheet(page: Page, name = "Ayla") {
   await page.getByRole("button", { name: "Nova ficha", exact: true }).click();
   await page.getByRole("dialog").getByLabel("Nome da ficha").fill(name);
   await page.getByRole("dialog").getByRole("button", { name: "Criar ficha", exact: true }).click();
-  await expect(page.getByRole("heading", { level: 1, name, exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 2, name, exact: true })).toBeVisible();
   await expect(page).toHaveURL(/\/codex\/sheet\?/);
 }
 
@@ -17,17 +17,18 @@ test("category tabs navigate with keyboard, create, rename, reorder and delete c
   await openSheet(page);
 
   const tablist = page.getByRole("tablist", { name: "Categorias da ficha" });
+  const panel = page.getByRole("region", { name: "Dados da ficha" }).getByRole("tabpanel");
   await expect(tablist.getByRole("tab", { name: "Dados gerais" })).toBeVisible();
   await expect(tablist.getByRole("tab", { name: "Características físicas" })).toBeVisible();
 
   // Switch tabs
   await tablist.getByRole("tab", { name: "Características físicas" }).click();
-  await expect(page.getByRole("tabpanel")).toContainText("Características físicas");
+  await expect(panel).toContainText("Características físicas");
 
   // Keyboard navigation
   await tablist.getByRole("tab", { name: "Características físicas" }).focus();
   await page.keyboard.press("ArrowRight");
-  await expect(page.getByRole("tabpanel")).toContainText("Psicologia");
+  await expect(panel).toContainText("Psicologia");
 
   // Create new category
   await page.getByRole("button", { name: "Nova categoria", exact: true }).click();
@@ -36,7 +37,7 @@ test("category tabs navigate with keyboard, create, rename, reorder and delete c
   await categoryDialog.getByRole("button", { name: "Adicionar categoria" }).click();
   await expect(categoryDialog).toHaveCount(0);
   await expect(tablist.getByRole("tab", { name: "Magia e Poderes" })).toBeVisible();
-  await expect(page.getByRole("tabpanel")).toContainText("Magia e Poderes");
+  await expect(panel).toContainText("Magia e Poderes");
 
   // Rename category
   await page.getByRole("button", { name: "Renomear categoria", exact: true }).click();
@@ -61,7 +62,7 @@ test("dynamic fields support creation, type change, reordering, scale, tags and 
   await page.getByRole("button", { name: "Nova ficha", exact: true }).click();
   await page.getByRole("dialog").getByLabel("Nome da ficha").fill("Cidade de Luz");
   await page.getByRole("dialog").getByRole("button", { name: "Criar ficha", exact: true }).click();
-  await expect(page.getByRole("heading", { level: 1, name: "Cidade de Luz" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 2, name: "Cidade de Luz" })).toBeVisible();
 
   // Return to first entity
   await page.goto("/codex?universeId=world");
@@ -138,7 +139,7 @@ test("templates save sheet structure and allow instantiating new sheets without 
   await createDialog.getByRole("button", { name: "Criar ficha" }).click();
 
   // Verify new entity has the template category and field, but empty content
-  await expect(page.getByRole("heading", { level: 1, name: "Guerreiro Novo" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 2, name: "Guerreiro Novo" })).toBeVisible();
   const tablist = page.getByRole("tablist", { name: "Categorias da ficha" });
   await tablist.getByRole("tab", { name: "Equipamentos" }).click();
   await expect(page.getByRole("textbox", { name: "Artefatos Especiais", exact: true })).toHaveValue("");

@@ -6,7 +6,7 @@ O hub está disponível em `/codex`, pela entrada **Códice** da navegação lat
 
 O seletor **Universo ou livro** agrupa Universos e Livros avulsos. O primeiro contexto ativo disponível é selecionado na entrada; contextos arquivados ficam identificados e disponíveis para consulta. Se não houver Livro/Universo, a tela orienta criar um na Biblioteca.
 
-As abas **Personagens**, **Lugares** e **Conceitos** exibem a quantidade de fichas do contexto. A busca encontra nome, resumo, papel, status, arquétipo e tags, sem diferenciar maiúsculas ou acentos. Cards são ordenados por nome.
+As abas **Personagens**, **Lugares** e **Conceitos** exibem a quantidade de fichas do contexto. A busca encontra nome, resumo, papel, status, arquétipo e tags, sem diferenciar maiúsculas ou acentos. A lista de fichas é ordenada por nome.
 
 O contexto e a aba são representados na URL pelos parâmetros `bookId` ou `universeId`, mais `kind=character|location|lore`. A navegação mantém histórico e funciona após recarregar. Um link com `bookId` de um livro pertencente a Universo resolve o Códice compartilhado desse Universo. IDs inexistentes, dois escopos simultâneos e falhas de persistência são apresentados como erro com nova tentativa, preservando dados.
 
@@ -18,9 +18,11 @@ As abas suportam setas esquerda/direita, Home e End, com foco móvel e painel as
 
 O modal mantém valores quando uma operação falha, impede envios simultâneos e permanece aberto durante a gravação. Escape, cancelamento, foco inicial, contenção de Tab e restauração de foco seguem o componente Modal existente.
 
-Após criar, a listagem é atualizada e abre a [ficha visual](codex-sheet.md) em `/codex/sheet`, com identidade, galeria e categorias/campos do modelo. A mesma ficha pode ser aberta pelo card, que exibe sua imagem principal quando disponível. Contextos arquivados não permitem criar fichas, mas continuam permitindo consultar as existentes.
+Após criar, a listagem é atualizada e abre a [ficha visual](codex-sheet.md) em `/codex/sheet`, com identidade, galeria e categorias/campos do modelo. A mesma ficha pode ser aberta pela lista compacta, que exibe sua imagem principal quando disponível. Um layout compartilhado preserva a lista, a busca e a rolagem ao alternar fichas; a ficha ocupa o painel principal. Contextos arquivados não permitem criar fichas, mas continuam permitindo consultar as existentes.
 
-A ficha visual e a galeria estão disponíveis desde o Dia 6. A edição de categorias/campos e modelos permanece prevista no Dia 7.
+Links, abas e o seletor de contexto pedem confirmação quando há alterações pendentes na identidade ou nos campos. Em janelas estreitas, “Ver fichas” alterna entre o navegador e o conteúdo sem desmontar o rascunho. O corpo da ficha se adapta à largura do painel.
+
+A ficha visual e a galeria estão disponíveis desde o Dia 6. A edição de categorias/campos e modelos é descrita em [Abas customizáveis e campos dinâmicos](codex-tabs.md).
 
 ## Implementação e validação
 

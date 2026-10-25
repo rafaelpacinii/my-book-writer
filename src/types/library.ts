@@ -15,7 +15,8 @@ export interface LibraryFilters {
   formatFilter: string;
   sortOrder: LibrarySort;
 }
-export type LibraryMoveTarget = { kind: "root" } | LibraryCollection;
+/** Direct placement moves the book to this parent in the navigation tree. */
+export type LibraryMoveTarget = { kind: "root" } | (LibraryCollection & { direct?: boolean });
 export interface LibraryDragSource {
   kind: "book" | "series";
   id: string;

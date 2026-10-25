@@ -58,6 +58,13 @@ describe("moving books between collections", () => {
     expect(libraryMoveInput(volumes[0], { kind: "root" })).toEqual({ clear_series: true, clear_universe: true });
     expect(libraryMoveInput(book, { kind: "root" })).toBeNull();
   });
+  it("moves tree drops to the exact parent, detaching a volume even within the same universe", () => {
+    expect(libraryMoveInput({ ...volumes[0], universe_id: universe.id }, { ...world, direct: true }))
+      .toEqual({ universe_id: universe.id, clear_series: true });
+    expect(libraryMoveInput(direct, { ...world, direct: true })).toBeNull();
+    expect(libraryMoveInput(direct, { ...saga, kind: "series", direct: true,
+      collection: { ...series, universe_id: null } })).toEqual({ series_id: series.id, clear_universe: true });
+  });
 });
 
 describe("series movement respects the domain hierarchy", () => {

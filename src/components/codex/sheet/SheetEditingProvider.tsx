@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState, type ReactNode } from "react";
-import { SheetDirtyContext } from "@/lib/codex/editing";
+import { SheetDirtyContext, SheetNavigationContext } from "@/lib/codex/editing";
 import { useUnsavedNavigation } from "@/hooks/useUnsavedNavigation";
 import { DiscardChangesModal } from "@/components/books/settings/DiscardChangesModal";
 
@@ -20,7 +20,7 @@ export function SheetEditingProvider({ backHref, children }: { backHref: string;
   }, [dirty]);
   return (
     <SheetDirtyContext.Provider value={register}>
-      {children}
+      <SheetNavigationContext.Provider value={navigation.requestNavigation}>{children}</SheetNavigationContext.Provider>
       <DiscardChangesModal isOpen={navigation.isOpen} onClose={navigation.close} onDiscard={navigation.confirm} />
     </SheetDirtyContext.Provider>
   );

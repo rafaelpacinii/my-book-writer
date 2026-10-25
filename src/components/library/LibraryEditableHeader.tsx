@@ -1,5 +1,6 @@
 import type { LibraryCollection } from "@/types/library";
 import { useLibraryInlineEdit } from "@/hooks/useLibraryInlineEdit";
+import styles from "@/components/library/libraryWorkspace.module.css";
 
 interface Props {
   scope: LibraryCollection;
@@ -20,7 +21,7 @@ export function LibraryEditableHeader({ scope, onSave }: Props) {
   const label = isSeries ? "Série" : "Universo";
 
   return (
-    <div className="min-w-0 flex-1 max-w-2xl">
+    <div className="min-w-0 flex-1">
       <div className="flex items-center gap-2">
         <p className="editorial-eyebrow">{label}</p>
         {saveStatus === "saving" && (
@@ -41,16 +42,16 @@ export function LibraryEditableHeader({ scope, onSave }: Props) {
         }}
         placeholder={isSeries ? "Nome da série…" : "Nome do universo…"}
         aria-label={isSeries ? "Nome da série" : "Nome do universo"}
-        className="editorial-heading mt-1 mb-2 block w-full border-b border-transparent bg-transparent p-0 text-foreground transition-colors placeholder:text-muted/40 hover:border-border/60 focus:border-primary/50 focus:outline-none"
+        className={`${styles.editableTitle} editorial-heading mt-1 mb-2.5 block w-full border-0 bg-transparent p-0 text-foreground transition-colors placeholder:text-muted hover:bg-surface-hover focus-visible:outline-primary`}
       />
       <textarea
-        rows={2}
+        rows={1}
         value={description}
         onChange={(e) => handleDescriptionChange(e.target.value)}
         onBlur={flush}
         placeholder={isSeries ? "Adicione uma descrição para esta série…" : "Adicione uma descrição para este universo…"}
         aria-label={isSeries ? "Descrição da série" : "Descrição do universo"}
-        className="block w-full resize-none border-b border-transparent bg-transparent p-0 text-xs leading-relaxed text-muted transition-colors placeholder:text-muted/40 hover:border-border/60 focus:border-primary/50 focus:outline-none"
+        className="block w-full resize-y border-0 bg-transparent p-0 text-xs leading-relaxed text-muted transition-colors placeholder:text-muted hover:bg-surface-hover focus-visible:outline-primary"
       />
     </div>
   );

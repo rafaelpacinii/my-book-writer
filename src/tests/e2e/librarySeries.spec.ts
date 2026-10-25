@@ -5,7 +5,7 @@ import type { BookSeries } from "@/types/series";
 import { book } from "@/tests/fixtures/book";
 import { test, expect } from "@/tests/e2e/fixtures";
 import { mockUI } from "@/tests/e2e/uiMock";
-import { createLibraryItem } from "@/tests/e2e/libraryActions";
+import { createLibraryItem, dragLibraryItem } from "@/tests/e2e/libraryActions";
 
 const saga: BookSeries = {
   id: "saga", profile_id: book.profile_id, universe_id: null, name: "Saga do Norte",
@@ -106,7 +106,7 @@ test("dragging volumes persists their order and ignores the library title sort",
   await seed(page);
   await page.goto("/library?seriesId=saga");
   const group = page.getByRole("region", { name: "Série Saga do Norte" });
-  await group.getByRole("button", { name: "Arrastar Gama" }).dragTo(group.locator('[data-series-book="volume-1"]'));
+  await dragLibraryItem(page, group.getByRole("button", { name: "Arrastar Gama" }), group.locator('[data-series-book="volume-1"]'));
   await expect(group.getByRole("article").first()).toContainText("Gama");
   await expect(group.getByRole("article").first()).toContainText("Vol. 1");
   await page.getByLabel("Ordenar livros").selectOption("title");

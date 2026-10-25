@@ -15,6 +15,7 @@ export function useUnsavedNavigation(isDirty: boolean, fallbackHref: string) {
 
   return {
     isOpen: destination !== null,
+    requestNavigation,
     close: () => setDestination(null),
     cancel: () => requestNavigation(fallbackHref),
     confirm: () => {

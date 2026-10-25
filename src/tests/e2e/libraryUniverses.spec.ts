@@ -142,13 +142,13 @@ for (const theme of ["light", "dark"]) {
       expect(await page.locator("main").evaluate((element) => element.scrollWidth <= element.clientWidth)).toBe(true);
     }
     await page.setViewportSize({ width: 800, height: 900 });
-    const select = page.getByLabel("Agrupar biblioteca");
-    await select.selectOption("type");
-    await expect(select).toHaveValue("type");
+    const select = page.getByLabel("Ordenar livros");
+    await select.selectOption("title");
+    await expect(select).toHaveValue("title");
     if (await page.evaluate(() => CSS.supports("appearance", "base-select"))) {
       await select.click();
       await expect(select).toHaveCSS("appearance", "base-select");
-      await expect(page.getByRole("option", { name: "Separar por tipo", exact: true })).toBeVisible();
+      await expect(page.getByRole("option", { name: "Título A–Z", exact: true })).toBeVisible();
       if (testInfo.project.name === "chromium") {
         await expect(page).toHaveScreenshot(`library-select-${theme}.png`, { animations: "disabled" });
       }
