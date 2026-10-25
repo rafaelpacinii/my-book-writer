@@ -1,0 +1,54 @@
+/* Native customizable select: progressive enhancement from the Chrome article. */
+.ui-select {
+  appearance: none;
+  width: 100%;
+  min-width: 0;
+  height: 48px;
+  border: 1px solid var(--control-border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--foreground);
+  padding: 0 40px 0 14px;
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+.ui-select:hover:not(:disabled) { background: var(--surface-hover); }
+.ui-select:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.ui-select[aria-invalid="true"] { border-color: var(--danger); }
+.ui-select:disabled { cursor: default; opacity: .5; }
+.ui-select-compact { height: 40px; font-size: 12px; }
+.ui-select-with-icon { padding-left: 36px; }
+.ui-select-leading { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); pointer-events: none; color: var(--muted); }
+@supports (appearance: base-select) {
+  .ui-select, .ui-select::picker(select) { appearance: base-select; }
+  .ui-select { align-items: center; }
+  .ui-select::picker-icon { display: none; }
+  .ui-select:open { border-color: var(--primary); }
+  .ui-select::picker(select) {
+    min-width: anchor-size(width);
+    max-width: calc(100vw - 24px);
+    max-height: min(360px, 60dvh);
+    margin-block: 6px;
+    padding: 5px;
+    border: 1px solid var(--control-border);
+    border-radius: 10px;
+    background: var(--surface);
+    color: var(--foreground);
+    box-shadow: 0 12px 32px color-mix(in srgb, var(--foreground) 15%, transparent);
+  }
+  .ui-select option {
+    min-height: 36px;
+    padding: 9px 10px;
+    gap: 10px;
+    border-radius: 6px;
+    font-size: 13px;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+  .ui-select option:hover, .ui-select option:focus { background: var(--surface-hover); }
+  .ui-select option:focus-visible { outline: 2px solid var(--primary); outline-offset: -2px; }
+  .ui-select option:checked { background: var(--primary-soft); color: var(--foreground); font-weight: 600; }
+  .ui-select option::checkmark { color: var(--primary); }
+  .ui-select option:disabled { opacity: .5; }
+}

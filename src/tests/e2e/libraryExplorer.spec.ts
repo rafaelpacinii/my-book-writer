@@ -7,6 +7,7 @@ import { book } from "@/tests/fixtures/book";
 import { mockDesktopWindow } from "@/tests/e2e/windowMock";
 import { mockUI } from "@/tests/e2e/uiMock";
 import { test, expect } from "@/tests/e2e/fixtures";
+import { createLibraryItem } from "@/tests/e2e/libraryActions";
 
 const world: Universe = {
   id: "world", name: "Terras do Norte", profile_id: book.profile_id, description: "Um mundo compartilhado",
@@ -152,12 +153,12 @@ test("keyboard move dialog transfers volumes between universes and series and co
 test("empty universes can be created, contain new series and be deleted without losing content", async ({ page }) => {
   await seed(page, { books: [], series: [], universes: [] });
   await page.goto("/library");
-  await page.getByRole("button", { name: "Novo universo", exact: true }).click();
+  await createLibraryItem(page, "universo");
   await page.getByLabel("Nome do universo").fill("Mundo novo");
   await page.getByRole("button", { name: "Salvar universo", exact: true }).click();
   await page.getByRole("link", { name: "Abrir universo Mundo novo", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Este universo ainda não tem livros ou séries." })).toBeVisible();
-  await page.getByRole("button", { name: "Nova série", exact: true }).click();
+  await createLibraryItem(page, "série");
   await page.getByLabel("Nome da série").fill("Uma jornada");
   await page.getByRole("button", { name: "Salvar série", exact: true }).click();
   await expect(page.getByRole("link", { name: "Abrir série Uma jornada", exact: true })).toBeVisible();

@@ -1,4 +1,4 @@
-import { BookSeriesSelect } from "@/components/shared/BookSeriesSelect";
+import { NewBookCollections } from "@/components/books/new/NewBookCollections";
 import { BookInfoFields } from "@/components/books/new/BookInfoFields";
 import { LayoutSettingsFields } from "@/components/books/new/LayoutSettingsFields";
 import { CoverPreview } from "@/components/books/new/CoverPreview";
@@ -16,9 +16,7 @@ export function NewBookForm({ form }: { form: ReturnType<typeof useNewBookForm> 
             formatId={form.formatId} setFormatId={form.setFormatId} formats={form.formats}
             fontId={form.fontId} setFontId={form.setFontId} fonts={form.fonts}
           />
-          <BookSeriesSelect series={form.seriesData.series} value={form.seriesId} onChange={form.setSeriesId}
-            isLoading={form.seriesData.isLoading} error={form.seriesData.error}
-            onRetry={() => { void form.seriesData.refreshSeries(); }} />
+          <NewBookCollections form={form} />
           <LayoutSettingsFields
             fontSize={form.fontSize} setFontSize={form.setFontSize}
             lineHeight={form.lineHeight} setLineHeight={form.setLineHeight}

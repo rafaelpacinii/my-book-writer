@@ -1,5 +1,6 @@
 import { test, expect } from "@/tests/e2e/fixtures";
 import { mockUI } from "@/tests/e2e/uiMock";
+import { createLibraryItem } from "@/tests/e2e/libraryActions";
 
 test("@ui repeated navigation preserves shell, decoded covers and loaded data", async ({ page }) => {
   const image = "data:image/svg+xml," + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="60" height="40"><rect width="60" height="40" fill="green"/></svg>');
@@ -22,7 +23,8 @@ test("@ui repeated navigation preserves shell, decoded covers and loaded data", 
     }
     for (const name of ["Biblioteca", "Novo livro", "Configurações", "Início"]) {
       const region = name === "Novo livro" ? page.locator("main") : page.getByRole("navigation", { name: "Navegação principal" });
-      await region.getByRole("link", { name, exact: true }).click();
+      if (name === "Novo livro") await createLibraryItem(page, "livro");
+      else await region.getByRole("link", { name, exact: true }).click();
       await expect(page.getByRole("heading", { level: 1, name: name === "Início" ? "Bom te ver, Helena." : name, exact: true })).toBeVisible();
       await expect(page.locator('[data-persisted="yes"]')).toHaveCount(1);
       if (name === "Início" || name === "Biblioteca") {
@@ -67,7 +69,7 @@ test("@ui creating a book and restoring a backup invalidate previously loaded da
   await mockUI(page);
   await page.goto("/library");
   await expect(page.getByRole("heading", { name: "Livro de teste" })).toBeVisible();
-  await page.locator("main").getByRole("link", { name: "Novo livro", exact: true }).click();
+  await createLibraryItem(page, "livro");
   await page.getByLabel("Título do livro").fill("Minha nova história");
   await page.getByRole("button", { name: "Criar livro", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Minha nova história" })).toBeVisible();

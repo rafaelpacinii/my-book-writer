@@ -83,9 +83,14 @@ Cada etapa diária entrega uma fatia funcional completa, validada por testes aut
   - Seleção, troca e remoção de Série diretamente na criação/configuração do livro, com numeração automática e detecção de alterações não salvas.
   - Arrastar e soltar HTML habilitado no Windows por `dragDropEnabled: false` no Tauri; operações continuam usando as APIs locais do Dia 1.
   - Testes de agrupamento/reordenação e fluxos Playwright: criação offline, edição, exclusão sem perda de livros, seleção/troca/remoção, filtros, persistência, falhas IPC com nova tentativa e acessibilidade nos temas claro/escuro.
-- [ ] **Dia 3 — Gestão de Universos na Biblioteca (`/library`)**
-  - Criação, edição e exclusão de Universos Literários já disponíveis no Explorer, com preservação de livros e séries ao excluir; séries novas podem ser criadas dentro de um Universo.
-  - Associação de Séries existentes a Universos já disponível por arrastar e soltar ou “Mover série”. Permanecem pendentes os filtros rápidos da Biblioteca (*Todos*, *Séries*, *Universos*).
+- [x] **Dia 3 — Gestão de Universos na Biblioteca (`/library`)** *(Concluído)*
+  - Criação, edição de nome/descrição e exclusão de Universos, inclusive vazios. A exclusão preserva séries, livros, volumes e capítulos; erros mantêm o formulário preenchido e permitem nova tentativa.
+  - Associação de livros e séries por arrastar ou pelos diálogos acessíveis; séries novas podem ser criadas dentro de um Universo.
+  - Filtros rápidos *Todos*, *Livros*, *Séries* e *Universos*, combinados com busca, formato, ordenação e apresentação em grade/lista. Na raiz, as visões por tipo incluem itens aninhados; dentro de um Universo ficam limitadas ao seu conteúdo. Abrir uma coleção ou limpar os filtros restaura a visão completa.
+  - Botão “+” com opções *Livro*, *Série* e *Universo*, destacando Livro. O menu usa popover nativo, navegação por teclado, Escape e retorno do foco ao acionador.
+  - Cadastro de livros com seleção de Universo e contexto da coleção de origem; entrar pelo menu de uma Série pré-seleciona a série e herda seu Universo, preservando a numeração automática.
+  - Select compartilhado com `appearance: base-select` e `::picker(select)`, conforme o artigo do Chrome, com aprimoramento progressivo, cores semânticas e ícones locais. Busca, filtros e visualização usam a mesma linguagem de controles.
+  - Regressões de edição, exclusão de Universo preenchido, criação contextual, falha IPC com nova tentativa, filtros combinados e acessibilidade dos controles nos dois temas.
 
 ### Fase 2 — O Códice: Fichas de Personagens e Lugares
 - [ ] **Dia 4 — Motor de Dados do Códice (SQLite + Rust + API)**
