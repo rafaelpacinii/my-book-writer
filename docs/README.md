@@ -10,6 +10,7 @@ Este diretório reúne as diretrizes de produto, arquitetura de software, catál
 
 | Documento | Descrição | Público Principal |
 | :--- | :--- | :--- |
+| [**Desenvolvimento do Frontend**](frontend-design.md) | Processo de referências visuais e escolha, layout desktop, componentes compartilhados, estados, movimento e revisão de UX/UI. | Agentes, Designers, Desenvolvedores Frontend |
 | [**Guia de Implementação da Interface**](guia-implementacao-ui.md) | Direção de produto, filosofia visual de geometria editorial, tokens de cores, tipografia e detalhamento de cada tela do aplicativo. | Designers, Desenvolvedores Frontend, Avaliadores |
 | [**Roadmap de Funcionalidades & Códice**](roadmap-funcionalidades.md) | Plano estratégico e cronograma diário para Universos, Séries, Códice (Personagens e Lugares) e Dossiê Narrativo. | Produto, Desenvolvedores |
 | [**Motor de Dados do Códice**](codex-data.md) | Esquema SQLite, escopos compartilhados, presets, API Tauri/TypeScript e contratos para os próximos dias. | Desenvolvedores |
