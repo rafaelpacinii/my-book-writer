@@ -53,6 +53,8 @@ Usar `PageContent` para a estrutura comum e `AppShell` para moldura, margens e r
 
 Preservar a barra de título de 48 px, a lateral compacta de 48 px e a expandida de 216 px. O caminho contextual fica na barra de título. Janelas estreitas precisam continuar operáveis com o menu compacto, quebra das ferramentas e rolagem vertical, sem ocultar ações essenciais.
 
+Barra de título e menu principal compartilham o token `--app-chrome`, com tom próprio mais escuro que a área de trabalho em ambos os temas. Essa moldura identifica a navegação global. Painéis locais, como a lista de capítulos, usam `surface` e precisam permanecer visualmente distintos da moldura, inclusive com o menu expandido. Não reutilizar `--app-chrome` nos painéis de uma funcionalidade.
+
 ## Identidade e componentes compartilhados
 
 Os tokens efetivos estão em `src/app/globals.css` e `src/lib/branding/tokens.css`; não copiar cores antigas de protótipos para JSX. Fontes, ícones e recursos visuais devem continuar disponíveis offline.

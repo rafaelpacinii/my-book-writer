@@ -1,7 +1,6 @@
 :root {
   --app-titlebar-height: 48px;
   --app-sidebar-width: 216px;
-  --app-chrome: var(--surface);
   --app-viewport-height: calc(100dvh - var(--app-titlebar-height));
 }
 
