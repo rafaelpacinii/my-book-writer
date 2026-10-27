@@ -9,7 +9,7 @@ async function openSheet(page: Page) {
   await page.getByRole("button", { name: "Nova ficha", exact: true }).click();
   await page.getByRole("dialog").getByLabel("Nome da ficha").fill("Ayla");
   await page.getByRole("dialog").getByRole("button", { name: "Criar ficha", exact: true }).click();
-  await expect(page.getByRole("heading", { level: 2, name: "Ayla", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "Ayla", exact: true })).toBeVisible();
   await expect(page).toHaveURL(/\/codex\/sheet\?/);
 }
 const gallery = (page: Page) => page.getByRole("region", { name: "Galeria da ficha" });
@@ -137,6 +137,30 @@ test("archived sheets preserve gallery reads while identity and gallery actions 
   await expect(page.getByRole("button", { name: "Adicionar imagens" })).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Salvar identidade" })).toHaveCount(0);
 });
+
+for (const reducedMotion of ["no-preference", "reduce"] as const) {
+  test(`catalog image feedback is interruptible with motion preference ${reducedMotion}`, async ({ page }) => {
+    await page.emulateMedia({ reducedMotion });
+    await openSheet(page);
+    await gallery(page).getByLabel("Selecionar imagens da ficha").setInputFiles("public/icon-192.png");
+    await expect(gallery(page).getByRole("img", { name: "icon-192.png", exact: true })).toBeVisible();
+    await page.getByRole("link", { name: "Voltar ao Códice", exact: true }).click();
+    const card = page.getByRole("link", { name: "Ver ficha de Ayla", exact: true });
+    const image = card.getByRole("img", { name: "Imagem principal de Ayla", exact: true });
+    await expect(image).toBeVisible();
+    const initial = await image.evaluate((element) => getComputedStyle(element).transform);
+    await card.hover();
+    const durations = await image.evaluate((element) => element.getAnimations().map((animation) =>
+      Number(animation.effect?.getTiming().duration ?? 0)));
+    if (reducedMotion === "reduce") expect(durations).toEqual([]);
+    else {
+      expect(durations.length).toBeGreaterThan(0);
+      expect(durations.every((duration) => duration > 0 && duration <= 200)).toBe(true);
+    }
+    await page.mouse.move(1200, 1);
+    await expect.poll(() => image.evaluate((element) => getComputedStyle(element).transform)).toBe(initial);
+  });
+}
 
 for (const theme of ["light", "dark"]) for (const width of [440, 1440]) {
   test(`sheet layout, gallery and accessibility in ${theme} at ${width}`, async ({ page }, testInfo) => {

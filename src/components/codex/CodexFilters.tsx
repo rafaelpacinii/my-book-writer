@@ -41,6 +41,10 @@ export function CodexFilters({ hub }: { hub: CodexHub }) {
             value={hub.search} onChange={(event) => hub.setSearch(event.target.value)} />
         </label>
       </div>
+      <button type="button" onClick={() => hub.setSearch("")} disabled={!hub.search.trim()}
+        className="self-start text-xs text-primary enabled:hover:underline disabled:cursor-not-allowed disabled:text-muted disabled:opacity-50">
+        Limpar busca
+      </button>
     </div>
   );
 }

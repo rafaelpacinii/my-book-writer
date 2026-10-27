@@ -11,10 +11,11 @@ import styles from "@/components/codex/codexWorkspace.module.css";
 export function Main() {
   const page = useCodexSheetPage();
   const hub = useCodexWorkspace();
+  const error = hub.error ?? page.error;
   return (
     <div className={styles.sheet}>
-      {page.error && !hub.error && <ErrorState message={page.error} onRetry={page.retry} />}
-      {(!page.error || page.sheet) && (
+      {error && <ErrorState message={error} onRetry={hub.error ? hub.retry : page.retry} />}
+      {(!error || page.sheet) && (
         <LoadingRegion isLoading={page.isLoading} label="Carregando ficha" skeleton={<Skeleton className="h-96" />}>
           {page.sheet && page.scope && <SheetContent key={page.sheet.entity.id} sheet={page.sheet} scope={page.scope}
             archived={page.archived} />}

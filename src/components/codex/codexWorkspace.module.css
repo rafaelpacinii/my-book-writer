@@ -1,30 +1,39 @@
-.layout { grid-template-columns: 320px minmax(0, 1fr); }
+.layout { grid-template-columns: 360px minmax(0, 1fr); }
+.layout[data-selected="true"][data-list-open="false"] { grid-template-columns: minmax(0, 1fr); }
+.layout[data-selected="true"][data-list-open="false"] .navigation { display: none; }
 .navigation { display: flex; flex-direction: column; overflow: hidden; }
-.filters { flex-shrink: 0; padding: 16px; border-bottom: 1px solid var(--border); }
+.filters { flex-shrink: 0; padding: 20px 16px; border-bottom: 1px solid var(--border); }
 .filters :global(.library-type-filter) { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); width: 100%; }
-.filters :global(.library-type-filter button) { flex-direction: column; gap: 3px; padding: 6px 2px; font-size: 11px; }
-.filters :global(.library-filter-select) { flex-basis: 100%; max-width: none; }
-.filters :global(.library-search) { flex-basis: 100%; }
+.filters :global(.library-type-filter button) { justify-content: center; gap: 4px; padding: 8px 3px; font-size: 11px; }
+.filters :global(.library-type-filter svg) { display: none; }
+.filters :global(.library-filter-select), .filters :global(.library-search) { flex-basis: 100%; width: 100%; max-width: none; }
+.filtersToggle { display: none; }
 .list { flex: 1; min-height: 0; overflow-y: auto; padding: 12px; scrollbar-gutter: stable; }
 .list > p { padding: 0 4px 10px; color: var(--muted); font-size: 11px; }
 .entry { display: grid; grid-template-columns: 44px minmax(0, 1fr); align-items: center; gap: 12px; padding: 12px 8px; margin-bottom: 4px; border: 1px solid transparent; border-radius: 8px; }
 .entry:hover { background: var(--surface-hover); }
 .entry[aria-current="page"] { background: var(--primary-soft); border-color: var(--primary); }
 .portrait { display: flex; align-items: center; justify-content: center; width: 44px; height: 52px; overflow: hidden; border-radius: 5px; background: var(--surface-hover); color: var(--muted); }
-.listToggle { display: none; }
+.toolbar { display: flex; flex-shrink: 0; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 24px; border-bottom: 1px solid var(--border); }
+.toolbar > a, .toolbar > button { min-height: 36px; padding: 8px 10px; font-size: 12px; }
 .sheet { container-type: inline-size; container-name: dossier; }
-.sheet :global(.editorial-heading) { font-size: 32px; }
-.sheetColumns { display: grid; grid-template-columns: minmax(0, 260px) minmax(0, 1fr); gap: 24px; align-items: start; }
-@container dossier (max-width: 760px) {
-  .sheetColumns { grid-template-columns: minmax(0, 1fr); }
+.sheet :global(.editorial-heading) { font-size: 38px; }
+.sheetColumns { display: grid; grid-template-columns: minmax(0, 300px) minmax(0, 1fr); gap: 32px; align-items: start; }
+@container dossier (max-width: 800px) {
+  .sheetColumns { grid-template-columns: minmax(0, 1fr); gap: 24px; }
+  .sheet :global(.editorial-heading) { font-size: 32px; }
 }
 @container workbench (max-width: 740px) {
-  .layout { grid-template-columns: minmax(0, 1fr); }
-  .navigation { border-right: 0; }
-  .layout[data-selected="false"][data-has-entries="true"] .detail { display: none; }
-  .layout[data-selected="false"][data-has-entries="false"] { grid-template-rows: minmax(0, 45%) minmax(0, 1fr); }
-  .layout[data-selected="true"] .navigation { display: none; }
-  .layout[data-selected="true"][data-list-open="true"] .navigation { display: flex; }
+  .layout { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); }
+  .navigation { max-height: min(50vh, 400px); border-right: 0; border-bottom: 1px solid var(--border); }
+  .filters { flex-shrink: 1; min-height: 0; overflow-y: auto; padding: 12px 16px; }
+  .filtersToggle { display: flex; flex-shrink: 0; align-items: center; gap: 8px; width: 100%; padding: 12px 16px; font-size: 12px; }
+  .navigation[data-filters-open="false"] .filters { display: none; }
+  .layout[data-selected="true"] { grid-template-rows: minmax(0, 1fr); }
+  .layout[data-selected="true"][data-list-open="true"] .navigation { max-height: none; }
   .layout[data-selected="true"][data-list-open="true"] .detail { display: none; }
-  .listToggle { display: inline-flex; align-items: center; gap: 6px; min-height: 32px; margin-top: 8px; color: var(--primary); font-size: 12px; }
+  .toolbar { padding: 8px 12px; }
+}
+@container workbench (max-width: 340px) {
+  .filters :global(.library-type-filter button) { flex-direction: column; gap: 2px; }
 }

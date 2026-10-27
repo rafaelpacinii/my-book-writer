@@ -1,0 +1,17 @@
+.fields { min-width: 0; padding: 24px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); container-type: inline-size; }
+.structureToolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
+.structureToolbar button { min-height: 36px; padding: 8px 10px; font-size: 12px; }
+.fieldGrid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; }
+.field { min-width: 0; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
+.galleryImage { display: flex; align-items: center; justify-content: center; height: 280px; overflow: hidden; background: var(--primary-soft); }
+.galleryImage[data-empty="true"] { height: 180px; }
+.identityTitle { margin-bottom: 20px; font-size: 14px; font-weight: 700; }
+@container (min-width: 600px) {
+  .fieldGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .field[data-field-type="long_text"], .field[data-field-type="reference"], .field[data-field-type="document"] { grid-column: 1 / -1; }
+}
+@container dossier (max-width: 800px) {
+  .galleryImage { height: 240px; }
+  .galleryImage[data-empty="true"] { height: 140px; }
+  .fields { padding: 18px; }
+}

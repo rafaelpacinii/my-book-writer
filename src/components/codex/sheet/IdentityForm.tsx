@@ -2,6 +2,7 @@ import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { useCodexIdentity } from "@/hooks/useCodexIdentity";
 import type { CodexEntity, CodexScopeInput } from "@/types/codex";
+import styles from "@/components/codex/sheet/dossier.module.css";
 
 export function IdentityForm({ scope, entity, archived }: {
   scope: CodexScopeInput; entity: CodexEntity; archived: boolean;
@@ -9,7 +10,7 @@ export function IdentityForm({ scope, entity, archived }: {
   const form = useCodexIdentity(scope, entity);
   return (
     <section className="rounded-xl border border-border bg-surface p-5" aria-label="Identidade da ficha">
-      <h2 className="mb-5 text-sm font-bold uppercase tracking-wider text-foreground">Identidade</h2>
+      <h2 className={styles.identityTitle}>Identidade</h2>
       <form onSubmit={form.submit} noValidate className="flex flex-col gap-4">
         <fieldset disabled={archived || form.busy} className="flex min-w-0 flex-col gap-4">
           <Input label="Nome da ficha" value={form.values.name} maxLength={160} required onChange={(event) => form.change("name", event.target.value)} />

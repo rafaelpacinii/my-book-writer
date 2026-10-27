@@ -24,6 +24,10 @@ Links, abas e o seletor de contexto pedem confirmação quando há alterações 
 
 A ficha visual e a galeria estão disponíveis desde o Dia 6. A edição de categorias/campos e modelos é descrita em [Abas customizáveis e campos dinâmicos](codex-tabs.md).
 
+## Revisão visual de 27/10/2026
+
+A composição de lista permanente descrita acima foi substituída por catálogo em grade/lista, com “Suas fichas (x)” e o card “Nova ficha” na primeira posição. Filtros ficam na lateral; os cards mostram imagem, nome, papel, resumo e status. Criar não entra na contagem. O nome da ficha aberta assume o cabeçalho principal e o navegador compacto só aparece por “Ver fichas”, inclusive em janelas amplas. Fechar o navegador preserva o rascunho. Voltar ao catálogo restaura busca, exibição e rolagem durante a sessão. A escolha e as referências estão em [Frontend Design](frontend-design.md).
+
 ## Implementação e validação
 
 - Rota estática: `src/app/(workspace)/codex/page.tsx`, composta com Suspense.

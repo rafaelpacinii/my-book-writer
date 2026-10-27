@@ -2,6 +2,19 @@
 
 Contrato de UX/UI para o agente e para quem desenvolve o frontend. Leia junto de [src/AGENTS.md](../src/AGENTS.md) e dos [critérios de qualidade](ui-quality.md). Decisões explícitas do usuário prevalecem; protótipos antigos não substituem os contratos atuais.
 
+## Códice: catálogo visual e dossiê — 27/10/2026
+
+O usuário aprovou a **opção A — catálogo visual + dossiê**, orientada pela [galeria do Craft](https://www.craft.do/blog/craft-update-3-3-9). Esta decisão substitui a lista permanentemente aberta aprovada em 25/10, preservando as cores, serifas e superfícies editoriais da aplicação.
+
+- `/codex`: filtros locais à esquerda, com contexto Universo/Livro, tipos e contagens disponíveis e busca. O catálogo fluido usa grade/lista, “Suas fichas (x)” e um card “Nova ficha” na primeira posição, do mesmo tamanho dos demais. Os cards mostram imagem principal ou composição tipográfica, nome, papel/classificação, resumo e status reais. A contagem não inclui a criação.
+- `/codex/sheet`: o nome da entidade assume o cabeçalho principal. A ficha ocupa a largura disponível; galeria e identidade ficam à esquerda e categorias/campos à direita. Em painéis estreitos, as colunas se empilham. A imagem vazia tem altura reduzida para aproximar a identidade; imagens existentes mantêm proporção com `object-contain`.
+- “Ver fichas” abre o navegador sob demanda. Fechá-lo não desmonta os formulários; selecionar outra entidade o recolhe e reinicia a rolagem do dossiê. Busca, tipo, contexto e grade/lista permanecem no layout compartilhado; voltar ao catálogo restaura sua rolagem durante a sessão, inclusive pelo histórico.
+- Contexto e entidade continuam na URL e na barra de título. A barra local da ficha contém retorno e “Ver fichas”, sem repetir o cabeçalho grande do hub. Trocas de ficha, contexto, tipo e saídas continuam protegidas contra descarte acidental de rascunhos.
+- Gerenciamento de categorias, campos e modelos usa menus contextuais acessíveis com Escape e restauração de foco. Salvar identidade e salvar campos continuam explícitos e independentes. Estados vazios, erros recuperáveis, consulta de contextos arquivados e persistência local mantêm seus contratos.
+- Janelas estreitas permitem recolher contexto/filtros; com o navegador de fichas aberto, ele ocupa temporariamente a área de trabalho sem desmontar o dossiê. A moldura global permanece distinta das superfícies locais. Movimento usa os tokens compartilhados e respeita movimento reduzido.
+
+O futuro `/codex/editor` seguirá uma composição de escrita focada com largura de texto confortável e histórico recolhível. Sua implementação permanece nos Dias 8–9 do roadmap; esta revisão não apresenta controles de documentos ou aparições ainda indisponíveis.
+
 ## Lateral com retomada — 27/10/2026
 
 O usuário escolheu os cards **abaixo dos filtros**, para preservar a posição dos controles. Referência fornecida: [AI Model Catalog Cards — Dark, por Dmitry Sergushkin](https://dribbble.com/shots/27230217-AI-Model-Catalog-Cards-Dark), aproveitando a composição horizontal e a hierarquia de informações, com a paleta e a tipografia editorial do aplicativo.
@@ -62,7 +75,7 @@ Observar as imagens das interfaces dos aplicativos, não a estrutura comercial d
 Em 25/10/2026, o usuário escolheu o explorador da Biblioteca inspirado no [Eagle](https://en.eagle.cool/) e a lista com ficha ao lado para o Códice inspirada no [Bear](https://bear.app/). A revisão de 27/10 removeu o painel redundante de detalhes da Biblioteca. Essas composições preservam a direção editorial acolhedora já aprovada.
 
 - **Biblioteca:** navegação contextual por Universos e Séries, acervo em grade/lista e lateral com filtros e livros recentes. Capa e título abrem o livro diretamente. Informações e ações ficam nos cards convencionais, sem painel adicional. Mover/reordenar permanece disponível.
-- **Códice:** contexto, categorias, busca e lista compacta à esquerda; a ficha selecionada ocupa a área principal. O layout compartilhado mantém a lista montada durante a seleção, preservando busca e rolagem. A URL continua identificando contexto e entidade, inclusive em recarga e histórico. Links, troca de contexto e abas passam pela mesma proteção de rascunhos.
+- **Códice:** a revisão de 27/10 substituiu a lista permanente por catálogo visual e dossiê; a lista compacta permanece acessível por “Ver fichas”. O layout compartilhado preserva busca, exibição e rolagem do catálogo. A URL continua identificando contexto e entidade, inclusive em recarga e histórico. Links, troca de contexto e abas passam pela mesma proteção de rascunhos.
 - **Painéis:** cabeçalhos compactos, rolagem independente e superfícies locais distintas da navegação global. O corpo de uma ficha se adapta à largura do seu painel, não apenas à largura total da janela.
 - **Janelas estreitas:** a lateral de filtros e retomada da Biblioteca pode ser recolhida. No Códice, “Ver fichas” alterna entre a lista e a ficha sem desmontar o rascunho.
 
