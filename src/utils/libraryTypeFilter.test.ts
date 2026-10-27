@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { book } from "@/tests/fixtures/book";
 import { libraryCollections, libraryEntries, filterLibraryEntries } from "@/utils/libraryExplorer";
-import { libraryTypeEntries } from "@/utils/libraryTypeFilter";
+import { libraryTypeEntries, libraryTypeIsAvailable } from "@/utils/libraryTypeFilter";
 import type { Universe } from "@/types/universe";
 
 const world: Universe = { id: "world", name: "Mundo", profile_id: book.profile_id, description: null,
@@ -14,6 +14,13 @@ const collections = libraryCollections(books, [saga, independent], [world]);
 const root = { kind: "root" } as const;
 
 describe("library type filters", () => {
+  it("keeps a fixed type set with only valid choices enabled in each scope", () => {
+    const types = ["all", "book", "series", "universe"] as const;
+    expect(types.filter((type) => libraryTypeIsAvailable(type, "root"))).toEqual(types);
+    expect(types.filter((type) => libraryTypeIsAvailable(type, "universe"))).toEqual(["all", "book", "series"]);
+    expect(types.filter((type) => libraryTypeIsAvailable(type, "series"))).toEqual(["all", "book"]);
+    expect(types.filter((type) => libraryTypeIsAvailable(type, "missing"))).toEqual([]);
+  });
   it("preserves the explorer by default and includes nested items in root typed views", () => {
     const entries = libraryEntries(books, collections, root);
     expect(libraryTypeEntries(books, collections, root, entries, "all")).toEqual(entries);

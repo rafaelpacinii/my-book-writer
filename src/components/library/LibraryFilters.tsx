@@ -27,8 +27,10 @@ export function LibraryFilters({ lib }: { lib: ReturnType<typeof useLibrary> }) 
           </Select>
         </div>
       </div>
-      {lib.isFiltered && <button type="button" onClick={lib.handleClearFilters}
-        className="mt-3 text-xs text-primary hover:underline">Limpar filtros</button>}
+      <button type="button" onClick={lib.handleClearFilters} disabled={!lib.isFiltered}
+        className="mt-3 text-xs text-primary enabled:hover:underline disabled:cursor-not-allowed disabled:text-muted disabled:opacity-50">
+        Limpar filtros
+      </button>
     </section>
   );
 }

@@ -29,7 +29,8 @@ test("@ui repeated navigation preserves shell, decoded covers and loaded data", 
       await expect(page.locator('[data-persisted="yes"]')).toHaveCount(1);
       if (name === "Início" || name === "Biblioteca") {
         await expect(page.locator("[data-loading-placeholder]")).toHaveCount(0);
-        await expect(page.getByRole("img", { name: "Capa de Livro de teste" })).toBeVisible();
+        const content = name === "Biblioteca" ? page.locator("[data-library-catalog]") : page.locator("main");
+        await expect(content.getByRole("img", { name: "Capa de Livro de teste" })).toBeVisible();
       }
     }
   }
@@ -56,13 +57,14 @@ test("@ui slow loading never shows an empty library and failure offers recovery"
 test("@ui invalid cover finishes loading with an accessible fallback", async ({ page }) => {
   await mockUI(page, { cover: "data:image/png;base64,broken" });
   await page.goto("/library");
-  await expect(page.getByRole("img", { name: "Capa indisponível: Livro de teste" })).toBeVisible();
+  const catalog = page.locator("[data-library-catalog]");
+  await expect(catalog.getByRole("img", { name: "Capa indisponível: Livro de teste" })).toBeVisible();
   await expect(page.locator("[data-loading-placeholder]")).toHaveCount(0);
   await page.evaluate(() => {
     (window as unknown as { uiCover: string }).uiCover = "data:image/svg+xml," + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="60" height="40"/>');
   });
-  await page.getByRole("button", { name: "Recarregar capa" }).click();
-  await expect(page.getByRole("img", { name: "Capa de Livro de teste" })).toBeVisible();
+  await catalog.getByRole("button", { name: "Recarregar capa" }).click();
+  await expect(catalog.getByRole("img", { name: "Capa de Livro de teste" })).toBeVisible();
 });
 
 test("@ui creating a book and restoring a backup invalidate previously loaded data", async ({ page }) => {

@@ -16,12 +16,10 @@ interface Props {
   disabled: boolean;
   move: LibraryMove;
   onReorder: (ids: string[]) => void;
-  onInspect: (book: Book, element: HTMLButtonElement) => void;
-  selectedId?: string;
   creation?: ReactNode;
 }
 
-export function SeriesBookGrid({ books, allBooks, formatMap, fontMap, view, disabled, onReorder, move, onInspect, selectedId, creation }: Props) {
+export function SeriesBookGrid({ books, allBooks, formatMap, fontMap, view, disabled, onReorder, move, creation }: Props) {
   const order = useSeriesBookOrder(allBooks, onReorder, disabled);
   return (
     <div className={`${view === "grid" ? "book-grid" : "book-list"} ${styles.seriesGrid}`} aria-busy={disabled}>
@@ -36,7 +34,6 @@ export function SeriesBookGrid({ books, allBooks, formatMap, fontMap, view, disa
             <BookCard book={book} index={index}
               formatName={formatMap.get(book.format_id)} fontName={fontMap.get(book.font_preset_id)}
               onMove={() => move.open(book)} disabled={disabled}
-              selected={book.id === selectedId} onInspect={(element) => onInspect(book, element)}
               onDragStart={(event) => move.start(event, book.id)} onDragEnd={move.end} />
             <div className="flex items-center justify-end gap-1 py-2" aria-label={`Ordem de ${book.title}`}>
               <Button type="button" variant="ghost" draggable={!disabled} disabled={disabled}

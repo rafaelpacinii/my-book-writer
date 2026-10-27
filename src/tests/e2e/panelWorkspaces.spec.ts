@@ -2,7 +2,7 @@ import AxeBuilder from "@axe-core/playwright";
 import { test, expect } from "@/tests/e2e/fixtures";
 import { seedDesktop } from "@/tests/e2e/panelWorkspaceFixtures";
 
-test("library collections navigate locally and book inspection preserves the catalog and explicit opening", async ({ page }) => {
+test("library collections navigate locally and book covers open the book without a details panel", async ({ page }) => {
   await seedDesktop(page);
   await page.goto("/library");
   const crumbs = page.getByRole("navigation", { name: "Caminho do acervo" });
@@ -16,18 +16,11 @@ test("library collections navigate locally and book inspection preserves the cat
   await expect(page.locator("[data-series-book]")).toHaveCount(2);
   await crumbs.getByRole("link", { name: "Biblioteca", exact: true }).click();
   await page.getByLabel("Buscar por título ou autor").fill("Avulso");
-  const selection = page.getByRole("button", { name: "Ver detalhes de Avulso", exact: true });
-  await selection.click();
-  await expect(page).toHaveURL(/\/library$/);
-  const details = page.getByRole("complementary", { name: "Detalhes da biblioteca" });
-  await expect(details.getByRole("heading", { name: "Avulso", exact: true })).toBeVisible();
-  await expect(selection).toHaveAttribute("aria-pressed", "true");
+  const catalog = page.locator("[data-library-catalog]");
+  await expect(page.locator("#library-inspector")).toHaveCount(0);
+  await expect(page.getByRole("button", { name: /^Ver detalhes de/ })).toHaveCount(0);
   await expect(page.getByLabel("Buscar por título ou autor")).toHaveValue("Avulso");
-  await details.getByRole("button", { name: "Fechar detalhes" }).click();
-  await expect(details).toHaveCount(0);
-  await expect(selection).toBeFocused();
-  await selection.click();
-  await details.getByRole("link", { name: "Abrir livro", exact: true }).click();
+  await catalog.locator('[data-book-id="free"]').click({ position: { x: 40, y: 40 } });
   await expect(page).toHaveURL(/\/books\/view\?bookId=free$/);
 });
 
@@ -79,15 +72,13 @@ for (const theme of ["light", "dark"]) {
       await page.setViewportSize({ width, height: 1000 });
       await page.addInitScript((theme) => localStorage.setItem("mbw-theme-preference", theme), theme);
       await page.goto("/library");
-      await page.getByRole("button", { name: "Ver detalhes de Avulso", exact: true }).click();
-      const inspector = page.getByRole("complementary", { name: "Detalhes da biblioteca" });
-      await expect(inspector).toBeVisible();
-      await inspector.getByRole("link", { name: "Abrir livro", exact: true }).scrollIntoViewIfNeeded();
+      await expect(page.locator("#library-inspector")).toHaveCount(0);
+      await expect(page.getByRole("button", { name: /^Ver detalhes de/ })).toHaveCount(0);
       expect((await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa"]).analyze()).violations).toEqual([]);
       expect(await page.locator("main").evaluate((element) => element.scrollWidth <= element.clientWidth)).toBe(true);
       await page.screenshot({ path: `/tmp/my-book-writer-library-panels-${theme}-${width}.png` });
       if (width === 1440 && testInfo.project.name === "chromium" && process.platform === "linux") {
-        await expect(page).toHaveScreenshot(`library-inspector-${theme}.png`, { animations: "disabled", caret: "hide" });
+        await expect(page).toHaveScreenshot(`library-catalog-${theme}.png`, { animations: "disabled", caret: "hide" });
       }
       await page.goto("/codex?universeId=world");
       await page.getByRole("link", { name: "Ver ficha de Personagem de Aurora 1", exact: true }).click();

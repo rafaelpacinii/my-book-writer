@@ -1,5 +1,4 @@
 .layout { grid-template-columns: 360px minmax(0, 1fr); }
-.withInspector { grid-template-columns: 360px minmax(0, 1fr) 280px; }
 .editableTitle { height: 1.05em; }
 .layout :global(.book-grid) { grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr)); gap: 20px; }
 .layout :global(.book-grid .book-stage) { aspect-ratio: 1; }
@@ -12,6 +11,8 @@
 .typeNavigation { padding: 0; }
 .typeNavigation :global(.library-type-filter) { display: flex; flex-wrap: nowrap; width: 100%; }
 .typeNavigation :global(.library-type-filter button) { flex: 1; gap: 5px; padding-inline: 6px; white-space: nowrap; }
+.typeNavigation :global(.library-type-filter button:disabled) { color: var(--muted); opacity: .45; cursor: not-allowed; }
+.typeNavigation :global(.library-type-filter button:disabled:hover) { background: transparent; color: var(--muted); }
 .createItem { display: flex; min-width: 0; min-height: 360px; }
 .createCard { display: flex; flex: 1; flex-direction: column; align-items: center; justify-content: center; gap: 12px; width: 100%; min-width: 0; padding: 24px 12px; border: 1px solid var(--control-border); border-radius: 10px; background: var(--surface); color: var(--foreground); text-align: center; }
 .createCard > svg { color: var(--primary); }
@@ -50,24 +51,11 @@
 .crumbMenu a[aria-current="page"] { background: var(--primary-soft); font-weight: 600; }
 .crumbMenu a[data-drop-ready="true"] { border-color: var(--primary); }
 .crumbMenu a[data-drop-active="true"] { border-style: solid; border-color: var(--primary); outline: 2px solid var(--primary); background: var(--primary-soft); }
-.inspector { min-width: 0; min-height: 0; overflow: auto; border-left: 1px solid var(--border); background: var(--surface); padding: 20px; }
-.inspector > header { position: sticky; top: 0; z-index: 1; display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 20px; padding-bottom: 8px; background: var(--surface); }
-.inspector :global(.book-object) { width: 106px; }
-.inspector :global(dl) { display: grid; gap: 12px; font-size: 12px; }
-.inspector :global(dt) { margin-bottom: 3px; color: var(--muted); }
-.inspector :global(dd) { overflow-wrap: anywhere; }
-.inspector :global(h2) { overflow-wrap: anywhere; }
-@container workbench (max-width: 1100px) {
-  .layout, .withInspector { grid-template-columns: 360px minmax(0, 1fr); }
-  .withInspector { grid-template-rows: minmax(0, 1fr) minmax(0, 35%); }
-  .inspector { grid-column: 1 / -1; border-left: 0; border-top: 1px solid var(--border); }
-}
 @container workbench (max-width: 420px) {
   .typeNavigation :global(.library-type-filter svg) { display: none; }
 }
 @container workbench (max-width: 740px) {
-  .layout, .withInspector { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); }
-  .withInspector { grid-template-rows: auto minmax(0, 1fr) minmax(0, 40%); }
+  .layout { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); }
   .navigation { max-height: min(60vh, 480px); border-right: 0; border-bottom: 1px solid var(--border); }
   .navigationContent { max-height: 430px; }
   .navigationToggle { display: flex; align-items: center; gap: 8px; width: 100%; padding: 10px 16px; font-size: 12px; }

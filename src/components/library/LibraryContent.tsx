@@ -26,8 +26,6 @@ export function LibraryContent({ lib }: { lib: ReturnType<typeof useLibrary> }) 
           <SeriesBookGrid books={lib.entries.flatMap((entry) => entry.kind === "book" ? [entry.book] : [])}
             allBooks={scope.books} formatMap={lib.formatMap} fontMap={lib.fontMap} view={lib.view}
             disabled={lib.busy} move={lib.move} creation={<LibraryCreateMenu lib={lib} />}
-            selectedId={lib.inspector.selectedId}
-            onInspect={(book, element) => lib.inspector.select({ kind: "book", book }, element)}
             onReorder={(ids) => { void lib.seriesManager.reorder(scope.collection.id, ids); }} />
         </section>
       ) : <LibraryGroups lib={lib} /> : <div className="flex flex-col gap-6">

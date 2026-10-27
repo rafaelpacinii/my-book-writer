@@ -14,9 +14,7 @@ export function LibraryEntryGrid({ entries, lib, includeCreate = false }: {
         <BookCard key={`book:${entry.book.id}`} book={entry.book} index={index}
           formatName={lib.formatMap.get(entry.book.format_id)} fontName={lib.fontMap.get(entry.book.font_preset_id)}
           onDragStart={(event) => lib.move.start(event, entry.book.id)} onDragEnd={lib.move.end}
-          onMove={() => lib.move.open(entry.book)} disabled={lib.busy}
-          selected={lib.inspector.selectedId === entry.book.id}
-          onInspect={(element) => lib.inspector.select(entry, element)} />
+          onMove={() => lib.move.open(entry.book)} disabled={lib.busy} />
       ) : <CollectionCard key={`${entry.kind}:${entry.collection.id}`} entry={entry} lib={lib} />)}
     </div>
   );
