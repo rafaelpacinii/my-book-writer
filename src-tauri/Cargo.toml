@@ -28,16 +28,16 @@ sqlx = { version = "0.9.0", features = ["runtime-tokio", "sqlite", "migrate"] }
 uuid = { version = "1.26.1", features = ["v7", "serde"] }
 thiserror = "2.0.20"
 sha2 = "0.11.0"
-base64 = "0.23"
-scraper = "0.27"
+base64 = "0.22"
+scraper = "0.29"
 tempfile = "3"
 tungstenite = "0.30"
 tauri-plugin-dialog = "2"
 epub-builder = "0.8.3"
 docx-rs = "0.4.22"
-zip = { version = "6", default-features = false, features = ["deflate"] }
+zip = { version = "8", default-features = false, features = ["deflate"] }
 quick-xml = "0.42"
-lopdf = "0.45"
+lopdf = "0.46"
 image = { version = "0.25", default-features = false, features = ["png", "jpeg", "gif", "webp"] }
 
 
