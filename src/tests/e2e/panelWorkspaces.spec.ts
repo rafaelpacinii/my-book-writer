@@ -29,11 +29,13 @@ test("codex keeps its list, search and scroll while changing sheets and protects
   await page.goto("/codex?universeId=world");
   await page.getByLabel("Buscar fichas").fill("Aurora");
   await page.getByRole("link", { name: "Ver ficha de Personagem de Aurora 1", exact: true }).click();
+  await page.getByRole("button", { name: "Ver fichas", exact: true }).click();
   const list = page.locator("[data-codex-list]");
   await list.evaluate((element) => { element.setAttribute("data-persisted", "yes"); element.scrollTop = 280; });
   const previousScroll = await list.evaluate((element) => element.scrollTop);
   await page.getByRole("link", { name: "Ver ficha de Personagem de Aurora 14", exact: true }).click();
-  await expect(page.getByRole("heading", { level: 2, name: "Personagem de Aurora 14", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "Personagem de Aurora 14", exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Ver fichas", exact: true }).click();
   await expect(list).toHaveAttribute("data-persisted", "yes");
   expect(await list.evaluate((element) => element.scrollTop)).toBe(previousScroll);
   await expect(page.getByLabel("Buscar fichas")).toHaveValue("Aurora");
@@ -57,9 +59,10 @@ test("codex keeps its list, search and scroll while changing sheets and protects
   await page.getByLabel("Buscar fichas").fill("Aurora");
   await page.getByRole("link", { name: "Ver ficha de Personagem de Aurora 15", exact: true }).click();
   await discard.getByRole("button", { name: "Descartar e voltar" }).click();
-  await expect(page.getByRole("heading", { level: 2, name: "Personagem de Aurora 15", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "Personagem de Aurora 15", exact: true })).toBeVisible();
   await expect(page.getByLabel("Status", { exact: true })).toHaveValue("Em jornada");
   await page.reload();
+  await page.getByRole("button", { name: "Ver fichas", exact: true }).click();
   await expect(page.getByRole("link", { name: "Ver ficha de Personagem de Aurora 15", exact: true })).toHaveAttribute("aria-current", "page");
 });
 
@@ -82,11 +85,11 @@ for (const theme of ["light", "dark"]) {
       }
       await page.goto("/codex?universeId=world");
       await page.getByRole("link", { name: "Ver ficha de Personagem de Aurora 1", exact: true }).click();
-      await expect(page.getByRole("heading", { level: 2, name: "Personagem de Aurora 1", exact: true })).toBeVisible();
+      await expect(page.getByRole("heading", { level: 1, name: "Personagem de Aurora 1", exact: true })).toBeVisible();
       if (width < 800) {
         await page.getByRole("button", { name: "Ver fichas", exact: true }).click();
         await page.getByRole("link", { name: "Ver ficha de Personagem de Aurora 10", exact: true }).click();
-        await expect(page.getByRole("heading", { level: 2, name: "Personagem de Aurora 10", exact: true })).toBeVisible();
+        await expect(page.getByRole("heading", { level: 1, name: "Personagem de Aurora 10", exact: true })).toBeVisible();
       }
       expect((await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa"]).analyze()).violations).toEqual([]);
       expect(await page.locator("main").evaluate((element) => element.scrollWidth <= element.clientWidth)).toBe(true);

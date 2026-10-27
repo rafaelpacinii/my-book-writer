@@ -3,11 +3,12 @@ import { LayoutGrid, List } from "lucide-react";
 interface Props {
   view: "grid" | "list";
   onChange: (view: "grid" | "list") => void;
+  label?: string;
 }
 
-export function LibraryViewToggle({ view, onChange }: Props) {
+export function LibraryViewToggle({ view, onChange, label = "Visualização da biblioteca" }: Props) {
   return (
-    <div role="group" aria-label="Visualização da biblioteca" className="library-view-toggle">
+    <div role="group" aria-label={label} className="library-view-toggle">
       <button type="button" aria-label="Visualizar em grade" aria-pressed={view === "grid"}
         onClick={() => onChange("grid")}
       >

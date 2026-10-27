@@ -17,7 +17,7 @@ export function useLibraryCreateMenu() {
     const bounds = popover.getBoundingClientRect();
     popover.style.left = `${Math.max(12, Math.min(rect.left, innerWidth - bounds.width - 12))}px`;
     popover.style.top = `${Math.max(12, Math.min(rect.bottom + 8, innerHeight - bounds.height - 12))}px`;
-    popover.querySelector<HTMLElement>("a, button")?.focus();
+    popover.querySelector<HTMLElement>("a[href], button:not(:disabled)")?.focus();
   };
   const close = () => {
     popoverRef.current?.hidePopover();

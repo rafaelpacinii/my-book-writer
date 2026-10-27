@@ -4,6 +4,7 @@ import { CodexImageView } from "@/components/codex/CodexImageView";
 import { GalleryActions } from "@/components/codex/sheet/GalleryActions";
 import { useCodexGallery } from "@/hooks/useCodexGallery";
 import type { CodexScopeInput, CodexSheet } from "@/types/codex";
+import styles from "@/components/codex/sheet/dossier.module.css";
 
 export function Gallery({ sheet, scope, archived }: { sheet: CodexSheet; scope: CodexScopeInput; archived: boolean }) {
   const gallery = useCodexGallery(scope, sheet);
@@ -12,7 +13,7 @@ export function Gallery({ sheet, scope, archived }: { sheet: CodexSheet; scope: 
       <div className="flex items-center justify-between gap-2 px-4 py-3">
         <h2 className="text-sm font-bold text-foreground">Galeria</h2><span className="text-xs text-muted">{sheet.images.length} / 64</span>
       </div>
-      <div className="aspect-[4/5] w-full overflow-hidden bg-primary-soft">
+      <div className={styles.galleryImage} data-empty={!gallery.current}>
         {gallery.current ? <CodexImageView scope={scope} entity={sheet.entity.id} image={gallery.current.id}
           alt={gallery.current.caption || `Imagem de ${sheet.entity.name}`} contain retry /> : (
           <div className="flex h-full flex-col items-center justify-center gap-3 p-6 text-center text-primary">

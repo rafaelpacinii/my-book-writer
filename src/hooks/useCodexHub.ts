@@ -34,6 +34,7 @@ export function useCodexHub() {
   const kind = data.entities.find((item) => item.id === selectedId)?.kind
     ?? codexKinds.find((item) => item === params.get("kind")) ?? "character";
   const [search, setSearch] = useState("");
+  const [view, setView] = useState<"grid" | "list">("grid");
   const dialogKey = `${profile.profile?.id}:${context ? contextKey(context) : "none"}:${kind}`;
   const [creationKey, setCreationKey] = useState<string | null>(null);
   const setCreating = (open: boolean) => setCreationKey(open ? dialogKey : null);
@@ -47,7 +48,7 @@ export function useCodexHub() {
   };
   const error = profile.error ?? contexts.error ?? (invalidScope ? "Escolha apenas um Livro ou Universo para o Códice." : null)
     ?? (requested ? resolved.error : null) ?? data.error;
-  return { ...data, contexts: contexts.contexts, context, scope, kind, search, setSearch, chooseContext, chooseKind,
+  return { ...data, contexts: contexts.contexts, context, scope, kind, search, setSearch, view, setView, chooseContext, chooseKind,
     creating: creationKey === dialogKey, setCreating,
     announcement, selectedId,
     visible: filterCodex(data.entities, kind, search), error,

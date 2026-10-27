@@ -9,7 +9,7 @@ async function openSheet(page: Page, name = "Ayla") {
   await page.getByRole("button", { name: "Nova ficha", exact: true }).click();
   await page.getByRole("dialog").getByLabel("Nome da ficha").fill(name);
   await page.getByRole("dialog").getByRole("button", { name: "Criar ficha", exact: true }).click();
-  await expect(page.getByRole("heading", { level: 2, name, exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name, exact: true })).toBeVisible();
   await expect(page).toHaveURL(/\/codex\/sheet\?/);
 }
 
@@ -40,6 +40,7 @@ test("category tabs navigate with keyboard, create, rename, reorder and delete c
   await expect(panel).toContainText("Magia e Poderes");
 
   // Rename category
+  await page.getByRole("button", { name: "Gerenciar categoria", exact: true }).click();
   await page.getByRole("button", { name: "Renomear categoria", exact: true }).click();
   const renameDialog = page.getByRole("dialog", { name: "Renomear categoria" });
   await renameDialog.getByLabel("Nome da categoria").fill("Sistema Mágico");
@@ -47,6 +48,7 @@ test("category tabs navigate with keyboard, create, rename, reorder and delete c
   await expect(tablist.getByRole("tab", { name: "Sistema Mágico" })).toBeVisible();
 
   // Delete category
+  await page.getByRole("button", { name: "Gerenciar categoria", exact: true }).click();
   await page.getByRole("button", { name: "Excluir categoria", exact: true }).click();
   const deleteModal = page.getByRole("dialog", { name: "Excluir categoria?" });
   await deleteModal.getByRole("button", { name: "Confirmar" }).click();
@@ -62,7 +64,7 @@ test("dynamic fields support creation, type change, reordering, scale, tags and 
   await page.getByRole("button", { name: "Nova ficha", exact: true }).click();
   await page.getByRole("dialog").getByLabel("Nome da ficha").fill("Cidade de Luz");
   await page.getByRole("dialog").getByRole("button", { name: "Criar ficha", exact: true }).click();
-  await expect(page.getByRole("heading", { level: 2, name: "Cidade de Luz" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "Cidade de Luz" })).toBeVisible();
 
   // Return to first entity
   await page.goto("/codex?universeId=world");
@@ -124,6 +126,7 @@ test("templates save sheet structure and allow instantiating new sheets without 
   await expect(page.getByText("Categorias e campos salvos.")).toBeVisible();
 
   // Save template
+  await page.getByRole("button", { name: "Opções da ficha", exact: true }).click();
   await page.getByRole("button", { name: "Salvar como modelo", exact: true }).click();
   const tplDialog = page.getByRole("dialog", { name: "Salvar como modelo" });
   await tplDialog.getByLabel("Nome do modelo").fill("Modelo Combatente");
@@ -139,7 +142,7 @@ test("templates save sheet structure and allow instantiating new sheets without 
   await createDialog.getByRole("button", { name: "Criar ficha" }).click();
 
   // Verify new entity has the template category and field, but empty content
-  await expect(page.getByRole("heading", { level: 2, name: "Guerreiro Novo" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "Guerreiro Novo" })).toBeVisible();
   const tablist = page.getByRole("tablist", { name: "Categorias da ficha" });
   await tablist.getByRole("tab", { name: "Equipamentos" }).click();
   await expect(page.getByRole("textbox", { name: "Artefatos Especiais", exact: true })).toHaveValue("");
@@ -158,10 +161,44 @@ test("unsaved structure changes protect navigation and can be discarded", async 
   await expect(page.getByRole("textbox", { name: "Nome de nascimento", exact: true })).toHaveValue("Alteração Pendente");
 
   // Discard changes
+  await page.getByRole("button", { name: "Opções da ficha", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Descartar alterações nos campos", exact: true })).toBeFocused();
   await page.getByRole("button", { name: "Descartar alterações nos campos" }).click();
   const discardModal = page.getByRole("dialog", { name: "Descartar alterações nos campos?" });
   await discardModal.getByRole("button", { name: "Confirmar" }).click();
   await expect(page.getByRole("textbox", { name: "Nome de nascimento", exact: true })).toHaveValue("");
+});
+
+test("context menus edit, reorder and remove fields while preserving their saved content", async ({ page }) => {
+  await openSheet(page, "Ficha com menus");
+  await page.getByRole("textbox", { name: "Nome de nascimento", exact: true }).fill("Ayla Ventania");
+  await page.getByRole("button", { name: "Ações do campo Nome de nascimento", exact: true }).click();
+  await page.getByRole("button", { name: "Editar campo Nome de nascimento", exact: true }).click();
+  const dialog = page.getByRole("dialog", { name: "Editar campo", exact: true });
+  await dialog.getByLabel("Nome do campo").fill("Nome original");
+  await dialog.getByRole("button", { name: "Aplicar campo", exact: true }).click();
+  await expect(page.getByRole("textbox", { name: "Nome original", exact: true })).toHaveValue("Ayla Ventania");
+  await page.getByRole("button", { name: "Ações do campo Nome original", exact: true }).click();
+  await page.getByRole("button", { name: "Mover campo Nome original para baixo", exact: true }).click();
+  await expect(page.locator("[data-codex-field]").first()).toContainText("Idade");
+  await page.getByRole("button", { name: "Gerenciar categoria", exact: true }).click();
+  await page.getByRole("button", { name: "Mover categoria para a direita", exact: true }).click();
+  const tabs = page.getByRole("tablist", { name: "Categorias da ficha", exact: true });
+  await expect(tabs.getByRole("tab").nth(1)).toHaveText("Dados gerais");
+  await page.getByRole("button", { name: "Salvar campos", exact: true }).click();
+  await expect(page.getByText("Categorias e campos salvos.", { exact: true })).toBeVisible();
+  await page.reload();
+  await tabs.getByRole("tab", { name: "Dados gerais", exact: true }).click();
+  await expect(page.getByRole("textbox", { name: "Nome original", exact: true })).toHaveValue("Ayla Ventania");
+  await expect(page.locator("[data-codex-field]").first()).toContainText("Idade");
+  await page.getByRole("button", { name: "Ações do campo Nome original", exact: true }).click();
+  await page.getByRole("button", { name: "Excluir campo Nome original", exact: true }).click();
+  await page.getByRole("dialog", { name: "Excluir campo?", exact: true }).getByRole("button", { name: "Confirmar", exact: true }).click();
+  await page.getByRole("button", { name: "Salvar campos", exact: true }).click();
+  await expect(page.getByText("Categorias e campos salvos.", { exact: true })).toBeVisible();
+  await page.reload();
+  await tabs.getByRole("tab", { name: "Dados gerais", exact: true }).click();
+  await expect(page.getByRole("textbox", { name: "Nome original", exact: true })).toHaveCount(0);
 });
 
 for (const theme of ["light", "dark"]) {

@@ -9,7 +9,7 @@ async function create(page: Page, name: string) {
   const dialog = page.getByRole("dialog");
   await dialog.getByLabel("Nome da ficha").fill(name);
   await dialog.getByRole("button", { name: "Criar ficha", exact: true }).click();
-  await expect(page.getByRole("heading", { level: 2, name, exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name, exact: true })).toBeVisible();
   await page.getByRole("link", { name: "Voltar ao Códice" }).click();
   await expect(page.getByRole("link", { name: `Ver ficha de ${name}`, exact: true })).toBeVisible();
 }
@@ -89,7 +89,7 @@ test("retries IPC failures, preserves form values and prevents duplicate submiss
   await expect(dialog.getByText("Não foi possível criar esta ficha. Tente novamente.")).toBeVisible();
   await expect(dialog.getByLabel("Nome da ficha")).toHaveValue("Pessoa persistente");
   await dialog.getByRole("button", { name: "Criar ficha", exact: true }).click();
-  await expect(page.getByRole("heading", { level: 2, name: "Pessoa persistente", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "Pessoa persistente", exact: true })).toBeVisible();
   await page.getByRole("link", { name: "Voltar ao Códice" }).click();
   await expect(page.getByRole("article")).toHaveCount(1);
   const count = await page.evaluate(() => (window as unknown as { codexCalls: Record<string, number> }).codexCalls.create_codex_entity);
