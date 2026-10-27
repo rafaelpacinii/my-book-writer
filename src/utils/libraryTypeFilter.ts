@@ -1,6 +1,11 @@
 import type { Book } from "@/types/book";
 import type { LibraryCollection, LibraryEntry, LibraryScope, LibraryTypeFilter } from "@/types/library";
 
+export function libraryTypeIsAvailable(type: LibraryTypeFilter, scope: LibraryScope["kind"]) {
+  return scope !== "missing" && (type !== "universe" || scope === "root")
+    && (type !== "series" || scope !== "series");
+}
+
 /** Typed views expose nested items at the root and stay within the open collection. */
 export function libraryTypeEntries(books: Book[], collections: LibraryCollection[], scope: LibraryScope,
   entries: LibraryEntry[], type: LibraryTypeFilter): LibraryEntry[] {

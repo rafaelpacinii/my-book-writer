@@ -13,7 +13,6 @@
 .collection-card .collection-stage { overflow: hidden; isolation: isolate; }
 .book-card[draggable="true"] { cursor: grab; }
 .book-card[draggable="true"]:active { cursor: grabbing; }
-.book-card[data-selected="true"] { outline: 2px solid var(--primary); outline-offset: 2px; }
 
 /* Universes open the covers into a fan; series keep the sequential stack. */
 .collection-stack[data-kind="universe"] .collection-cover[data-slot="0"] {

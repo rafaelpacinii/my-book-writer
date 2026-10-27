@@ -8,7 +8,7 @@ import type { Book } from "@/types/book";
 import type { BookSeries } from "@/types/series";
 import type { Universe } from "@/types/universe";
 import type { LibrarySort, LibraryTypeFilter } from "@/types/library";
-import { libraryTypeEntries } from "@/utils/libraryTypeFilter";
+import { libraryTypeEntries, libraryTypeIsAvailable } from "@/utils/libraryTypeFilter";
 
 export function useLibraryExplorer(books: Book[], series: BookSeries[], universes: Universe[]) {
   const params = useSearchParams();
@@ -16,9 +16,10 @@ export function useLibraryExplorer(books: Book[], series: BookSeries[], universe
   const [searchQuery, setSearchQuery] = useState("");
   const [formatFilter, setFormatFilter] = useState("");
   const [sortOrder, setSortOrder] = useState<LibrarySort>("recent");
-  const [typeFilter, setTypeFilter] = useState<LibraryTypeFilter>("all");
+  const [requestedType, setTypeFilter] = useState<LibraryTypeFilter>("all");
   const collections = useMemo(() => libraryCollections(books, series, universes), [books, series, universes]);
   const scope = libraryScope(collections, params.get("seriesId"), params.get("universeId"));
+  const typeFilter = libraryTypeIsAvailable(requestedType, scope.kind) ? requestedType : "all";
   const scopedEntries = libraryEntries(books, collections, scope);
   const typedEntries = libraryTypeEntries(books, collections, scope, scopedEntries, typeFilter);
   const entries = filterLibraryEntries(typedEntries, { searchQuery, formatFilter, sortOrder }, scope.kind === "series");

@@ -2,13 +2,23 @@
 
 Contrato de UX/UI para o agente e para quem desenvolve o frontend. Leia junto de [src/AGENTS.md](../src/AGENTS.md) e dos [critérios de qualidade](ui-quality.md). Decisões explícitas do usuário prevalecem; protótipos antigos não substituem os contratos atuais.
 
+## Lateral com retomada — 27/10/2026
+
+O usuário escolheu os cards **abaixo dos filtros**, para preservar a posição dos controles. Referência fornecida: [AI Model Catalog Cards — Dark, por Dmitry Sergushkin](https://dribbble.com/shots/27230217-AI-Model-Catalog-Cards-Dark), aproveitando a composição horizontal e a hierarquia de informações, com a paleta e a tipografia editorial do aplicativo.
+
+“Retome suas histórias” apresenta até três livros atualizados recentemente no escopo aberto: todo o perfil na raiz, livros do Universo ou volumes da Série. Usa `Book.updated_at`, que também acompanha salvamentos de capítulos; não representa frequência de edição. Busca, formato, ordenação e tipo do catálogo não alteram esses atalhos. Os cards mostram a capa real ou automática, título, autor e atualização; o link abre o detalhe do livro. O botão de recuperar capa permanece independente da abertura. A lateral mantém rolagem em janelas baixas e pode ser recolhida em janelas estreitas, sem forçar a largura do catálogo.
+
+Todos/Livros/Séries/Universos permanece montado em uma única linha, com posições constantes. Na raiz, os quatro tipos estão habilitados; no Universo, Universos fica desabilitado; na Série, Séries e Universos ficam desabilitados. Um tipo incompatível herdado da navegação passa a Todos, sem alterar o escopo. Não restaurar a árvore lateral removida nas iterações seguintes ao primeiro explorador.
+
+O painel de detalhes da Biblioteca foi removido a pedido do usuário: as informações já estão no card convencional. O catálogo usa o espaço restante da janela, sem uma terceira coluna ou faixa de inspeção. Clicar na capa ou no título abre o livro; ações de configuração, movimentação e demais opções continuam no menu do card. A lateral mantém apenas filtros e atalhos recentes, inclusive no modo recolhível.
+
 ## Ajuste aprovado da Biblioteca — 25/10/2026
 
 Opção A, explorador suave, com referência na [lateral do Eagle 4](https://en.eagle.cool/blog/post/eagle4). Preservar as cores e a tipografia editorial da aplicação. A navegação usa seleção discreta, ícones leves e níveis progressivos de 18 px para Universo → Série → Livro, com espaço fixo para setas em todos os níveis. Mostrar também livros diretos do Universo, séries independentes e livros avulsos conforme os vínculos reais.
 
 A lateral local mede 360 px, com árvore e filtros separados por uma divisória sutil e rolagem própria. O seletor de tipo fica em uma única linha no topo, no lugar do antigo link “Todo o acervo”; busca, formato, ordenação, agrupamento e limpeza continuam na lateral. O topo do catálogo contém “Seu acervo (x itens)” e grade/lista; a contagem reflete o escopo e os filtros, sem incluir o card de criação. Em janelas estreitas, “Navegação e filtros” abre esses controles acima do catálogo. Não apresentar “Coleções” como uma configuração disponível. Títulos dos grupos, Filtros e labels dos seletores usam 12 px, negrito e foreground.
 
-Biblioteca, Universo e Série compartilham a composição de PageHeader, sem botões de criação ou de alternância do painel de detalhes no cabeçalho local. Universo e Série preservam edição direta de nome e descrição; a descrição inicia com uma linha e pode ser expandida pelo usuário. A seleção de capa abre os detalhes, cujo botão de fechar permanece dentro do próprio painel.
+Biblioteca, Universo e Série compartilham a composição de PageHeader, sem botões de criação no cabeçalho local. Universo e Série preservam edição direta de nome e descrição; a descrição inicia com uma linha e pode ser expandida pelo usuário. Conforme a revisão de 27/10, a capa abre o livro diretamente e o painel de detalhes foi removido.
 
 A criação usa um card do mesmo tamanho dos demais, sempre na primeira posição, em grade, lista, agrupamento, busca ou estado vazio. Seu popover mantém as opções válidas no contexto. A lateral oferece atalhos de criação com ícones, conforme a referência de explorador do VS Code fornecida pelo usuário; Livro herda o escopo, Série recebe o Universo atual (ou o da Série selecionada), e Universo é criado na raiz.
 
@@ -49,12 +59,12 @@ Observar as imagens das interfaces dos aplicativos, não a estrutura comercial d
 
 ## Composição aprovada para Biblioteca e Códice
 
-Em 25/10/2026, o usuário escolheu o **explorador com detalhes para a Biblioteca**, inspirado no [Eagle](https://en.eagle.cool/), e a **lista com ficha ao lado para o Códice**, inspirada no [Bear](https://bear.app/). Essas composições evoluem a direção editorial acolhedora já aprovada.
+Em 25/10/2026, o usuário escolheu o explorador da Biblioteca inspirado no [Eagle](https://en.eagle.cool/) e a lista com ficha ao lado para o Códice inspirada no [Bear](https://bear.app/). A revisão de 27/10 removeu o painel redundante de detalhes da Biblioteca. Essas composições preservam a direção editorial acolhedora já aprovada.
 
-- **Biblioteca:** navegação local por Universos e Séries, acervo em grade/lista e painel de detalhes recolhível. Selecionar a capa consulta o livro sem sair do acervo; o título e “Abrir livro” são ações explícitas de abertura. Os filtros e as ações de mover/reordenar continuam disponíveis. A hierarquia usa links e seções recolhíveis com nomes acessíveis.
+- **Biblioteca:** navegação contextual por Universos e Séries, acervo em grade/lista e lateral com filtros e livros recentes. Capa e título abrem o livro diretamente. Informações e ações ficam nos cards convencionais, sem painel adicional. Mover/reordenar permanece disponível.
 - **Códice:** contexto, categorias, busca e lista compacta à esquerda; a ficha selecionada ocupa a área principal. O layout compartilhado mantém a lista montada durante a seleção, preservando busca e rolagem. A URL continua identificando contexto e entidade, inclusive em recarga e histórico. Links, troca de contexto e abas passam pela mesma proteção de rascunhos.
 - **Painéis:** cabeçalhos compactos, rolagem independente e superfícies locais distintas da navegação global. O corpo de uma ficha se adapta à largura do seu painel, não apenas à largura total da janela.
-- **Janelas estreitas:** as coleções da Biblioteca podem ser recolhidas e os detalhes passam para uma área inferior rolável. No Códice, “Ver fichas” alterna entre a lista e a ficha sem desmontar o rascunho.
+- **Janelas estreitas:** a lateral de filtros e retomada da Biblioteca pode ser recolhida. No Códice, “Ver fichas” alterna entre a lista e a ficha sem desmontar o rascunho.
 
 A identidade compartilhada permanece nos tokens, fontes, controles, estados e comportamento. A composição varia com a tarefa; a Biblioteca explora o acervo e o Códice desenvolve uma entidade por vez.
 

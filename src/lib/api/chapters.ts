@@ -1,5 +1,7 @@
 import { storeChapterWithReview } from "@/lib/api/browserReviews";
 import { browserCheckpoint } from "@/lib/api/browserHistory";
+import { getStoredBooks, saveStoredBooks } from "@/lib/api/books";
+import { publishDataChange } from "@/lib/data/changes";
 import { invoke } from "@tauri-apps/api/core";
 import type { Chapter, ChapterSummary, CreateChapterInput } from "@/types/chapter";
 
@@ -126,7 +128,7 @@ export async function updateChapterType(
   });
 }
 
-export async function saveChapterContent(
+async function persistChapterContent(
   id: string,
   expectedRevision: number,
   contentJson: string,
@@ -153,6 +155,16 @@ export async function saveChapterContent(
     expectedRevision,
     contentJson,
   });
+}
+
+export async function saveChapterContent(id: string, expectedRevision: number, contentJson: string): Promise<Chapter> {
+  const chapter = await persistChapterContent(id, expectedRevision, contentJson);
+  if (!isTauriEnvironment()) {
+    saveStoredBooks(getStoredBooks().map((book) => book.id === chapter.book_id
+      ? { ...book, updated_at: chapter.updated_at } : book));
+  }
+  publishDataChange("books");
+  return chapter;
 }
 
 export async function reorderChapters(
