@@ -1,0 +1,28 @@
+name: Funcionalidade
+description: Propor uma capacidade com critérios verificáveis.
+title: "feat: "
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Necessidade do autor ou contribuidor
+    validations:
+      required: true
+  - type: textarea
+    id: behavior
+    attributes:
+      label: Comportamento esperado e limites de escopo
+      description: Considere funcionamento offline, falhas e preservação do conteúdo.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Critérios observáveis de aceitação
+    validations:
+      required: true
+  - type: textarea
+    id: contracts
+    attributes:
+      label: Regras BR, camadas, dependências e impacto de versão
+      description: Indique migrations ou mudança de contrato quando conhecidas; mantenedor define milestone.

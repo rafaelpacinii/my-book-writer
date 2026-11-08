@@ -118,7 +118,12 @@ As referências visuais pertencem ao Chromium/Linux com as fontes locais. As cap
 MBW_EDITOR_TEST_URL=http://127.0.0.1:3100 npm run test:e2e -- uiVisual --project=chromium --update-snapshots=all
 ```
 
-O workflow .github/workflows/ui-quality.yml executa os checks, build, regressões na exportação e suíte nativa Windows. Ele envia traces, capturas e relatórios como artifacts. Exigir os jobs como checks obrigatórios depende da configuração de proteção da branch no GitHub; este trabalho não altera essa configuração.
+O workflow `.github/workflows/verify.yml` seleciona checks por impacto e executa as
+regressões de navegador sobre a exportação estática. A suíte nativa Windows e o
+instalador para revisão ficam no workflow manual `windows-artifact.yml`. Ambos
+enviam os respectivos traces, capturas e relatórios como artifacts. Recomenda-se
+exigir somente o gate `CI required`; a proteção de branch precisa ser configurada
+no GitHub. Consulte a [matriz e os limites de CI/CD](development/ci-cd.md).
 
 ## Windows real: execução e aceite de release
 

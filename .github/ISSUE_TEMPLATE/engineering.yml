@@ -1,0 +1,22 @@
+name: Evolução técnica
+description: Rastrear integridade de dados, segurança, testes ou experiência de contribuição.
+title: "chore: "
+body:
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Problema observado e evidência
+      description: Arquivos, gatilho e consequência; não inclua dados pessoais ou segredos.
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Escopo proposto e critérios de conclusão
+    validations:
+      required: true
+  - type: textarea
+    id: validation
+    attributes:
+      label: Validação, compatibilidade e recuperação
+      description: Para banco/backup, descreva testes isolados e preservação do original.

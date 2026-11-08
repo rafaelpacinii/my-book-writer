@@ -27,9 +27,13 @@ out/
 *.sw?
 nsis*/
 
-# UI Prototype and Implementation Guide (local only)
-docs/guia-implementacao-ui.md
+# UI prototype assets remain local; Markdown contracts are versioned.
 docs/prototipo-ui/
 src/prototype/
-/docs/*
-!/docs/frontend-design.md
+# Local planning and test artifacts are not contribution documentation.
+docs/plano.md
+docs/testes/
+
+# Governance automation output
+__pycache__/
+*.pyc

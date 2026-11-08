@@ -1,69 +1,38 @@
-name: UI quality
+name: Windows review artifact
 
 on:
-  pull_request:
-    branches: [develop, main]
-  push:
-    branches: [develop, main]
   workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: ui-${{ github.ref }}
-  cancel-in-progress: true
+  group: windows-candidate-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
-  browser:
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 24
-          cache: npm
-      - run: npm ci
-      - run: npx playwright install --with-deps chromium firefox
-      - run: npx next typegen
-      - run: npm run typecheck
-      - run: npm run lint
-      - run: npm run check:ui
-      - run: npm test
-      - run: node --test src/tests/native/webdriver.test.mjs
-      - run: npm run build -- --webpack
-      - name: Test production export
-        shell: bash
-        run: |
-          npm run preview:static > /tmp/mbw-static.log 2>&1 &
-          preview_pid=$!
-          trap 'kill "$preview_pid"' EXIT
-          for attempt in {1..60}; do
-            if curl -sf http://127.0.0.1:3100/home > /dev/null; then break; fi
-            sleep 1
-          done
-          MBW_EDITOR_TEST_URL=http://127.0.0.1:3100 npm run test:e2e
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: browser-ui-results
-          path: |
-            src/tests/playwright-report
-            src/tests/test-results
+  verify:
+    uses: ./.github/workflows/verify.yml
 
   windows-native:
+    name: Windows candidate
+    needs: verify
+    timeout-minutes: 60
     # Avoid the WebView2 automation regression in windows-2025-vs2026 (runner-images#14738).
     runs-on: windows-2022
     env:
       CARGO_TARGET_DIR: ${{ github.workspace }}/src-tauri/target/ui-tests
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - uses: actions/setup-node@v4
         with:
           node-version: 24
           cache: npm
       - uses: dtolnay/rust-toolchain@stable
       - run: npm ci
+      - run: python scripts/check_versions.py
       - run: npx playwright install chromium
       - run: cargo install tauri-driver --locked
       - name: Install Edge WebDriver matching the WebView2 runtime
@@ -97,3 +66,26 @@ jobs:
         with:
           name: windows-native-ui-results
           path: src/tests/test-results/native
+      - name: Build review installer
+        shell: pwsh
+        run: |
+          $env:CARGO_TARGET_DIR = "$env:GITHUB_WORKSPACE/src-tauri/target/candidate"
+          npm run tauri build -- --bundles nsis
+          if ($LASTEXITCODE -ne 0) { throw "Installer build failed" }
+      - name: Record installer checksum and source
+        shell: pwsh
+        run: |
+          $bundles = @(Get-ChildItem src-tauri/target/candidate/release/bundle/nsis/*.exe)
+          if ($bundles.Count -eq 0) { throw "NSIS installer not found" }
+          foreach ($bundle in $bundles) {
+            $hash = (Get-FileHash $bundle.FullName -Algorithm SHA256).Hash.ToLower()
+            "$hash  $($bundle.Name)" | Set-Content "$($bundle.FullName).sha256" -Encoding ascii
+          }
+          "Commit: $env:GITHUB_SHA" | Set-Content src-tauri/target/candidate/release/bundle/nsis/SOURCE.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-candidate-${{ github.sha }}
+          path: src-tauri/target/candidate/release/bundle/nsis/
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 7
