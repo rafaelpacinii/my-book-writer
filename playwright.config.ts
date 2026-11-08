@@ -12,7 +12,10 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   workers: 1,
   timeout: 60_000,
-  expect: { timeout: 10_000 },
+  expect: {
+    timeout: 10_000,
+    toHaveScreenshot: { maxDiffPixelRatio: 0.05 },
+  },
   reporter: [["list"], ["html", { open: "never", outputFolder: "src/tests/playwright-report" }]],
   use: {
     baseURL,

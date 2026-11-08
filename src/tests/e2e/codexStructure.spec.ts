@@ -203,6 +203,7 @@ test("context menus edit, reorder and remove fields while preserving their saved
 
 for (const theme of ["light", "dark"]) {
   test(`structure controls and dialogs are accessible in ${theme}`, async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
     await page.addInitScript((theme) => localStorage.setItem("mbw-theme-preference", theme), theme);
     await openSheet(page, `A11y ${theme}`);
 
@@ -210,6 +211,7 @@ for (const theme of ["light", "dark"]) {
     expect(result.violations).toEqual([]);
 
     await page.getByRole("button", { name: "Nova categoria", exact: true }).click();
+    await expect(page.getByRole("dialog", { name: "Nova categoria" })).toBeVisible();
     const catResult = await new AxeBuilder({ page }).include('[role="dialog"]').withTags(["wcag2a", "wcag2aa"]).analyze();
     expect(catResult.violations).toEqual([]);
     await page.keyboard.press("Escape");

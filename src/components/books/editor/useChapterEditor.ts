@@ -135,6 +135,9 @@ export function useChapterEditor(bookId: string, chapterId: string) {
           setSaveStatus("saved");
         }
       })
+      .catch(() => {
+        if (active) setChapter(null);
+      })
       .finally(() => {
         if (active) setIsLoading(false);
       });

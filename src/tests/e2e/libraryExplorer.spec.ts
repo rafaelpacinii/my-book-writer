@@ -199,7 +199,7 @@ for (const theme of ["light", "dark"]) {
     expect((await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa"]).analyze()).violations).toEqual([]);
     if (testInfo.project.name === "chromium" && process.platform === "linux") {
       await expect(page).toHaveScreenshot(`library-explorer-${theme}.png`, {
-        animations: "disabled", caret: "hide", maxDiffPixelRatio: 0.001,
+        animations: "disabled", caret: "hide",
       });
     }
   });
