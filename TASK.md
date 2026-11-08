@@ -22,15 +22,8 @@ do aplicativo e a alteração preexistente em `next-env.d.ts`.
 - [x] Runner de checks, validação de governança/versões e classificador testável.
 - [x] CI separa frontend/Rust/docs e amplia em contratos compartilhados.
 - [x] Templates de issues/PR e workflow manual para instalador Windows.
-- [x] Executar verificações, estabilizar falhas do job `Browser static export` da PR #97 e registrar resultados finais/limites.
+- [x] Executar verificações e registrar resultados finais/limites.
 - [x] Revisar diff e preparar comandos Git seletivos, sem executá-los.
-
-## Estabilização do job `Browser static export` (PR #97)
-
-- `src/tests/e2e/uiMock.ts` e `src/components/books/editor/useChapterEditor.ts`: adicionados handlers mockados para `list_chapters`, `get_chapter_by_id`, `list_review_comments`, `get_review_progress` e `list_chapter_versions` quando `window.__TAURI_INTERNALS__` está ativo em `mockUI` (usado por `mockDesktopWindow` em `workspaceChrome.spec.ts`), além de `.catch(...)` no carregamento inicial do editor para evitar `pageerror` por rejeição não tratada.
-- `src/tests/e2e/uiBookNavigation.spec.ts`: alinhada a asserção de geometria ao contrato atual da `AppShell` (`.workspace-studio` sem padding externo em `/library` vs `.workspace-main` com margens internas em `/books/view` e `/books/settings`), validando que `#main-content` mantém a largura de `/library` e `#main-content > div` ocupa toda a largura útil entre `/books/view` e `/books/settings`.
-- `src/tests/e2e/codexStructure.spec.ts`: adicionado `reducedMotion: "reduce"` e espera explícita de visibilidade do diálogo antes da análise `AxeBuilder`, eliminando o flake de contraste durante a animação de entrada de 200 ms.
-- `playwright.config.ts`, `src/tests/e2e/libraryExplorer.spec.ts` e `src/tests/e2e/uiVisual.spec.ts`: configurado `toHaveScreenshot: { maxDiffPixelRatio: 0.05 }` para absorver a diferença de ~3% na suavização de glifos FreeType/Fontconfig entre snapshots gerados no Fedora 44 e o runner `ubuntu-24.04` do GitHub Actions, preservando as verificações de layout e acessibilidade.
 
 ## Evidências desta execução
 
@@ -38,15 +31,13 @@ do aplicativo e a alteração preexistente em `next-env.d.ts`.
   versão 0.1.0 alinhada e **25 testes Python aprovados**. Cobertura inclui diff,
   fallback, contratos compartilhados, gate de falha/cancelamento, runner e roadmap.
 - `python3 scripts/ai_checks.py verify --scope frontend`: typegen, tsc, lint,
-  **112 testes Vitest (25 arquivos)**, check:ui e **4 testes Node do driver** aprovados.
+  **112 testes Vitest (25 arquivos)**, check:ui e **1 teste Node do driver** aprovados.
 - `python3 scripts/ai_checks.py verify --scope native`: fmt, cargo check --locked
   e cargo test --locked --lib aprovados: **64 passaram, 4 ignorados**.
-- `npx playwright test src/tests/e2e/uiBookNavigation.spec.ts src/tests/e2e/workspaceChrome.spec.ts src/tests/e2e/codexStructure.spec.ts -g "book details share|unified .* chrome keeps|structure controls and dialogs" --retries=0`:
-  build estático e **10 testes aprovados** (Chromium e Firefox).
-- `npx playwright test` nos 26 cenários visuais (`codex.spec.ts`, `codexCatalog.spec.ts`,
-  `codexSheet.spec.ts`, `libraryExplorer.spec.ts`, `libraryUniverses.spec.ts`,
-  `panelWorkspaces.spec.ts` e `uiVisual.spec.ts`) em Chromium com `--retries=0`:
-  **26 testes aprovados**.
+- `CI=true npm run test:e2e -- src/tests/e2e/libraryNavigation.spec.ts
+  --project=chromium --project=firefox`: build estático e **14 testes aprovados**.
+  A primeira tentativa ficou bloqueada por sockets do sandbox; execução autorizada
+  fora dessa restrição passou. A suíte E2E completa não foi executada nesta tarefa.
 - `npm ci --prefix /tmp/mbw-clean-install --offline --no-audit --no-fund
   --cache /tmp/mbw-npm-cache`: instalação limpa aprovada. Há avisos preexistentes de
   peer dependencies entre plugins ESLint e ESLint 10; lint passou após ajuste TS.
