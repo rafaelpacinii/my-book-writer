@@ -1,0 +1,40 @@
+name: Correção de comportamento
+description: Relatar um erro reproduzível no estúdio editorial.
+title: "fix: "
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problema e passos para reproduzir
+      description: Use conteúdo fictício; não anexe banco ou manuscrito pessoal.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Resultado atual e resultado esperado
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Versão, sistema e modo
+      description: Informe desktop Tauri ou prévia web; inclua escala de tela se relevante.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Critérios de aceitação e regra BR relacionada
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Área afetada
+      multiple: true
+      options:
+        - Frontend
+        - Native Rust
+        - Dados e migrations
+        - Exportação
+        - Documentação e IA
+        - CI e distribuição
