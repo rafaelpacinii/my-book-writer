@@ -9,17 +9,23 @@ test("@ui book details share the library width and retain the global sidebar acr
   await page.setViewportSize({ width: 1920, height: 1080 });
   await page.goto("/library");
   await expect(page.locator("main").getByRole("heading", { name: book.title, exact: true })).toBeVisible();
-  const libraryWidth = await page.locator("#main-content > div").evaluate((element) => element.getBoundingClientRect().width);
+  const libraryMainWidth = await page.locator("#main-content").evaluate((element) => element.getBoundingClientRect().width);
   await page.locator("[data-app-sidebar]").evaluate((element) => { element.dataset.persisted = "yes"; });
   await page.locator("main").getByRole("link", { name: book.title, exact: true }).click();
   await expect(page.getByRole("heading", { level: 1, name: book.title })).toBeVisible();
-  expect(await page.locator("#main-content > div").evaluate((element) => element.getBoundingClientRect().width)).toBe(libraryWidth);
+  expect(await page.locator("#main-content").evaluate((element) => element.getBoundingClientRect().width)).toBe(libraryMainWidth);
+  const viewContentWidth = await page.locator("#main-content").evaluate((main) => {
+    const style = getComputedStyle(main);
+    return main.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
+  });
+  expect(await page.locator("#main-content > div").evaluate((element) => element.getBoundingClientRect().width)).toBe(viewContentWidth);
   await expect(page.locator('[data-app-sidebar][data-persisted="yes"]')).toHaveCount(1);
   await page.locator("main").getByRole("link", { name: "Configurações", exact: true }).click();
   const breadcrumbs = page.getByRole("navigation", { name: "Caminho contextual" });
   await expect(breadcrumbs.getByRole("link", { name: "Biblioteca" })).toHaveAttribute("href", "/library");
   await expect(breadcrumbs.getByRole("link", { name: book.title, exact: true })).toHaveAttribute("href", `/books/view${query}`);
   await expect(breadcrumbs.locator('[aria-current="page"]')).toHaveText("Configurações");
+  expect(await page.locator("#main-content > div").evaluate((element) => element.getBoundingClientRect().width)).toBe(viewContentWidth);
   await breadcrumbs.getByRole("link", { name: book.title, exact: true }).click();
   await expect(page).toHaveURL(new RegExp(`/books/view\\?bookId=${book.id}`));
   await expect(page.locator('[data-app-sidebar][data-persisted="yes"]')).toHaveCount(1);

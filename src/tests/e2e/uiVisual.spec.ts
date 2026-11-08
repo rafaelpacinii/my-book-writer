@@ -21,7 +21,7 @@ for (const theme of ["light", "dark"]) {
         await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
         await page.addStyleTag({ content: "nextjs-portal { visibility: hidden; }" });
         await expect(page).toHaveScreenshot(`${name}-${theme}-${width}.png`, {
-          animations: "disabled", caret: "hide", maxDiffPixelRatio: 0.001,
+          animations: "disabled", caret: "hide",
         });
       }
     });

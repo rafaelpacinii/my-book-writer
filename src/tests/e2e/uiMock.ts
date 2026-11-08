@@ -1,9 +1,9 @@
 import type { Page } from "@playwright/test";
-import { book, format, font } from "@/tests/fixtures/book";
+import { book, chapter, format, font } from "@/tests/fixtures/book";
 import type { Book } from "@/types/book";
 
 export async function mockUI(page: Page, options: { delay?: number; failBooks?: number; cover?: string; empty?: boolean; failCover?: number; books?: Book[] } = {}) {
-  await page.addInitScript(({ book, format, font, options }) => {
+  await page.addInitScript(({ book, chapter, format, font, options }) => {
     const runtime = window as unknown as {
       __TAURI_INTERNALS__: { invoke: (command: string, args?: Record<string, unknown>) => Promise<unknown> };
       uiCalls: Record<string, number>;
@@ -33,6 +33,11 @@ export async function mockUI(page: Page, options: { delay?: number; failBooks?: 
             if (runtime.uiFailBooks-- > 0) throw new Error("Não foi possível carregar seus livros.");
             return runtime.uiBooks;
           case "get_book_by_id": return runtime.uiBooks.find((item) => item.id === args?.id) ?? null;
+          case "list_chapters": return [chapter].filter((item) => item.book_id === args?.bookId);
+          case "get_chapter_by_id": return args?.id === chapter.id ? chapter : null;
+          case "list_review_comments": return [];
+          case "get_review_progress": return null;
+          case "list_chapter_versions": return [];
           case "list_book_formats": return [{ ...format, id: book.format_id }];
           case "list_font_presets": return [{ ...font, id: book.font_preset_id }];
           case "get_database_stats": return {
@@ -68,5 +73,5 @@ export async function mockUI(page: Page, options: { delay?: number; failBooks?: 
         }
       },
     };
-  }, { book, format, font, options });
+  }, { book, chapter, format, font, options });
 }
