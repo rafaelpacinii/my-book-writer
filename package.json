@@ -24,10 +24,10 @@
     "preview:static": "node src/tests/serve-static.mjs"
   },
   "dependencies": {
-    "@tailwindcss/postcss": "^4.3.3",
+    "@tailwindcss/postcss": "^4.3.4",
     "@tauri-apps/api": "~2.12.4",
-    "lucide-react": "^1.61.0",
-    "next": "^16.4.2",
+    "lucide-react": "^1.69.0",
+    "next": "^16.4.5",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "tailwindcss": "^4.3.3"
