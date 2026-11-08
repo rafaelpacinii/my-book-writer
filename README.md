@@ -44,6 +44,10 @@
   </p>
 </div>
 
+For contributors: [start here](CONTRIBUTING.md), [documentation map](docs/README.md),
+[current system state](docs/SYSTEM_STATE.md), [AI governance](docs/ai-governance.md),
+and [issues, versions and delivery](docs/development/workflow.md).
+
 <!-- TABLE OF CONTENTS -->
 <details>
   <summary>Table of Contents</summary>

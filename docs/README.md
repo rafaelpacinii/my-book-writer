@@ -1,8 +1,26 @@
-# Documentação Técnica — My Book Writer
+# Documentação — My Book Writer
 
-Bem-vindo à documentação técnica do **My Book Writer**, um estúdio editorial desktop *Local-First* desenvolvido com Tauri v2, Rust, Next.js, React 19 e SQLite.
+Para contribuir sem conhecer todo o código, siga esta ordem:
 
-Este diretório reúne as diretrizes de produto, arquitetura de software, catálogo de telas do protótipo e critérios de qualidade seguidos pelo projeto.
+1. [Contribuir](../CONTRIBUTING.md): ambiente e primeira alteração.
+2. [Estado do sistema](SYSTEM_STATE.md): o que existe, onde está e limitações.
+3. [Regras de negócio](BUSINESS_RULES.md): invariantes editoriais e evidências.
+4. [Convenções](CONVENTIONS.md) e [governança de IA](ai-governance.md): como trabalhar.
+5. [Workflow](development/workflow.md) e [CI/CD](development/ci-cd.md): issues,
+   versões, checks por escopo e candidato Windows.
+
+| Documento de governança | Quando consultar |
+| --- | --- |
+| [AGENTS](../AGENTS.md) | Política canônica e regras por camada |
+| [TASK](../TASK.md) | Objetivo, decisões e evidências da tarefa corrente |
+| [Roadmap](ROADMAP.md) | Prioridades propostas e espelho manual de issues |
+| [ADR 0001](adr/0001-ai-governance-and-scoped-ci.md) | Decisão sobre governança e CI |
+
+Os contratos especializados abaixo continuam nos caminhos existentes. Documentos
+com cronograma por dia são histórico/especificação; não substituem o estado atual.
+O guia visual original é preservado como histórico. As imagens do protótipo podem
+existir apenas no ambiente do autor; para desenvolvimento atual, use
+`frontend-design.md`, `ui-quality.md` e os componentes.
 
 ---
 
@@ -11,7 +29,7 @@ Este diretório reúne as diretrizes de produto, arquitetura de software, catál
 | Documento | Descrição | Público Principal |
 | :--- | :--- | :--- |
 | [**Desenvolvimento do Frontend**](frontend-design.md) | Processo de referências visuais e escolha, layout desktop, componentes compartilhados, estados, movimento e revisão de UX/UI. | Agentes, Designers, Desenvolvedores Frontend |
-| [**Guia de Implementação da Interface**](guia-implementacao-ui.md) | Direção de produto, filosofia visual de geometria editorial, tokens de cores, tipografia e detalhamento de cada tela do aplicativo. | Designers, Desenvolvedores Frontend, Avaliadores |
+| [**Guia de Implementação da Interface**](guia-implementacao-ui.md) (histórico) | Direção de produto, filosofia visual de geometria editorial, tokens de cores, tipografia e detalhamento de cada tela do aplicativo. | Designers, Desenvolvedores Frontend, Avaliadores |
 | [**Roadmap de Funcionalidades & Códice**](roadmap-funcionalidades.md) | Plano estratégico e cronograma diário para Universos, Séries, Códice (Personagens e Lugares) e Dossiê Narrativo. | Produto, Desenvolvedores |
 | [**Motor de Dados do Códice**](codex-data.md) | Esquema SQLite, escopos compartilhados, presets, API Tauri/TypeScript e contratos para os próximos dias. | Desenvolvedores |
 | [**Hub do Códice**](codex-hub.md) | Navegação, filtros por contexto, criação por modelos, consulta e critérios de validação da interface. | Produto, Desenvolvedores |
@@ -54,9 +72,9 @@ O My Book Writer foi projetado para oferecer independência da nuvem com desempe
 
 O protótipo visual do projeto foi construído inteiramente em SVG puro e inspecionável, sem depender de imagens rasterizadas externas. 
 
-* **Visualização Geral**: [`docs/prototipo-ui/visao-geral.png`](prototipo-ui/visao-geral.png)
-* **Arquivos PNG Exportados**: [`docs/prototipo-ui/png/`](prototipo-ui/png/) (94 imagens cobrindo todos os fluxos e estados nos temas claro e escuro)
-* **Arquivos Vetoriais SVG**: [`docs/prototipo-ui/telas/`](prototipo-ui/telas/)
+* **Visualização Geral**: `docs/prototipo-ui/visao-geral.png` (local opcional)
+* **Arquivos PNG Exportados**: `docs/prototipo-ui/png/` (local opcional) (94 imagens cobrindo todos os fluxos e estados nos temas claro e escuro)
+* **Arquivos Vetoriais SVG**: `docs/prototipo-ui/telas/` (local opcional)
 
 Para executar o protótipo interativo no navegador local:
 ```bash
@@ -68,7 +86,9 @@ Acesse [http://127.0.0.1:4178/src/prototype/index.html](http://127.0.0.1:4178/sr
 
 ## 3. Como Executar e Validar o Projeto
 
-Para executar a suíte completa de verificações de qualidade recomendada para revisores:
+Para verificação completa, os comandos abaixo continuam disponíveis. No trabalho
+diário e no CI de PR, execute apenas os escopos afetados conforme a
+[matriz de CI](development/ci-cd.md). Documentação usa o preset governance:
 
 ```bash
 # 1. Verificação de tipos e linting do frontend

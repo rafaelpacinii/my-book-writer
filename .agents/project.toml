@@ -1,0 +1,29 @@
+# Runner configuration, not native Codex settings or a sandbox policy.
+version = 1
+
+[scopes.governance]
+cwd = "."
+commands = [
+  ["python3", "scripts/check_governance.py"],
+  ["python3", "scripts/check_versions.py"],
+  ["python3", "-m", "unittest", "discover", "-s", "scripts", "-p", "test_*.py", "-v"],
+]
+
+[scopes.frontend]
+cwd = "."
+commands = [
+  ["npx", "next", "typegen"],
+  ["npx", "tsc", "--noEmit"],
+  ["npm", "run", "lint"],
+  ["npm", "test"],
+  ["npm", "run", "check:ui"],
+  ["node", "--test", "src/tests/native/webdriver.test.mjs"],
+]
+
+[scopes.native]
+cwd = "src-tauri"
+commands = [
+  ["cargo", "fmt", "--check"],
+  ["cargo", "check", "--locked"],
+  ["cargo", "test", "--locked", "--lib"],
+]

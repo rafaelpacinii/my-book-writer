@@ -1,105 +1,77 @@
 # Project Rules & AI Agent Guidelines
 
-> **Project Identity**: My Book Writer is a professional, local-first desktop editorial studio for authors and book makers.
-> Built with Next.js (App Router, static export), React 19, TypeScript, Tailwind CSS v4, Tauri v2, Rust, and SQLite (WAL mode).
+My Book Writer is a local-first desktop editorial studio: Next.js static export,
+React 19, TypeScript, Tailwind v4, Tauri v2, Rust and SQLite (SQLx, WAL).
 
----
+## Start here
 
-## 1. Architectural North Star
+Read [current task](TASK.md), [system state](docs/SYSTEM_STATE.md) and the
+[documentation map](docs/README.md). Load only the domain documents needed for the
+request. [AI governance](docs/ai-governance.md) explains skills and tool adapters.
 
-My Book Writer is designed around **data sovereignty** and **sub-millisecond local responsiveness**:
-* **Local-First Core**: All core application capabilities (drafting, editing, chapter reordering, versioning, front matter configuration, and high-fidelity PDF/EPUB/DOCX export) must operate flawlessly without an internet connection.
-* **Non-Blocking Persistence**: Persist changes locally first. Preferred flow:
-  `User Action → SQLite (WAL) → Local UI → Sync Queue (background) → Remote API (optional)`
-* **Boundary Invariants**:
-  * **Next.js / React (`src/`)**: Pure UI rendering, client-side interaction, and ergonomic layout. The frontend **must never** directly access SQLite, the filesystem, or remote databases.
-  * **Tauri / Rust (`src-tauri/`)**: Native system operations, SQLite access via SQLx, Chromium DevTools PDF orchestration, and background sync infrastructure.
-  * **SQLite**: Local single source of truth for the desktop client.
-  * **Remote API / MySQL**: Optional online synchronization layer. The frontend must never connect directly to MySQL.
+- [Business rules](docs/BUSINESS_RULES.md) describe editorial invariants.
+- [Conventions](docs/CONVENTIONS.md) describe implementation choices.
+- [Frontend rules](src/AGENTS.md) apply to `src/`.
+- [Native rules](src-tauri/AGENTS.md) apply to `src-tauri/`.
+- [Delivery workflow](docs/development/workflow.md) connects issues, PRs and versions.
 
----
+The closest applicable AGENTS.md adds scoped rules. Explicit user decisions take
+precedence over repository guidance; do not ask again for an already authorized
+change. Record a requested business-rule change in the affected docs and tests.
+Code proves current behavior; a discrepancy with policy is debt to report, not
+permission to silently redefine the product.
 
-## 2. General Engineering Rules
+## Architecture and code
 
-* **Small, Single-Responsibility Files**: Keep files small, focused, and legible.
-* **Strict TSX Limit**: Every `.tsx` file has a strict maximum of **70 lines**. Split components or extract custom hooks when approaching this threshold.
-* **Page Composition**: Every `page.tsx` must only compose route components (typically less than 15 lines). Never implement page UI directly inside `page.tsx`.
-* **Zero `any`**: Do not use `any` unless strictly justified. Use `unknown` and narrow safely.
-* **Explicit Error Handling**: Do not silently swallow errors. Map internal errors into user-friendly typed application errors.
-* **No Unrelated Refactors**: Respect existing code structure and conventions. Only modify files relevant to the active task.
-* **Documentation Integrity**: Preserve existing comments, docstrings, and license headers unless explicitly requested to modify them.
+- Core drafting, editing, ordering, versions, front matter and exports work offline.
+- Frontend uses typed IPC wrappers. Never access SQLite, the filesystem or remote
+  databases directly from React. Browser fixtures are not desktop persistence.
+- Native flow: Command → Service → Repository → SQLite. Persist successfully
+  before reporting a completed save or publishing a data-change event.
+- Remote API/MySQL and background sync remain optional future architecture.
+- Every `.tsx` file has at most **70 lines**. Extract components/hooks; never
+  compress code to evade the limit. `page.tsx` only composes route components.
+- No unjustified `any`; narrow `unknown`. Map errors to actionable typed errors.
+- Keep files focused. Preserve unrelated changes, comments and license headers.
+- Do not read manuscripts, backups, credentials or generated directories as bulk
+  AI context. Use synthetic data for tests; see [context rules](docs/ai-governance.md).
 
----
+## Task memory and review
 
-## 3. Scope Hierarchy
+For substantial work, maintain TASK.md with objective, acceptance criteria,
+affected scope, decisions, checks actually executed and remaining work. Small
+wording fixes do not need a new task ceremony. Do not overwrite another active
+task silently. Architectural decisions belong in docs/adr; proposals are labeled.
+Skills in `.agents/skills/` are reusable procedures, not permissions or subagents.
 
-Always consult the closest applicable `AGENTS.md`:
-* **Frontend Rules**: [`src/AGENTS.md`](src/AGENTS.md) governs React components, hooks, Tailwind styling, App Router boundaries, and UI primitives.
-* **Native Rust Rules**: [`src-tauri/AGENTS.md`](src-tauri/AGENTS.md) governs Tauri commands, application services, SQLx repositories, SQLite schema migrations, and export pipelines.
+## Gitflow and authorization
 
----
+- `main` is release history; `develop` is integration.
+- `feature/*` and `fix/*` branch from and target `develop`.
+- `release/*` branches from `develop`, merges into `main` and back into `develop`.
+- `hotfix/*` branches from `main`, merges into both long-lived branches.
+- Never commit, push, create issues/PRs, publish or alter GitHub settings unless
+  explicitly requested. Preparing files and commands does not perform those actions.
+- At the end of every implementation, supply exact ready-to-run Git commands with
+  concrete branch, Conventional Commit message and PR title/body. Stage relevant
+  files explicitly, never `git add .`. Account for the actual current branch and
+  dirty worktree; do not prescribe a pull over unrelated local changes.
+- Meaningful changes reference a real issue when available. Do not fabricate an
+  issue number or block local progress solely because GitHub is unavailable.
 
-## 4. Gitflow Workflow & PR Generation
+## Verification
 
-Follow the standard **Atlassian Gitflow Workflow**:
+Use `python3 scripts/ai_checks.py verify --scope governance|frontend|native|all`.
+Run checks for affected scopes; contract/shared changes require both app scopes.
+See [CI scope matrix](docs/development/ci-cd.md) for exact routing.
 
-### Long-Lived Branches
-* `main`: Production and official release history.
-* `develop`: Integration branch for ongoing development.
-
-### Supporting Branches
-* `feature/<feature-name>`: Branched from `develop`, targets `develop`.
-* `fix/<bug-name>`: Branched from `develop`, targets `develop`.
-* `release/<version>`: Branched from `develop`, merged into both `main` and `develop`.
-* `hotfix/<fix-name>`: Branched from `main`, merged into both `main` and `develop`.
-
-### Rules for AI Agents
-1. **Never commit, push, or open pull requests automatically** unless the user explicitly requests you to do so.
-2. At the end of every completed implementation task, always generate the **exact, ready-to-run Git commands** for the user to review and execute.
-3. Generate concrete values—**never** output placeholders like `<branch-name>`, `<commit-message>`, or `<title>`.
-4. Follow Conventional Commits format (`feat: ...`, `fix: ...`, `refactor: ...`, `chore: ...`).
-5. Stage only relevant files explicitly (e.g., `git add src/components/library/Main.tsx`).
-
-### Standard Git Output Template
-```bash
-git checkout develop
-git pull origin develop
-git checkout -b feature/example-feature-name
-
-git add <specific-files>
-git commit -m "feat: concise and descriptive summary"
-
-git push -u origin feature/example-feature-name
-
-gh pr create \
-  --base develop \
-  --head feature/example-feature-name \
-  --title "feat: concise and descriptive summary" \
-  --body "## Summary
-- concise explanation of changes
-- concrete problem solved
-
-## Validation
-- specific command actually executed
-- test result observed"
-```
-
----
-
-## 5. Verification Before Completion
-
-Before claiming a task is finished:
-* **Frontend**:
-  ```bash
-  npx tsc --noEmit
-  npm run lint
-  npm test
-  ```
-* **Native (when Rust code is touched)**:
-  ```bash
-  cd src-tauri && cargo fmt --check && cargo check && cargo test --lib
-  ```
-* **Strict Rule**: Never claim a test, build, lint check, or command succeeded unless it was **actually executed** in the environment.
+Frontend: `npx tsc --noEmit`, `npm run lint`, `npm test` and `npm run check:ui`.
+On a fresh checkout run `npx next typegen` before TypeScript. Relevant browser
+regressions also apply to UI changes; review screenshots before updating baselines.
+Native: from `src-tauri`, `cargo fmt --check`, `cargo check --locked`,
+`cargo test --locked --lib`. Desktop integration and releases need native evidence.
+Documentation/governance alone uses governance checks; it does not require app
+compilation. Never claim a skipped, unavailable or unexecuted check passed.
 
 <!-- BEGIN:nextjs-agent-rules -->
 

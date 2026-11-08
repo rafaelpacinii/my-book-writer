@@ -2,9 +2,18 @@
 
 - Describe the problem and resulting behavior.
 
+## Traceability and compatibility
+
+- Issue: link an existing issue, or explain why this small change has none.
+- Scope: frontend / native / data / docs / CI.
+- Business rules or ADR affected:
+- Release impact: none / patch / minor / breaking (explain migration).
+
 ## Validation
 
-- List only checks actually executed.
+- List only checks actually executed, with results and unavailable checks.
+- Distinguish browser fixtures, native SQLite and Windows WebView2 evidence.
+- Update TASK.md and affected contracts/system state for substantial work.
 
 ## UI changes
 
