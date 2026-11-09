@@ -33,7 +33,9 @@ do aplicativo e a alteração preexistente em `next-env.d.ts`.
 - `python3 scripts/ai_checks.py verify --scope frontend`: typegen, tsc, lint,
   **112 testes Vitest (25 arquivos)**, check:ui e **1 teste Node do driver** aprovados.
 - `python3 scripts/ai_checks.py verify --scope native`: fmt, cargo check --locked
-  e cargo test --locked --lib aprovados: **64 passaram, 4 ignorados**.
+  e cargo test --locked --lib aprovados: **64 passaram, 4 ignorados**. Corrigida a
+  quebra de API da crate `zip 9.1.3` em `docx_package.rs`, `epub_package.rs` e `audit_tests.rs`,
+  onde `entry.name()` passou a retornar `ZipResult<Cow<'_, str>>`.
 - `CI=true npm run test:e2e -- src/tests/e2e/libraryNavigation.spec.ts
   --project=chromium --project=firefox`: build estático e **14 testes aprovados**.
   A primeira tentativa ficou bloqueada por sockets do sandbox; execução autorizada

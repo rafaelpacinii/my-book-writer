@@ -15,9 +15,10 @@ fn repair(bytes: &[u8]) -> Result<Vec<u8>, Box<dyn std::error::Error>> {
     let mut output = ZipWriter::new(Cursor::new(Vec::new()));
     for index in 0..archive.len() {
         let mut entry = archive.by_index(index)?;
+        let name = entry.name()?.to_string();
         let mut contents = Vec::new();
         entry.read_to_end(&mut contents)?;
-        if entry.name().ends_with(".opf") {
+        if name.ends_with(".opf") {
             contents = String::from_utf8(contents)?
                 .replace(
                     "<dc:language id=\"epub-creator-",
@@ -26,7 +27,7 @@ fn repair(bytes: &[u8]) -> Result<Vec<u8>, Box<dyn std::error::Error>> {
                 .into_bytes();
         }
         output.start_file(
-            entry.name(),
+            name,
             SimpleFileOptions::default().compression_method(entry.compression()),
         )?;
         output.write_all(&contents)?;
