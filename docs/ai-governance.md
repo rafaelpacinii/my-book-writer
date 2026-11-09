@@ -38,6 +38,7 @@ projeto. As permissões continuam sob controle do ambiente e do usuário.
 | `mbw-migration` | Evolução de SQLite e compatibilidade de dados existentes |
 | `mbw-export` | PDF/EPUB/DOCX, fontes locais e fidelidade editorial |
 | `mbw-release` | Preparar versão, rastreabilidade e artefato Windows |
+| `mbw-pr` | Inspecionar diff, estruturar commit convencional e gerar comando de PR via gh |
 
 ```text
 Use $mbw-feature e $mbw-frontend para implementar o comportamento desta issue.
