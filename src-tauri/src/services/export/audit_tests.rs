@@ -12,7 +12,8 @@ pub(super) fn entries(bytes: &[u8]) -> std::collections::HashMap<String, Vec<u8>
             let mut entry = archive.by_index(index).unwrap();
             let mut bytes = Vec::new();
             entry.read_to_end(&mut bytes).unwrap();
-            (entry.name().to_string(), bytes)
+            let name = entry.name().unwrap().to_string();
+            (name, bytes)
         })
         .collect()
 }

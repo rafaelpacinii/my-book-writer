@@ -39,7 +39,7 @@ fn finish_inner(
     let options = SimpleFileOptions::default().compression_method(zip::CompressionMethod::Deflated);
     for index in 0..archive.len() {
         let mut entry = archive.by_index(index)?;
-        let name = entry.name().to_owned();
+        let name = entry.name()?.to_string();
         if name == "word/fontTable.xml" || name == "word/_rels/fontTable.xml.rels" {
             continue;
         }
