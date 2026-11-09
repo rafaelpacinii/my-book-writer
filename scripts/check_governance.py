@@ -16,7 +16,7 @@ REQUIRED = (
     '.agents/rules/frontend.md', '.agents/rules/tauri-rust.md',
     '.agents/rules/governance.md',
 )
-SKILLS = ('mbw-feature', 'mbw-frontend', 'mbw-native', 'mbw-migration', 'mbw-export', 'mbw-release')
+SKILLS = ('mbw-feature', 'mbw-frontend', 'mbw-native', 'mbw-migration', 'mbw-export', 'mbw-release', 'mbw-pr')
 
 
 def link_errors(file, text, root):
